@@ -1,0 +1,3 @@
+/Users/alexanderthorbr/Library/Mobile Documents/com~apple~CloudDocs/Documents/Programming/C++/MAL/cmake-build-debug/CMakeFiles/MAL.dir
+/Users/alexanderthorbr/Library/Mobile Documents/com~apple~CloudDocs/Documents/Programming/C++/MAL/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/alexanderthorbr/Library/Mobile Documents/com~apple~CloudDocs/Documents/Programming/C++/MAL/cmake-build-debug/CMakeFiles/rebuild_cache.dir

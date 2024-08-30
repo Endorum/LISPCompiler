@@ -1,0 +1,71 @@
+^
+^{"a" 1} [1 2 3]
+-45
+[(+ 1 2)]
+[(+ 1 2) (* 3 4)]
+[+ 1 2]
+{1 (+ 1 2)}
+{abcdef (+ 1 2)}
+(let* [a 5 b 6] (+ a b))
+(def! y (+ 17))
+(def! y (+ 1 7))
+(let* [a 1 b 2] (* a b))
+(+ 2 3)
+(< 1 2)
+(<= 1 2)
+(prn 5)
+(prn asdasd)
+(prn 12345)
+(= 0 0)
+(= 0 1)
+(= (list 1 2) (list 1 3))
+(= (list 1 2) (list 1 2))
+(= (list 1 2) (list 1 3))
+(= true true)
+(= true false)
+(def! fib (fn* (N) (if (= N 0) 1 (if (= N 1) 1 (+ (fib (- N 1)) (fib (- N 2)))))))
+(fib 10)
+(fib 11)
+(fib 20)
+(fib 21)
+(fib 22)
+"etst"
+(if "" 7 8)
+"foo"
+"foo\""
+(def! fib (fn* (N) (if (= N 0) 1 (if (= N 1) 1 (+ (fib (- N 1)) (fib (- N 2)))))))
+(fib 20)
+""
+(if "" 1 2)
+(if "false" 1 2)
+(if false 1 2)
+(if true 1 2)
+(if nil 1 2)
+(if vlbeasd 1 2)
+(def! a true)
+(if a 8 9)
+(set a true)
+(set a true
+:abc
+(prn 123)
+(pr-str "a string")
+(pr-str 123)
+(prn [1])
+"foo"
+"abc"
+"foo"
+"abc\ndef"
+"foo"
+"foo\n"
+"
+ (def! fib (fn* (N) (if (= N 0) 1 (if (= N 1) 1 (+ (fib (- N 1)) (fib (- N 2)))))))
+(fib 10)
+(+ 1 2)
+(def! x 25)
+(def! y 35)
+(+ x y)
+ (def! fib (fn* (N) (if (= N 0) 1 (if (= N 1) 1 (+ (fib (- N 1)) (fib (- N 2)))))))
+(fib 10)
+(fib 20)
+(fib 25)
+
