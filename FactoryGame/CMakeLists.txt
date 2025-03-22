@@ -3,17 +3,13 @@ project(FactoryGame)
 
 set(CMAKE_CXX_STANDARD 17)
 
-
-
 add_executable(FactoryGame main.cpp
-        Entity.hpp
-        Tile.hpp
-        machine.hpp
-        Vec.hpp
+        Game.hpp
         World.hpp
-        Item.hpp
+        Tile.hpp
+        Entity.hpp
+        Machine.hpp
         Resource.hpp
-        Machine.cpp
-        Tile.cpp
-        World.cpp
+        Inventory.hpp
+        Game.cpp
 )

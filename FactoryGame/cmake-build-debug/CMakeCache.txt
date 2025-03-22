@@ -222,15 +222,6 @@ FactoryGame_IS_TOP_LEVEL:STATIC=ON
 //Value Computed by CMake
 FactoryGame_SOURCE_DIR:STATIC=/Users/alexanderthorbr/Library/Mobile Documents/com~apple~CloudDocs/Documents/Programming/C++/FactoryGame
 
-//Value Computed by CMake
-Project_BINARY_DIR:STATIC=/Users/alexanderthorbr/Library/Mobile Documents/com~apple~CloudDocs/Documents/Programming/C++/FactoryGame/cmake-build-debug
-
-//Value Computed by CMake
-Project_IS_TOP_LEVEL:STATIC=ON
-
-//Value Computed by CMake
-Project_SOURCE_DIR:STATIC=/Users/alexanderthorbr/Library/Mobile Documents/com~apple~CloudDocs/Documents/Programming/C++/FactoryGame
-
 
 ########################
 # INTERNAL cache entries

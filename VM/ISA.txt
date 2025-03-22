@@ -1,0 +1,18 @@
+
+
+16 bit address to physical address:
+
+
+PAGE HILO
+xxxx xxxx
+
+
+Instruction set
+
+OP   a0  a1  a2
+
+NOP
+IMM  REG lo  hi
+MOV  reg reg+off
+LOAD REG lo  hi
+STOR lo  hi  REG

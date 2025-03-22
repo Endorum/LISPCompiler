@@ -8,7 +8,15 @@ include_directories("/usr/local/Cellar/sdl2/2.30.6/include")
 include_directories("/usr/local/Cellar/sdl2_image/2.8.2_1/include/SDL2")
 
 # Add the executable target
-add_executable(V3_0 src/main.cpp include/testclass.hpp)
+add_executable(V3_0 src/main.cpp
+        include/draw.hpp
+        include/float2.hpp
+        src/float2.cpp
+        include/shape.hpp
+        include/RigidBody2D.hpp
+        src/draw.cpp
+        include/Simulation.hpp
+        src/Simulation.cpp)
 
 # Find SDL2 and SDL2_image packages
 find_package(SDL2 REQUIRED)

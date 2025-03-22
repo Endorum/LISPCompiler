@@ -55,20 +55,8 @@ build CMakeFiles/FactoryGame.dir/main.cpp.o: CXX_COMPILER__FactoryGame_unscanned
   OBJECT_DIR = CMakeFiles/FactoryGame.dir
   OBJECT_FILE_DIR = CMakeFiles/FactoryGame.dir
 
-build CMakeFiles/FactoryGame.dir/Machine.cpp.o: CXX_COMPILER__FactoryGame_unscanned_Debug /Users/alexanderthorbr/Library/Mobile$ Documents/com~apple~CloudDocs/Documents/Programming/C++/FactoryGame/Machine.cpp || cmake_object_order_depends_target_FactoryGame
-  DEP_FILE = CMakeFiles/FactoryGame.dir/Machine.cpp.o.d
-  FLAGS = -g -std=gnu++17 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk -fcolor-diagnostics
-  OBJECT_DIR = CMakeFiles/FactoryGame.dir
-  OBJECT_FILE_DIR = CMakeFiles/FactoryGame.dir
-
-build CMakeFiles/FactoryGame.dir/Tile.cpp.o: CXX_COMPILER__FactoryGame_unscanned_Debug /Users/alexanderthorbr/Library/Mobile$ Documents/com~apple~CloudDocs/Documents/Programming/C++/FactoryGame/Tile.cpp || cmake_object_order_depends_target_FactoryGame
-  DEP_FILE = CMakeFiles/FactoryGame.dir/Tile.cpp.o.d
-  FLAGS = -g -std=gnu++17 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk -fcolor-diagnostics
-  OBJECT_DIR = CMakeFiles/FactoryGame.dir
-  OBJECT_FILE_DIR = CMakeFiles/FactoryGame.dir
-
-build CMakeFiles/FactoryGame.dir/World.cpp.o: CXX_COMPILER__FactoryGame_unscanned_Debug /Users/alexanderthorbr/Library/Mobile$ Documents/com~apple~CloudDocs/Documents/Programming/C++/FactoryGame/World.cpp || cmake_object_order_depends_target_FactoryGame
-  DEP_FILE = CMakeFiles/FactoryGame.dir/World.cpp.o.d
+build CMakeFiles/FactoryGame.dir/Game.cpp.o: CXX_COMPILER__FactoryGame_unscanned_Debug /Users/alexanderthorbr/Library/Mobile$ Documents/com~apple~CloudDocs/Documents/Programming/C++/FactoryGame/Game.cpp || cmake_object_order_depends_target_FactoryGame
+  DEP_FILE = CMakeFiles/FactoryGame.dir/Game.cpp.o.d
   FLAGS = -g -std=gnu++17 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk -fcolor-diagnostics
   OBJECT_DIR = CMakeFiles/FactoryGame.dir
   OBJECT_FILE_DIR = CMakeFiles/FactoryGame.dir
@@ -81,7 +69,7 @@ build CMakeFiles/FactoryGame.dir/World.cpp.o: CXX_COMPILER__FactoryGame_unscanne
 #############################################
 # Link the executable FactoryGame
 
-build FactoryGame: CXX_EXECUTABLE_LINKER__FactoryGame_Debug CMakeFiles/FactoryGame.dir/main.cpp.o CMakeFiles/FactoryGame.dir/Machine.cpp.o CMakeFiles/FactoryGame.dir/Tile.cpp.o CMakeFiles/FactoryGame.dir/World.cpp.o
+build FactoryGame: CXX_EXECUTABLE_LINKER__FactoryGame_Debug CMakeFiles/FactoryGame.dir/main.cpp.o CMakeFiles/FactoryGame.dir/Game.cpp.o
   FLAGS = -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk
   OBJECT_DIR = CMakeFiles/FactoryGame.dir
   POST_BUILD = :

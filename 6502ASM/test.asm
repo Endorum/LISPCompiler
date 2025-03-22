@@ -1,0 +1,8 @@
+LDA #$05
+STA $0200
+LDA $10
+LDX $10,Y
+LDA $2000,X
+LDA ($40,X)
+LDA ($40),Y
+JMP ($FFFC)

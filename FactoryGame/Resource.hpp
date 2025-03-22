@@ -1,17 +1,17 @@
 #pragma once
-#include "Vec.hpp"
 
+enum class ResourceType {
 
-enum RessourceType {
-    RT_PLACE_HOLDER,
-    RT_IRON_ORE,
-    RT_COAL_ORE
 };
 
-class Resource{
+class Resource {
 public:
-    Vec2 position;
-    RessourceType type;
+    ResourceType type;
     int amount;
-    Resource(Vec2 pos, RessourceType type=RT_PLACE_HOLDER, int amount=0) : position(pos), type(type), amount(amount) {}
+
+    Resource(ResourceType tyoe, int amount);
+    ResourceType getType() const;
+    int harvest(int quantity); // returns harvested amount not always equal to the requested
+    void render();
+
 };

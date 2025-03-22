@@ -1,33 +1,22 @@
 #pragma once
 
 
-#include "Vec.hpp"
-#include "Resource.hpp"
-
 class Machine;
+class Resource;
 
+enum class TileType {
 
+};
 
 class Tile {
 public:
-    bool is_empty;
-    Vec2 position;
-
+    TileType type;
+    Resource* resource;
     Machine* machine;
-    Resource* ress;
 
+    Tile(TileType type);
+    bool isBuildable() const;
+    Resource* getResource();
+    void setMachine(Machine* machine);
 
-    Tile(int x, int y);
-
-    bool PlaceMachine(Machine* new_machine);
-
-
-
-    void RemoveMachine();
-
-    void PlaceRessource(Resource* new_ress) {
-        ress = new_ress;
-    }
-
-    void UpdateTile();
 };
