@@ -76,3 +76,5 @@ its string. see tokenizer.cpp/hpp.
 # AST
 From the token stream an AST should be generated which is later converted into assembly/bytecode/whatever (im not sure yet)
 
+# Could be a relevant resource:
+https://github.com/LensPlaysGames/Corth/tree/master

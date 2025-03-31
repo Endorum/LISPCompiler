@@ -7,20 +7,38 @@
 #include <vector>
 
 #include "parser.hpp"
+class Function;
+
+class Variable {
+public:
+    std::string name;
+    Function* scope = nullptr; // nullptr -> global
+    uint64_t loc; // just an offset its later calculated * 8 = space between
+    bool parameter = false;
+};
 
 class Function {
 public:
     std::string name;
-    ASTNode* paramList;
+    std::vector<Variable> parameters;
     ASTNode* body;
+
+    Function* scope=nullptr;
     // int loc (?)
 };
+
+
 
 class Generator {
 private:
     std::vector<ASTNode*> nodes;
 
     std::vector<Function> functions;
+    Function* currentScope=nullptr;
+
+    std::vector<Variable> globalVars;
+
+    uint64_t locOff=0;
 
 public:
     Generator(std::vector<ASTNode*>& nodes) : nodes(nodes) {}
@@ -33,8 +51,7 @@ public:
 
     std::string res = "";
 
-    bool isBuiltIn(ASTNode* node) {
-        std::string name = node->value;
+    bool isBuiltIn(std::string name) {
 
         return (
             name == "+" ||
@@ -57,24 +74,25 @@ public:
     }
 
     void evalBinaryOp(std::string op) {
-        res += "POP AX\n";
-        res += "POP BX\n";
+        res += "pop bx ; first argument\n";
+        res += "pop ax ; second argument\n";
 
         if(op.length() == 1) {
             char c = op[0];
 
             switch (c) {
-                case '+': res += "ADD AX, BX\n"; break;
-                case '-': res += "SUB AX, BX\n"; break;
-                case '*': res += "MUL AX, BX\n"; break;
-                case '/': res += "DIV AX, BX\n"; break;
+                default: res += "; Unknown op: " + op; res += "\n"; break;
+                case '+': res += "add ax, bx\n"; break;
+                case '-': res += "sub ax, bx\n"; break;
+                case '*': res += "mul ax, bx\n"; break;
+                case '/': res += "div ax, bx\n"; break;
             }
 
-        }else {
+        } else {
             // car cons etc
         }
 
-        res += "PUSH AX\n";
+        res += "push ax ; result\n";
     }
 
     void evalBuiltIn(ASTNode* expr) {
@@ -90,13 +108,57 @@ public:
         if(expr->children.size() == 3) {
             evalBinaryOp(op);
         }else {
-            // unary or more op
+            // unary or more - op
         }
 
 
     }
 
-    void evalFuncDecl(ASTNode* expr, Function func) {
+    void evalFuncDecl(ASTNode* expr) {
+        printf("evaluating function decl: %s\n",getChild(expr, 1)->value.c_str());
+
+        ASTNode* funcNameNode = getChild(expr, 1);
+        if(!funcNameNode) {
+            printf("ERROR: \n");
+            printf("    Expected function name\n");
+            exit(1);
+        }
+
+        ASTNode* funcParamsNode = getChild(expr, 2);
+        if(!funcParamsNode) {
+            printf("ERROR: \n");
+            printf("    Expected parameter list or empty list\n");
+            exit(1);
+        }
+
+        ASTNode* funcBodyNode = getChild(expr, 3);
+        if(!funcBodyNode) {
+            printf("ERROR: \n");
+            printf("    Expected body\n");
+            exit(1);
+        }
+
+        Function func;
+        func.name = funcNameNode->value;
+        func.body = funcBodyNode;
+
+        for(const auto & i : funcParamsNode->children) {
+            Variable param;
+            param.name = i->value;
+            param.loc = locOff++;
+            param.scope = &func;
+            param.parameter = true;
+
+            func.parameters.push_back(param);
+        }
+
+        functions.push_back(func);
+
+        currentScope = &functions[functions.size() - 1];
+
+        res += "_" + funcNameNode->value + ":\n";
+
+        evalTerminal(func.body);
 
     }
 
@@ -109,29 +171,33 @@ public:
     }
 
     void evalFuncCall(ASTNode* expr) {
-        printf("evaluating function call: %s\n",getFuncByName(getChild(expr, 0)->value)->name.c_str());
+        printf("evaluating function call: %s\n",getChild(expr, 0)->value.c_str());
+
         if (expr->children.empty()) return;
 
-        Function* func = getFuncByName(getChild(expr, 0)->value);
+        // first one is the function name
+        ASTNode* funcNameNode = getChild(expr, 0);
+        std::string funcName = (funcNameNode) ? funcNameNode->value : "NULL";
 
-        if(func == nullptr) {
-            printf("ERROR: function %s not found\n",getChild(expr, 0)->value.c_str());
-            exit(1);
+        // the rest are arguments
+        for(int i=1;i<expr->children.size();i++) {
+            ASTNode* arg = getChild(expr, i);
+            evalTerminal(arg);
         }
 
-        if(expr->children.size() - 1 != func->paramList->children.size()) {
-            printf("Error: Incorrect argument count for %s\n", func->name.c_str());
-            exit(1);
+        if(isBuiltIn(funcName)) {
+            if(expr->children.size() == 3) { // binary
+                evalBinaryOp(funcName);
+            }
+        } else {
+            res += "call " + funcName + "\n";
         }
 
-        // evaluating the arguments
-        for (size_t i = 1; i < expr->children.size(); i++) {
-            evalTerminal(expr->children[i]); // the values get pushed to the stack
+        for(int i=0;i<functions.size();i++) {
+            if(functions[i].name == funcName) {
+                currentScope = &functions[i];
+            }
         }
-
-
-        evalExpr(func->body);
-
 
 
     }
@@ -154,66 +220,81 @@ public:
 
         else if(firstChild->type == NT_Symbol) {
             if(firstChild->value == "defun") {
-                Function newFunc;
-                // eval func decl
-                ASTNode* funcNameNode = getChild(expr, 1);
-                if(!funcNameNode) {
-                    printf("ERROR: expected function name\n");
-                    exit(1);
-                }
-
-                newFunc.name = funcNameNode->value;
-
-
-                ASTNode* funcArgsNode = getChild(expr, 2);
-                if(!funcArgsNode) {
-                    printf("ERROR: expected argument list\n");
-                    exit(1);
-                }
-
-                newFunc.paramList = funcArgsNode;
-
-                ASTNode* funcBodyNode = getChild(expr, 3);
-                if(!funcBodyNode) {
-                    printf("ERROR: expected function body\n");
-                    exit(1);
-                }
-
-                newFunc.body = funcBodyNode;
-
-                evalFuncDecl(expr, newFunc);
-
-                functions.push_back(newFunc);
-            }
-
-            else if(isBuiltIn(firstChild)) {
-                // build in operator
-                evalBuiltIn(expr);
-            }
-
-            else if(isFuncCall(firstChild)) {
-                // function call
+                // function declaration
+                evalFuncDecl(expr);
+            } else { // otherwise it should be a function call, therefore evaluate second third etc child first then call
                 evalFuncCall(expr);
             }
-
-            else {
-                // symbol is part of data list
-            }
-
         }
+
+
+
+        // else if(firstChild->type == NT_Symbol) {
+        //     if(firstChild->value == "defun") {
+        //         // function declaration
+        //         evalFuncDecl(expr);
+        //     }
+        //
+        //     else if(isBuiltIn(firstChild)) {
+        //         // build in operator
+        //         evalBuiltIn(expr);
+        //     }
+        //
+        //     else if(isFuncCall(firstChild)) {
+        //         // function call
+        //         evalFuncCall(expr);
+        //     }
+        //
+        //     else {
+        //         // symbol is part of data list
+        //
+        //     }
+        //
+        // }
 
     }
 
-    void evalTerminal(ASTNode* terminal) {
+    void evalVariable(ASTNode* terminal) {
+        //printf("eval variable: %s\n",terminal->value.c_str());
+
+        if(currentScope != nullptr) {
+            for(int i=0;i<currentScope->parameters.size();i++) {
+                if(currentScope->parameters[i].name == terminal->value) {
+                    Variable var = currentScope->parameters[i];
+                    printf("read variable %s from loc %llu\n", var.name.c_str(), var.loc);
+                }
+            }
+        }else {
+            for(int i=0;i<globalVars.size();i++) {
+                if(globalVars[i].name == terminal->value) {
+                    Variable var = globalVars[i];
+                    printf("read global variable %s from loc %llu\n", var.name.c_str(), var.loc);
+                }
+            }
+        }
+    }
+
+    void evalTerminal(ASTNode* terminal, bool first=false) {
         if(terminal->type == NT_Number) {
             printf("eval term number: %s\n",terminal->value.c_str());
-            res += "PUSH " + terminal->value + "\n";
-            return;
+            res += "push " + terminal->value + "\n";
         } else if(terminal->type == NT_String) {
             printf("eval term String: %s\n",terminal->value.c_str());
         } else if(terminal->type == NT_Symbol) {
-            printf("eval term symbol %s\n",terminal->value.c_str());
-            res += "PUSH " + terminal->value + "\n";
+            /*
+             * decide if the Symbol is a function call or just a variable eg as a parameter
+             * if its the first element in a list it should be a call if not its a variable
+             * which are handled using look ups.
+             */
+            if(first) {
+                // then its a function call
+                evalFuncCall(terminal);
+            }else {
+                // its a variable
+                evalVariable(terminal);
+            }
+
+
         } else {
 
             evalExpr(terminal);

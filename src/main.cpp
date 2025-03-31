@@ -43,8 +43,10 @@ int main(){
 
     Generator generator(program);
 
-    generator.evalExpr(program[0]);
-    generator.evalExpr(program[1]);
+
+    for(int i=0;i<program.size();i++) {
+        generator.evalExpr(program[i]);
+    }
 
 
     printf("%s\n",generator.res.c_str());
