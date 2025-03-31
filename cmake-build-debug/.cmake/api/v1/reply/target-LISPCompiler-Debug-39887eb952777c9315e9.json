@@ -88,6 +88,13 @@
 				1,
 				2
 			]
+		},
+		{
+			"name" : "Header Files",
+			"sourceIndexes" : 
+			[
+				3
+			]
 		}
 	],
 	"sources" : 
@@ -109,6 +116,11 @@
 			"compileGroupIndex" : 0,
 			"path" : "src/tokenizer.cpp",
 			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"path" : "include/codegen.hpp",
+			"sourceGroupIndex" : 1
 		}
 	],
 	"type" : "EXECUTABLE"

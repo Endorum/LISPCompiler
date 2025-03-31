@@ -1,1 +1,5 @@
-(if (> x 0) (print "positive") (print "negative"))
+(defun mul (x y)
+  (* x y)
+)
+
+(mul 4 5)

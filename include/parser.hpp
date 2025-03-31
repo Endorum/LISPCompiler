@@ -20,6 +20,7 @@ typedef enum GeneralType {
     GT_None,
     GT_Terminal,   // everything without parenthesies
     GT_Expression, // everything with parenthesies
+    GT_Operator,   //
 }GeneralType;
 
 
@@ -106,6 +107,9 @@ private:
         } else if (firstToken.type == String) {
             localTree = new ASTNode(NT_String, GT_Terminal, firstToken.value);
             pos++;
+        } else if (firstToken.value == "+" || firstToken.value == "-" || firstToken.value == "*" || firstToken.value == "/") { // the operators
+            localTree = new ASTNode(NT_Symbol, GT_Operator, firstToken.value); // NT_Symbol -> NT_Operator ?
+            pos++;
         } else if (firstToken.type == Symbol || firstToken.type == Keyword) {
             localTree = new ASTNode(NT_Symbol, GT_Terminal, firstToken.value);
             pos++;
@@ -126,6 +130,7 @@ public:
     std::string generalTypeToString(const ASTNode & node) {
         if(node.gtype == GT_Expression) return "Expression";
         if(node.gtype == GT_Terminal) return "Terminal";
+        if(node.gtype == GT_Operator) return "Operator";
         return "None";
     }
 

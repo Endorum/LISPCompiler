@@ -5,6 +5,7 @@
 
 #include "../include/tokenizer.hpp"
 #include "../include/parser.hpp"
+#include "../include/codegen.hpp"
 
 
 
@@ -29,6 +30,7 @@ int main(){
     tokenizer.printTokens();
 
 
+
     std::vector<Token> tokens = tokenizer.getTokens();
 
     Parser parser(tokens);
@@ -38,6 +40,16 @@ int main(){
     for(auto expr : program) {
         std::cout << parser.printASTNode(*expr);
     }
+
+    Generator generator(program);
+
+    generator.evalExpr(program[0]);
+    generator.evalExpr(program[1]);
+
+
+    printf("%s\n",generator.res.c_str());
+
+
 
     return 0;
 
