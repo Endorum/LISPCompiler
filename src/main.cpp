@@ -1,9 +1,11 @@
+#include <iostream>
+
 #include "../include/tokenizer.hpp"
 #include "../include/parser.hpp"
 
 
 int main(){
-    std::string input = "(+ 1 2)";
+    std::string input = "(1 2 3)";
 
     Tokenizer tokenizer;
     tokenizer.setInput(input);
@@ -16,7 +18,11 @@ int main(){
 
     Parser parser(tokens);
 
-    parser.parse();
+    ASTNode* root = parser.parse();
+
+    std::cout << parser.printASTNode(*root);
+
+    return 0;
 
 
 }
