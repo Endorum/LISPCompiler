@@ -13,20 +13,26 @@ typedef enum NodeType {
     NT_Boolean,       // TRUE/FALSE values
     NT_String,        // String literals (e.g., "hello")
     NT_Nil,           // Represents NIL (null in Lisp-like languages)
-
-    NT_Expression,    // Represents a general expression (a list or function call)
-    NT_List,          // A list where at least the first element is a Terminal
-    NT_Terminal,      // a number or a String
+    NT_EOF,
 } NodeType;
+
+typedef enum GeneralType {
+    GT_None,
+    GT_Terminal,   // everything without parenthesies
+    GT_Expression, // everything with parenthesies
+}GeneralType;
 
 
 class ASTNode{
 public:
     std::string value;
+
     NodeType type;
+    GeneralType gtype;
+
     std::vector<ASTNode*> children;
     
-    ASTNode(NodeType type, const std::string& value) : type(type), value(value) {}
+    ASTNode(NodeType type, GeneralType gtype, const std::string& value) : type(type), gtype(gtype), value(value) {}
 
     void addChild(ASTNode* child) {
         children.push_back(child);
@@ -38,9 +44,11 @@ class Parser{
 public:
     Parser(std::vector<Token>& tokens) : tokens(tokens), pos(0) {}
 
-    ASTNode* parse() {
-        return parseExpression();
+    std::vector<ASTNode*> parse() {
+        return parseProgram();
     }
+
+
 
     Token getNext() {
         if(pos+1 < tokens.size())
@@ -58,35 +66,54 @@ private:
     std::vector<Token>& tokens;
     size_t pos;
 
+
+    std::vector<ASTNode*> parseProgram() {
+        std::vector<ASTNode*> expressions;
+
+        while (pos < tokens.size()) {
+            ASTNode* expr = parseExpression();
+            if (expr) {
+                expressions.push_back(expr);
+            }
+        }
+
+        return expressions;
+    }
+
+    size_t parenCounter = 0;
+
     ASTNode* parseExpression() {
         Token firstToken = getCurrent();
         ASTNode* localTree = nullptr;
 
         if (firstToken.type == LeftParen) {
-            // Opening parenthesis indicates a new list
-            localTree = new ASTNode(NT_List, "");  // Value is irrelevant for the list itself
+            // Start of a new expression
+            localTree = new ASTNode(NT_None, GT_Expression, "");
+            pos++; // Move past '('
 
-            Token elmToken = firstToken;
-
-            while(tokens[pos+1].type != RightParen) {
-                pos++;
+            while (pos < tokens.size() && tokens[pos].type != RightParen) {
                 localTree->children.push_back(parseExpression());
             }
 
+            // Ensure we consume the closing ')'
+            if (pos < tokens.size() && tokens[pos].type == RightParen) {
+                pos++;
+            }
 
-
-        } else if (firstToken.type == Number || firstToken.type == String) {
-            // If it's a terminal (number/string), return a node for it
-            localTree = new ASTNode(NT_Terminal, firstToken.value);
-        } else if (firstToken.type == Symbol) {
-            // Handle symbol if necessary, e.g., function names or operators
-            localTree = new ASTNode(NT_Terminal, firstToken.value);
-        } else if(firstToken.type == NONE && firstToken.value == "EOF") {
-            localTree = nullptr;
+        } else if (firstToken.type == Number) {
+            localTree = new ASTNode(NT_Number, GT_Terminal, firstToken.value);
+            pos++;
+        } else if (firstToken.type == String) {
+            localTree = new ASTNode(NT_String, GT_Terminal, firstToken.value);
+            pos++;
+        } else if (firstToken.type == Symbol || firstToken.type == Keyword) {
+            localTree = new ASTNode(NT_Symbol, GT_Terminal, firstToken.value);
+            pos++;
         }
 
         return localTree;
     }
+
 
 
 
@@ -96,50 +123,43 @@ private:
 
 
 public:
+    std::string generalTypeToString(const ASTNode & node) {
+        if(node.gtype == GT_Expression) return "Expression";
+        if(node.gtype == GT_Terminal) return "Terminal";
+        return "None";
+    }
+
     std::string printASTNode(ASTNode& node, int indent = 0) {
         std::string res = "";
 
-        for(int i=0;i<indent;i++) res+=" ";
+        for(int i=0;i<indent;i++) res += "\t";
 
-        // Print node type
-        if(indent == 0) res += "Node:\n";
-        res += "type: " + nodeToString(node) + "\n";
 
-        // Print the value of the node (if applicable)
-        if (!node.value.empty()) {
-            indent++;
-            for(int i=0;i<indent;i++) res+=" ";
-            res += "value: " + node.value + "\n";
+
+        res += "General Type: \'" + generalTypeToString(node) + "\'";
+        res += (node.type != NT_None) ? " Node Type: \'" + nodeTypeToString(node) + "\'" : "";
+        res += (!node.value.empty()) ? " Value: \'"+ node.value + "\'" : "";
+        res += (!node.children.empty()) ? " Children: \n" : "\n";
+        for(auto child : node.children) {
+            res += printASTNode(*child, indent + 1);
         }
 
-        // Print children if there are any
-        if (!node.children.empty()) {
-            res += "children:\n";
-            indent++;
-            for(int i=0;i<indent;i++) res+=" ";
 
-            // Recursively print each child node
-            for (size_t i = 0; i < node.children.size(); ++i) {
-                res += "child" + std::to_string(i) + ":\n" + printASTNode(*node.children[i], indent);
-            }
-        }
 
         return res;
     }
 
-    std::string nodeToString(ASTNode& node) {
+    std::string nodeTypeToString(ASTNode& node) {
         std::string table[] = {
             "None",
             "Number",
             "Symbol",
             "Operator",
-            "Expression",
             "Parenthesis",
             "Boolean",
             "String",
             "Nil",
-            "Terminal",
-            "List",
+            "EOF",
         };
 
         return table[node.type];

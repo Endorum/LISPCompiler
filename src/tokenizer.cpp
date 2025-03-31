@@ -55,7 +55,7 @@ Token Tokenizer::readNumber() {
 }
 
 bool Tokenizer::isSymbolChar(char c) {
-    return std::isalnum(c) || c == '+' || c == '-' || c == '*' || c == '/' || c == '!';
+    return std::isalnum(c) || c == '+' || c == '-' || c == '*' || c == '/' || c == '!' || c == '<' ||c == '>' || c == '=';
 }
 
 
