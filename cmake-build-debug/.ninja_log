@@ -1,0 +1,6 @@
+# ninja log v6
+3	195	1743380709831969023	build.ninja	7e2fd04e01b9c294
+1	1258	1743380672445567037	CMakeFiles/LISPCompiler.dir/src/main.cpp.o	4b35c7923aeb5bec
+9	713	1743380716225912278	CMakeFiles/LISPCompiler.dir/src/parser.cpp.o	594d71e58e1f7da4
+10	765	1743380716226767210	CMakeFiles/LISPCompiler.dir/src/tokenizer.cpp.o	9d22a7f11944f68b
+765	850	1743380716981328778	LISPCompiler	b8819ea434543309
