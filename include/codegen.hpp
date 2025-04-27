@@ -106,21 +106,26 @@ public:
         // binary op
         if(isBinary(op)) {
             if (node->children.size() < 3) {
-                throw std::runtime_error("ERROR: Expected <op> <arg1> <arg2>");
+                throw std::runtime_error("ERROR: Expected at least two arguments for binary operator");
             }
 
-            std::string left = generate_code(node->children.at(1));
-            std::string right = generate_code(node->children.at(2));
-            std::string temp = generate_tmp();
+            // Initialize temp with the first argument
+            std::string temp = generate_code(node->children.at(1));
 
-            emit(temp + " = " + left + " " + op + " " + right);
+            // Loop over the remaining arguments
+            for (int i = 2; i < node->children.size(); i++) {
+                std::string arg = generate_code(node->children.at(i));
+                std::string res = generate_tmp();
+                emit(res + " = " + temp + " " + op + " " + arg);
+                temp = res; // update temp to chain the next operation
+            }
 
             return temp;
-
         }
 
-        return "ERROR: gt_operator wasn't an operator?";
+        return "ERROR: handle_operator wasn't given an operator?";
     }
+
 
     std::string handle_let_keyword(ASTNode* node) {
         // first is the name
