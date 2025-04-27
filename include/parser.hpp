@@ -107,8 +107,18 @@ private:
         } else if (firstToken.type == String) {
             localTree = new ASTNode(NT_String, GT_Terminal, firstToken.value);
             pos++;
-        } else if (firstToken.value == "+" || firstToken.value == "-" || firstToken.value == "*" || firstToken.value == "/") { // the operators
-            localTree = new ASTNode(NT_Symbol, GT_Operator, firstToken.value); // NT_Symbol -> NT_Operator ?
+        } else if (
+            firstToken.value == "+" ||
+            firstToken.value == "-" ||
+            firstToken.value == "*" ||
+            firstToken.value == "/" ||
+
+            firstToken.value == ">" ||
+            firstToken.value == "<" ||
+            firstToken.value == "=" 
+
+            ) { // the operators
+            localTree = new ASTNode(NT_Symbol, GT_Operator, firstToken.value);
             pos++;
         } else if (firstToken.type == Symbol || firstToken.type == Keyword) {
             localTree = new ASTNode(NT_Symbol, GT_Terminal, firstToken.value);

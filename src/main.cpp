@@ -27,10 +27,6 @@ int main(){
     tokenizer.setInput(input);
     tokenizer.tokenize();
 
-    tokenizer.printTokens();
-
-
-
     std::vector<Token> tokens = tokenizer.getTokens();
 
     Parser parser(tokens);
@@ -42,16 +38,18 @@ int main(){
     }
 
     Generator generator(program);
+    generator.declareFunctions();
 
 
-    for(int i=0;i<program.size();i++) {
-        generator.evalExpr(program[i]);
+
+    generator.generate();
+
+    for(int i=0;i<generator.functionNames.size();i++) {
+        printf("function: %s\n",generator.functionNames.at(i).c_str());
     }
 
 
-    printf("%s\n",generator.res.c_str());
-
-
+    std::cout << generator.result << std::endl;
 
     return 0;
 

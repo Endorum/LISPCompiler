@@ -59,6 +59,9 @@ e.g.
 
 (square 5) ; Returns 25
 
+# Variables:
+(let varname initvalue)
+
 # Conditionals:
 e.g.
 (if (> 5 3) "yes" "no")
@@ -78,3 +81,6 @@ From the token stream an AST should be generated which is later converted into a
 
 # Could be a relevant resource:
 https://github.com/LensPlaysGames/Corth/tree/master
+
+# For Code generation and lists apoun lists of tutorials
+https://www.reddit.com/r/Compilers/comments/wok89g/resources_to_understand_code_generation_from_ast/
