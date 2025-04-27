@@ -115,7 +115,7 @@ private:
 
             firstToken.value == ">" ||
             firstToken.value == "<" ||
-            firstToken.value == "=" 
+            firstToken.value == "=="
 
             ) { // the operators
             localTree = new ASTNode(NT_Symbol, GT_Operator, firstToken.value);

@@ -34,6 +34,7 @@ List operator:
 - car: get first element
 - cdr: rest of list
 - cons: prepend element
+- (list 1 2 3 4) generates an array with these elmts
 - ..(?)
 Comparisons:
 =
@@ -70,6 +71,11 @@ e.g.
 (defun factorial (n)
 (if (= n 0) 1
 (* n (factorial (- n 1)))))
+
+# Builtin functions:
+(str "some string" index) : indexes a string and returns a char
+(length "some string") : returns length of the string
+(print "some string") : prints a string/stringvar/numbervar to stdout
 
 
 # Tokenizer

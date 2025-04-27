@@ -85,7 +85,7 @@ Token Tokenizer::readString() {
     position++;
     while(position < input.size() && input[position] != '\"'){
         position++;
-        printf("%c\n",input[position]);
+        //printf("%c\n",input[position]);
     }
     position++;
     return {String, input.substr(start, position - start)};
