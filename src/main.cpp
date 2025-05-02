@@ -1,57 +1,54 @@
 #include <fstream>
+#include <iostream>
 #include <sstream>
 #include <string>
-#include <iostream>
 
-#include "../include/tokenizer.hpp"
-#include "../include/parser.hpp"
 #include "../include/codegen.hpp"
+#include "../include/parser.hpp"
+#include "../include/tokenizer.hpp"
 
+std::string readFile(const std::string &filename) {
+  std::ifstream file(filename);
+  if (!file) {
+    throw std::runtime_error("Could not open file: " + filename);
+  }
 
-
-std::string readFile(const std::string& filename) {
-    std::ifstream file(filename);
-    if (!file) {
-        throw std::runtime_error("Could not open file: " + filename);
-    }
-
-    std::stringstream buffer;
-    buffer << file.rdbuf(); // Read entire file into buffer
-    return buffer.str();
+  std::stringstream buffer;
+  buffer << file.rdbuf(); // Read entire file into buffer
+  return buffer.str();
 }
 
-int main(){
-    std::string input = readFile("../test.lisp");
+int main() {
+  std::string input = readFile("test.lisp");
 
-    Tokenizer tokenizer;
-    tokenizer.setInput(input);
-    tokenizer.tokenize();
+  Tokenizer tokenizer;
+  tokenizer.setInput(input);
+  tokenizer.tokenize();
 
-    std::vector<Token> tokens = tokenizer.getTokens();
+  std::vector<Token> tokens = tokenizer.getTokens();
 
-    Parser parser(tokens);
+  for (auto token : tokens) {
+    tokenizer.printToken(token);
+  }
 
-    std::vector<ASTNode*> program = parser.parse();
+  return 0;
 
-    for(auto expr : program) {
-        std::cout << parser.printASTNode(*expr);
-    }
+  Parser parser(tokens);
 
-    Generator generator(program);
-    generator.declareFunctions();
+  std::vector<ASTNode *> program = parser.parse();
 
+  for (auto expr : program) {
+    // std::cout << parser.printASTNode(*expr);
+  }
 
+  Generator generator(program);
+  generator.declareFunctions();
 
-    generator.generate();
+  generator.generate();
 
-    for(int i=0;i<generator.functionNames.size();i++) {
-        printf("function: %s\n",generator.functionNames.at(i).c_str());
-    }
+  for (int i = 0; i < generator.functionNames.size(); i++) {
+    // printf("function: %s\n", generator.functionNames.at(i).c_str());
+  }
 
-
-    std::cout << generator.result << std::endl;
-
-    return 0;
-
-
+  return 0;
 }
