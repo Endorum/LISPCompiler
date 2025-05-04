@@ -6,4 +6,6 @@ set(CMAKE_CXX_STANDARD 17)
 add_executable(LISPCompiler src/main.cpp
         src/parser.cpp
         src/tokenizer.cpp
-        include/codegen.hpp)
+        include/codegen.hpp
+        src/preproc.cpp
+        include/preproc.hpp)

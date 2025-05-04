@@ -11,7 +11,7 @@ typedef enum NodeType {
     NT_Operator,      // Represents operators (+, -, *, /)
     NT_Parenthesis,   // Special node for parentheses (optional, for clarity)
     NT_Boolean,       // TRUE/FALSE values
-    NT_String,        // String literals (e.g., "hello")
+    NT_String,        // STRING literals (e.g., "hello")
     NT_Nil,           // Represents NIL (null in Lisp-like languages)
     NT_EOF,
 } NodeType;
@@ -87,24 +87,24 @@ private:
         Token firstToken = getCurrent();
         ASTNode* localTree = nullptr;
 
-        if (firstToken.type == LeftParen) {
+        if (firstToken.type == LPAREN) {
             // Start of a new expression
             localTree = new ASTNode(NT_None, GT_Expression, "");
             pos++; // Move past '('
 
-            while (pos < tokens.size() && tokens[pos].type != RightParen) {
+            while (pos < tokens.size() && tokens[pos].type != RPAREN) {
                 localTree->children.push_back(parseExpression());
             }
 
             // Ensure we consume the closing ')'
-            if (pos < tokens.size() && tokens[pos].type == RightParen) {
+            if (pos < tokens.size() && tokens[pos].type == RPAREN) {
                 pos++;
             }
 
-        } else if (firstToken.type == Number) {
+        } else if (firstToken.type == NUMBER) {
             localTree = new ASTNode(NT_Number, GT_Terminal, firstToken.value);
             pos++;
-        } else if (firstToken.type == String) {
+        } else if (firstToken.type == STRING) {
             localTree = new ASTNode(NT_String, GT_Terminal, firstToken.value);
             pos++;
         } else if (
@@ -120,7 +120,7 @@ private:
             ) { // the operators
             localTree = new ASTNode(NT_Symbol, GT_Operator, firstToken.value);
             pos++;
-        } else if (firstToken.type == Symbol || firstToken.type == Keyword) {
+        } else if (firstToken.type == ATOM) {
             localTree = new ASTNode(NT_Symbol, GT_Terminal, firstToken.value);
             pos++;
         }
@@ -132,7 +132,7 @@ private:
 
 
     bool isTerminal(Token& token){
-        return (token.type == Number || token.type == String); // no symbol because this should be a function -> operator
+        return (token.type == NUMBER || token.type == STRING); // no symbol because this should be a function -> operator
     }
 
 
@@ -167,7 +167,7 @@ public:
     std::string nodeTypeToString(ASTNode& node) {
         std::string table[] = {
             "None",
-            "Number",
+            "NUMBER",
             "Symbol",
             "Operator",
             "Parenthesis",

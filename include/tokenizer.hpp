@@ -1,17 +1,17 @@
 #pragma once
+#include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 
 typedef enum TokenType {
   NONE,       // Default/invalid token
-  Number,     // Numeric values
-  Symbol,     // Variable names, function names, operators
-  LeftParen,  // '('
-  RightParen, // ')'
-  String,     // "text"
-  Quote,      // "'"
-  Boolean,    // TRUE / FALSE
-  Keyword,    // defun, if, ...
+  LPAREN,
+  RPAREN,
+  ATOM, // Symbol
+  NUMBER,
+  STRING,
+  QUOTE,
 } TokenType;
 
 typedef struct Token {
@@ -31,11 +31,11 @@ class Tokenizer {
 public:
   void tokenize();
 
-  bool isSymbolChar(char c);
+  void skipComment();
+  Token readString();
   Token readNumber();
   Token readSymbol();
-  Token readString();
-  void skipComment();
+
 
   std::vector<Token> getTokens() { return tokens; }
 
@@ -47,21 +47,23 @@ public:
     exit(1);
   }
 
-  void printToken(Token &token) {
+  std::string toString(const Token &token) {
+    static const std::string ttypeTable[] = {
+      "NONE", "LPAREN", "RPAREN", "ATOM", "NUMBER", "STRING", "QUOTE"
+  };
 
-    std::string ttypeTable[] = {
-        "NONE",   "Number", "Symbol",  "LeftParen", "RightParen",
-        "String", "Quote",  "Boolean", "Keyword",   "Dot",
-    };
+    std::ostringstream oss;
+    oss << "Token:\n";
+    oss << "    type:  " << ttypeTable[token.type] << "\n";
+    oss << "    value: " << token.value << "\n";
 
-    printf("Token:\n");
-    printf("    type: %s\n", ttypeTable[token.type].c_str());
-    printf("    value: %s\n", token.value.c_str());
+    return oss.str();
   }
 
+
   void printTokens() {
-    for (int i = 0; i < tokens.size(); i++) {
-      printToken(tokens[i]);
+    for (auto token : tokens) {
+      std::cout << toString(token) << std::endl;
     }
   }
 

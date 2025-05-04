@@ -5,6 +5,7 @@
 
 #include "../include/codegen.hpp"
 #include "../include/parser.hpp"
+#include "../include/preproc.hpp"
 #include "../include/tokenizer.hpp"
 
 std::string readFile(const std::string &filename) {
@@ -18,8 +19,19 @@ std::string readFile(const std::string &filename) {
   return buffer.str();
 }
 
+
+
 int main() {
-  std::string input = readFile("test.lisp");
+  std::string input = readFile("../test.lisp");
+
+  Preproc preproc(input);
+
+  preproc.resolveAllIncludes();
+  preproc.resolveAllMacros();
+
+  std::cout << input << std::endl;
+
+  return 0;
 
   Tokenizer tokenizer;
   tokenizer.setInput(input);
@@ -27,11 +39,8 @@ int main() {
 
   std::vector<Token> tokens = tokenizer.getTokens();
 
-  for (auto token : tokens) {
-    tokenizer.printToken(token);
-  }
+  tokenizer.printTokens();
 
-  return 0;
 
   Parser parser(tokens);
 
