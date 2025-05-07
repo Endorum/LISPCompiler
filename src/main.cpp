@@ -3,7 +3,7 @@
 #include <sstream>
 #include <string>
 
-// #include "../include/codegen.hpp"
+#include "../include/codegen.hpp"
 #include "../include/parser.hpp"
 #include "../include/preproc.hpp"
 #include "../include/tokenizer.hpp"
@@ -48,22 +48,24 @@ int main() {
 
   Parser parser(tokens);
 
-  std::vector<std::unique_ptr<ASTNode>> program = parser.parse();
+  std::vector<ASTNode*> program = parser.parse();
 
   for (const auto& expr : program) {
     std::cout << parser.printASTNode(*expr);
   }
 
-  return 0;
+  Generator generator(program);
+  generator.declareFunctions();
 
-  // Generator generator(program);
-  // generator.declareFunctions();
-  //
-  // generator.generate();
-  //
-  // for (int i = 0; i < generator.functionNames.size(); i++) {
-  //   // printf("function: %s\n", generator.functionNames.at(i).c_str());
-  // }
-  //
-  // return 0;
+  generator.generate();
+
+  std::cout << generator.result << std::endl;
+
+  for (int i = 0; i < generator.functionNames.size(); i++) {
+    // printf("function: %s\n", generator.functionNames.at(i).c_str());
+  }
+
+
+
+  return 0;
 }

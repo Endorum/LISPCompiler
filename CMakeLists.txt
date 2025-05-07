@@ -8,4 +8,5 @@ add_executable(LISPCompiler src/main.cpp
         src/tokenizer.cpp
         include/codegen.hpp
         src/preproc.cpp
-        include/preproc.hpp)
+        include/preproc.hpp
+        src/codegen.cpp)

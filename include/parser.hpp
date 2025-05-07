@@ -1,6 +1,5 @@
 #pragma once
 #include <string>
-#include <utility>
 #include <vector>
 #include "tokenizer.hpp"
 
@@ -20,24 +19,28 @@ public:
 
     NodeType type;
 
-    std::vector<std::unique_ptr<ASTNode>> children;
+    std::vector<ASTNode*> children;
     
+    explicit ASTNode(const NodeType type) : type(type) { value = ""; }
     ASTNode(const NodeType type, std::string  value) : value(std::move(value)), type(type) {}
-    ASTNode(const NodeType type) : type(type) { value = ""; }
 
-    void addChild(std::unique_ptr<ASTNode> child) {
+    void addChild(ASTNode* child) {
         children.push_back(std::move(child));
     }
 
-    bool isAtom() const { return children.empty(); }
+    ~ASTNode() {
+        for(auto child : children) {
+            delete child; // test
+        }
+    }
 };
 
-class Parser{
 
+class Parser {
 public:
-    Parser(std::vector<Token>& tokens) : tokens(tokens), pos(0) {}
+    explicit Parser(std::vector<Token>& tokens) : tokens(tokens), pos(0) {}
 
-    std::vector<std::unique_ptr<ASTNode>> parse() {
+    std::vector<ASTNode*> parse() {
         return parseProgram();
     }
 
@@ -58,17 +61,10 @@ private:
     std::vector<Token>& tokens;
     size_t pos;
 
+    std::vector<ASTNode*> AST;
 
-    std::vector<std::unique_ptr<ASTNode>> parseProgram() {
-        std::vector<std::unique_ptr<ASTNode>> expressions;
 
-        while (pos < tokens.size()) {
-            std::unique_ptr<ASTNode> expr = parseExpression();
-            if (expr) {
-                expressions.push_back(std::move(expr));
-            }
-        }
-
+    void checkSyntax() const { //TODO: expand on that
         if(parenCounter > 0) {
             throw std::runtime_error("Expeced closing parentheses");
         }
@@ -76,21 +72,45 @@ private:
         if(parenCounter < 0) {
             throw std::runtime_error("too many closing parentheses");
         }
+    }
 
-        return expressions;
+    void semanticAnalysis() {
+        // for(const auto& expr : AST) {
+        //     // basic type checking
+        //
+        // }
+    }
+
+    std::vector<ASTNode*> parseProgram(){
+
+        // building the AST
+        while (pos < tokens.size()) {
+            ASTNode* expr = parseExpression();
+            if (expr) {
+                AST.push_back(std::move(expr));
+            }
+        }
+
+        // Syntax Checking
+        checkSyntax();
+
+        // Semantic analysis
+        semanticAnalysis();
+
+        return std::move(AST);
     }
 
     size_t parenCounter = 0;
 
-    std::unique_ptr<ASTNode> parseExpression() {
+    ASTNode* parseExpression() {
         Token token = getCurrent();
-        std::unique_ptr<ASTNode> localTree = nullptr;
+        ASTNode* localTree = nullptr;
 
         if (token.type == LPAREN) {
             parenCounter++;
 
             // Start of a new expression
-            localTree = std::make_unique<ASTNode>(NT_List, "");
+            localTree = new ASTNode(NT_List, "");
             pos++; // Move past '('
 
             // fill list with content
@@ -105,19 +125,19 @@ private:
             }
 
         } else if (token.type == NUMBER) {
-            localTree = std::make_unique<ASTNode>(NT_Number, token.value);
+            localTree = new ASTNode(NT_Number, token.value);
             pos++;
 
         } else if (token.type == STRING) {
-            localTree = std::make_unique<ASTNode>(NT_String, token.value);
+            localTree = new ASTNode(NT_String, token.value);
             pos++;
 
         } else if (token.type == ATOM) {
-            localTree = std::make_unique<ASTNode>(NT_Symbol, token.value);
+            localTree = new ASTNode(NT_Symbol, token.value);
             pos++;
         } else if (token.type == QUOTE) {
             pos++;
-            localTree = std::make_unique<ASTNode>(NT_Quote, "quote");
+            localTree = new ASTNode(NT_Quote, "quote");
             localTree->addChild(parseExpression());
 
         } else {
@@ -137,7 +157,7 @@ public:
 
         res += (node.type != NT_None) ? " Node Type: \'" + nodeTypeToString(node) + "\'" : "";
         res += (!node.value.empty()) ? " Value: \'"+ node.value + "\'" : "";
-        res += (!node.children.empty()) ? " Children: \n" : "\n";
+        res += (!node.children.empty()) ? " Children (" + std::to_string(node.children.size()) + "): \n" : "\n";
         for (const auto& child : node.children) {
             res += printASTNode(*child, indent + 1);
         }

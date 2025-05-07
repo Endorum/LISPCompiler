@@ -73,6 +73,12 @@ build CMakeFiles/LISPCompiler.dir/src/preproc.cpp.o: CXX_COMPILER__LISPCompiler_
   OBJECT_DIR = CMakeFiles/LISPCompiler.dir
   OBJECT_FILE_DIR = CMakeFiles/LISPCompiler.dir/src
 
+build CMakeFiles/LISPCompiler.dir/src/codegen.cpp.o: CXX_COMPILER__LISPCompiler_unscanned_Debug /Users/alexanderthorbr/Library/Mobile$ Documents/com~apple~CloudDocs/Documents/Programming/C++/LISPCompiler/src/codegen.cpp || cmake_object_order_depends_target_LISPCompiler
+  DEP_FILE = CMakeFiles/LISPCompiler.dir/src/codegen.cpp.o.d
+  FLAGS = -g -std=gnu++17 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk -fcolor-diagnostics
+  OBJECT_DIR = CMakeFiles/LISPCompiler.dir
+  OBJECT_FILE_DIR = CMakeFiles/LISPCompiler.dir/src
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target LISPCompiler
@@ -81,7 +87,7 @@ build CMakeFiles/LISPCompiler.dir/src/preproc.cpp.o: CXX_COMPILER__LISPCompiler_
 #############################################
 # Link the executable LISPCompiler
 
-build LISPCompiler: CXX_EXECUTABLE_LINKER__LISPCompiler_Debug CMakeFiles/LISPCompiler.dir/src/main.cpp.o CMakeFiles/LISPCompiler.dir/src/parser.cpp.o CMakeFiles/LISPCompiler.dir/src/tokenizer.cpp.o CMakeFiles/LISPCompiler.dir/src/preproc.cpp.o
+build LISPCompiler: CXX_EXECUTABLE_LINKER__LISPCompiler_Debug CMakeFiles/LISPCompiler.dir/src/main.cpp.o CMakeFiles/LISPCompiler.dir/src/parser.cpp.o CMakeFiles/LISPCompiler.dir/src/tokenizer.cpp.o CMakeFiles/LISPCompiler.dir/src/preproc.cpp.o CMakeFiles/LISPCompiler.dir/src/codegen.cpp.o
   FLAGS = -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk
   OBJECT_DIR = CMakeFiles/LISPCompiler.dir
   POST_BUILD = :
