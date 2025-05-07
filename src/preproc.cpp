@@ -84,7 +84,7 @@ std::string Preproc::normalizeWhitespace(std::string &code) {
     // Variable to track the position while iterating
     size_t pos = 0;
 
-    // Replace consecutive newlines with a single newline
+    // Replace consecutive newlines with a single space
     while ((pos = code.find("\n\n", pos)) != std::string::npos) {
         code.replace(pos, 2, " ");  // Replace "\n\n" with a single "\n"
         pos += 1;  // Move past the replaced newline

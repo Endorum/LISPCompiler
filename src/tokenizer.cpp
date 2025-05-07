@@ -23,8 +23,10 @@ void Tokenizer::tokenize() {
       position++;
     } else if (std::isdigit(c) || (c == '-' && std::isdigit(input.at(position + 1)))) {
       tokens.push_back(readNumber());
-    } else {
+    } else if (!isspace(c) && c != ',') {
       tokens.push_back(readSymbol());
+    } else {
+      printError("Unrecognized Character: \'" + std::string(1, input.at(position)) + "\'");
     }
   }
 }
@@ -49,22 +51,18 @@ Token Tokenizer::readNumber() {
 Token Tokenizer::readSymbol() {
   size_t start = position;
 
-  // advance until a space/(/)/'/etc is found
-  while (position < input.size()
-      && !(
-        isspace(input.at(position)) ||
-        input.at(position) == '(' ||
-        input.at(position) == ')' ||
-        input.at(position) == '.' ||
-        input.at(position) == ',' ||
-        input.at(position) == '\'' ||
-        input.at(position) == '\"' ) ) {
+  while (position < input.size()) {
+    char c = input.at(position);
+    if (isspace(c) || c == '(' || c == ')' || c == '"' || c == '\'' || c == ';') {
+      break;
+    }
     position++;
   }
-  std::string value = input.substr(start, position - start);
 
+  std::string value = input.substr(start, position - start);
   return {ATOM, value};
 }
+
 
 Token Tokenizer::readString() {
 
