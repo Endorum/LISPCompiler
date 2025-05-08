@@ -1,6 +1,46 @@
 this is a temp
 
+i think i only need to check for the different ops and generate accordingly.
+ops:
 
+= <- assignment
+
+add
+sub
+mul
+div
+and
+or
+xor
+neg
+le
+gr
+eq
+not
+
+store
+load
+
+print
+
+cons
+car
+cdr
+null?
+
+string_to_list
+list_to_string
+
+push
+pop
+
+if
+jump
+call
+
+read_file
+scan_user_input
+listLength
 
 i already want to think about how im generating the assembler code
 

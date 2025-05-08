@@ -6,6 +6,11 @@
 
 #include "../include/codegen.hpp"
 
+void Generator::printError(const std::string &msg) {
+    printf("not yet implemented\n");
+    exit(1);
+}
+
 bool Generator::isDeclaredFunction(std::string UD_funcName) {
     for(const auto& pair : functionMap) {
         if(UD_funcName == pair.first) return true;
@@ -52,11 +57,37 @@ std::string Generator::handle_functionCall(ASTNode *node) {
         emit("stack", res, "push");
     }
 
-    emit("call " + UDfuncName);
+    emit("function call", UDfuncName, "call");
 
     // after call, result is "somewhere" — but you might want to make it explicit
     std::string temp = generate_tmp();
     emit(temp, "return_value", "=");
+    variableMap["return_value"] = StackOffset += 4;
+    return temp;
+}
+
+std::string Generator::handle_read_keyword(ASTNode *node) {
+    if (node->children.size() != 2) {
+        throw std::runtime_error("ERROR: Expected only a filename");
+    }
+
+    std::string filename = generate_code(node->children.at(1));
+    std::string temp = generate_tmp();
+
+    emit(temp, filename, "read_file");
+
+    return temp;
+}
+
+std::string Generator::handle_scan_keyword(ASTNode *node) {
+    if (node->children.size() != 2) {
+        throw std::runtime_error("ERROR: Expected only a variable");
+    }
+
+    std::string temp = generate_tmp();
+
+    emit(temp, "stdin", "scan_user_input");
+
     return temp;
 }
 
@@ -65,16 +96,16 @@ std::string opCharToWord(std::string op) {
         default: return op;
         case '+': return "add";
         case '-': return "sub";
-        case '*': return "mul";
-        case '/': return "div";
+        case '*': return "imul";
+        case '/': return "idiv";
 
         case '&': return "and";
         case '|': return "or";
         case '^': return "xor";
         case '~': return "neg";
 
-        case '<': return "le";
-        case '>': return "gr";
+        case '<': return "lt";
+        case '>': return "gt";
         case '=': return "eq";
         case '!': return "not";
 
@@ -94,10 +125,13 @@ std::string Generator::handle_operator(ASTNode *node) {
         // Initialize temp with the first argument
         std::string temp = generate_code(node->children.at(1));
 
+
         // Loop over the remaining arguments
         for (int i = 2; i < node->children.size(); i++) {
             std::string arg = generate_code(node->children.at(i));
             std::string res = generate_tmp();
+
+
             // emit(res + " = " + temp + " " + opCharToWord(op) + " " + arg);
             emit(res, temp, opCharToWord(op), arg);
             temp = res; // update temp to chain the next operation
@@ -111,6 +145,7 @@ std::string Generator::handle_operator(ASTNode *node) {
 
         std::string temp = generate_code(node->children.at(1));
         std::string res = generate_tmp();
+
         emit(res, temp, opCharToWord(op));
 
         return res;
@@ -125,11 +160,15 @@ std::string Generator::handle_let_keyword(ASTNode *node) {
         throw std::runtime_error("ERROR: Invalid let expression");
     }
 
+    if(node->children.at(1)->type != NT_Symbol) {
+        throw std::runtime_error("ERROR: Expected a Symbol for the variable name");
+    }
+
     std::string varname = node->children.at(1)->value;
 
     std::string temp = generate_code(node->children.at(2));
 
-    variableMap[varname] = StackOffset++;
+    variableMap[varname] = StackOffset += 4;
 
     emit(varname, temp, "store");
 
@@ -166,10 +205,6 @@ std::string Generator::handle_toList_keyword(ASTNode *node) {
         throw std::runtime_error("ERROR: Invalid toList expression: (toList <string>)");
     }
 
-    if(node->children.at(1)->type != NT_String) {
-        throw std::runtime_error("ERROR: Expected a string");
-    }
-
     std::string strAddr = generate_code(node->children.at(1));
     std::string temp = generate_tmp();
 
@@ -197,9 +232,6 @@ std::string Generator::handle_toString_keyword(ASTNode *node) {
         throw std::runtime_error("ERROR: Invalid toString expression: (toString <list>)");
     }
 
-    if(node->children.at(1)->type != NT_List) {
-        throw std::runtime_error("ERROR: Expected a List");
-    }
 
     const std::string listAddr = generate_code(node->children.at(1));
     std::string temp = generate_tmp();
@@ -219,11 +251,11 @@ std::string Generator::handle_defun_keyword(ASTNode *node) {
     }
 
     // Emit the function label
-    emit(functionName + ":");
+    emit("label", functionName, "defun");
 
     for(size_t i=parameters->children.size(); i > 0; i--) {
-        variableMap[parameters->children.at(i - 1)->value] = StackOffset++;
-        emit(parameters->children.at(i - 1)->value, "pop");
+        variableMap[parameters->children.at(i - 1)->value] = StackOffset += 4;
+        emit(parameters->children.at(i - 1)->value, "stack", "pop");
     }
 
     // Generate code for the body
@@ -236,7 +268,7 @@ std::string Generator::handle_defun_keyword(ASTNode *node) {
 }
 
 std::string Generator::handle_if_keyword(ASTNode *node) {
-    if(node->children.size() < 4) {
+    if(node->children.size() != 4) {
         throw std::runtime_error("ERROR: Expected: (if (<cond>) (<true body>) (<false body>) )");
     }
     ASTNode* cond = node->children.at(1);
@@ -277,9 +309,6 @@ std::string Generator::handle_length_keyword(ASTNode *node) {
         throw std::runtime_error("ERROR: Expected: (length <list>)");
     }
 
-    if(node->children.at(1)->type != NT_List) {
-        throw std::runtime_error("ERROR: Expected a List");
-    }
 
     std::string listAddr = generate_code(node->children.at(1)); // address of list
     std::string temp = generate_tmp();
@@ -294,9 +323,6 @@ std::string Generator::handle_print_keyword(ASTNode *node) {
         throw std::runtime_error("ERROR: Expected: (print <string/stringvariable>)");
     }
 
-    if(node->children.at(1)->type != NT_String) {
-        throw std::runtime_error("ERROR: Expected a string");
-    }
 
     std::string strAddr = generate_code(node->children.at(1)); // address of string
 

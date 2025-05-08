@@ -3,6 +3,7 @@
 #include <sstream>
 #include <string>
 
+#include "../include/asmgen.hpp"
 #include "../include/codegen.hpp"
 #include "../include/parser.hpp"
 #include "../include/preproc.hpp"
@@ -45,7 +46,7 @@ int main() {
   // Tokenizer
 
 
-
+  // Parser see parser.md
   Parser parser(tokens);
 
   std::vector<ASTNode*> program = parser.parse();
@@ -53,7 +54,9 @@ int main() {
   for (const auto& expr : program) {
     std::cout << parser.printASTNode(*expr);
   }
+  // Parser
 
+  // IR code generation see codegen.md
   Generator generator(program);
   generator.findFuncDecls();
 
@@ -62,9 +65,20 @@ int main() {
   std::vector<IRInstruction> instructions = generator.instructions;
 
   for(const auto& instr : instructions) {
-    std::cout << instr.str() << std::endl;
+    std::cout << instr.str(true) << std::endl;
+  }
+  // IR code generation
+
+  for(const auto& pair : generator.variableMap) {
+    std::cout << pair.first << " : " << std::to_string(pair.second) << std::endl;
   }
 
+
+  // Assembly generation
+  Asmgen asmgenerator(instructions,generator.variableMap);
+  asmgenerator.generate();
+  std::cout << asmgenerator.getAsm() << std::endl;
+  // Assembly generation
 
 
   return 0;

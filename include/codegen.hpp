@@ -21,7 +21,9 @@ struct IRInstruction {
 
     [[nodiscard]] std::string str(bool debug=false) const {
 
-        if(debug) return "dst: " + dst + " op: " + op + " src1: " + src1 + ((!src2.empty()) ? " src2: " + src2 : "");
+        if(debug) {
+            return "dst: '" + dst + "' op: '" + op + "' src1: '" + src1 + "' src2: '" + src2 + "'";
+        }
         return  dst + ((op == "=") ? " =" : " " + op)  + " " + src1 + ((!src2.empty()) ? " " + src2 : "");
     }
 };
@@ -35,7 +37,7 @@ public:
     std::unordered_map<std::string, int> variableMap; // store the name as well as the stack offset
     std::unordered_map<std::string, int> functionMap; // store name and labelOffset of function
 
-    int StackOffset = 0;
+    int StackOffset = 4;
     int labelOffset = 0;
 
     std::vector<ASTNode*>& program;
@@ -43,6 +45,26 @@ public:
     std::vector<IRInstruction> instructions;
 
     explicit Generator(std::vector<ASTNode*>& p): program(p) {}
+
+
+    void printError(const std::string& msg);
+
+    void assignOffsets() {
+        int offsetCounter = 1; // start from -4, -8, ...
+
+        for (const auto& instr : instructions) {
+            auto registerVar = [&](const std::string& name) {
+                if (!name.empty() && variableMap.find(name) == variableMap.end()) {
+                    variableMap[name] = -4 * offsetCounter++;
+                }
+            };
+
+            registerVar(instr.dst);
+            registerVar(instr.src1);
+            registerVar(instr.src2);
+        }
+    }
+
 
 
     void emit(const std::string& dst, const std::string& src1="", const std::string& op="", const std::string& src2="") {
@@ -65,6 +87,8 @@ public:
         for(auto node : program) {
             generate_code(node);
         }
+
+        // assignOffsets();
     }
 
     std::string serialize_quoted_list(ASTNode* node) {
@@ -110,11 +134,11 @@ public:
     std::string handle_toString_keyword(ASTNode * node);
     std::string handle_length_keyword(ASTNode * node);
     std::string handle_print_keyword(ASTNode * node);
+    std::string handle_read_keyword(ASTNode * node);
+    std::string handle_scan_keyword(ASTNode *node);
+
 
     std::string handle_functionCall(ASTNode * node);
-
-
-
 
     std::string generate_code(ASTNode* node) {
 
@@ -134,6 +158,7 @@ public:
 
 
             if(isOperator(firstChild->value)) {
+
                 return handle_operator(node);
             }
 
@@ -193,6 +218,11 @@ public:
             // (print "hello World") stdout -> "hello World"
             if(firstChild->value == "print") {
                 return handle_print_keyword(node);
+            }
+
+            // (read "filename")
+            if(firstChild->value == "read") {
+                return handle_read_keyword(node);
             }
 
             if(isDeclaredFunction(firstChild->value)) {

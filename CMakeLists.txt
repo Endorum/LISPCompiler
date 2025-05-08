@@ -12,4 +12,6 @@ add_executable(LISPCompiler src/main.cpp
         src/codegen.cpp
         include/asmgen.hpp
         src/asmgen.cpp
-        src/asmgen.cpp)
+        src/asmgen.cpp
+        src/asmgen.cpp
+        include/asmgen.hpp)

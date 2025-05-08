@@ -65,6 +65,12 @@ length:
 print:
 (print "hello World") -> stdout = "hello World"
 
+read:
+(read "file.filetype") -> reads the content of a file and stores address at a temp var
+
+scan:
+(scan x) -> reads user input into a variable
+
 the rest can be implemented using user defined functions and macros
 
 # Function definition:

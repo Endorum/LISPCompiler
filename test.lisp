@@ -1,1 +1,5 @@
-(length (toList "this is some string"))
+(defun add (x y)
+  (+ x y)
+)
+
+(add 1 2)
