@@ -22,7 +22,7 @@ struct IRInstruction {
     [[nodiscard]] std::string str(bool debug=false) const {
 
         if(debug) return "dst: " + dst + " op: " + op + " src1: " + src1 + ((!src2.empty()) ? " src2: " + src2 : "");
-        return  dst + " =" + ((op == "=") ? "" : " " + op)  + " " + src1 + ((!src2.empty()) ? " " + src2 : "");
+        return  dst + ((op == "=") ? " =" : " " + op)  + " " + src1 + ((!src2.empty()) ? " " + src2 : "");
     }
 };
 
@@ -86,8 +86,8 @@ public:
 
 
 
-    bool functionDeclared(std::string UD_funcName);
-    bool variableDeclared(std::string name);
+    bool isDeclaredFunction(std::string UD_funcName);
+    bool isDeclaredVariable(std::string name);
 
     bool isOperator(std::string op) {
         if(op.size() == 1) {
@@ -102,6 +102,7 @@ public:
     std::string handle_let_keyword(ASTNode* node);
 
 
+    std::string handle_cons_keyword(ASTNode* node);
 
     std::string generate_code(ASTNode* node) {
 
@@ -113,6 +114,7 @@ public:
             // went wrong as there shouldve been a quote before that
             // 1. check if its an operator
             // 2. check for various keywords
+            // 3. check if its a known function
 
             ASTNode* firstChild = node->children.at(0);
             if(!firstChild)
@@ -123,12 +125,39 @@ public:
                 return handle_operator(node);
             }
 
+            // (let x 5)
             if(firstChild->value == "let") {
                 return handle_let_keyword(node);
             }
 
+            // (defun add (x y) (+ x y) )
             if(firstChild->value == "defun") {
                 return handle_defun_keyword(node);
+            }
+
+            // (if (> x y) x y))
+            if(firstChild->value == "if") {
+                return handle_if_keyword(node);
+            }
+
+            // constructs a new pair
+            // (cons 1 '(2 3)) -> (1 2 3)
+            // (cons 1 (cons 2 3)) -> (1 2 3)
+            if(firstChild->value == "cons") {
+                return handle_cons_keyword(node);
+            }
+
+            // (car '(1 2 3)) -> 1
+            if(firstChild->value == "car") {
+                return handle_car_keyword(node);
+            }
+
+            if(isDeclaredFunction(firstChild->value)) {
+                return handle_functionCall(node);
+            }
+
+            else {
+                throw std::runtime_error("\'" + firstChild->value + "\' was not recognized as a built in or userdefined function");
             }
 
 
@@ -142,14 +171,19 @@ public:
             }
 
             if(node->type == NT_Symbol) {
-                if(variableDeclared(node->value)) {
+                if(isDeclaredVariable(node->value)) {
                     std::string temp = generate_tmp();
-                    // emit(temp + " = load " + node->value);
+
                     emit(temp, node->value, "load");
                     return temp;
                 }
 
                 throw std::runtime_error("Variable " + node->value + " not delcared in this scope");
+            }
+
+            if(node->type == NT_String) {
+                std::string temp = generate_tmp();
+                emit(temp, node->value, "loadstr");
             }
 
             if(node->type == NT_Quote) {

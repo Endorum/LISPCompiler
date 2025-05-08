@@ -6,14 +6,14 @@
 
 #include "../include/codegen.hpp"
 
-bool Generator::functionDeclared(std::string UD_funcName) {
+bool Generator::isDeclaredFunction(std::string UD_funcName) {
     for(const auto& pair : functionMap) {
         if(UD_funcName == pair.first) return true;
     }
     return false;
 }
 
-bool Generator::variableDeclared(std::string name) {
+bool Generator::isDeclaredVariable(std::string name) {
     for(const auto& pair : variableMap) {
         if(pair.first == name) return true;
     }
@@ -33,6 +33,7 @@ void Generator::findFuncDecls() {
 
             seenFunctions.insert(funcName);
             // functionNames.push_back(funcName);
+            functionMap.insert({funcName, 69});
         }
     }
 }
@@ -40,7 +41,7 @@ void Generator::findFuncDecls() {
 std::string Generator::handle_functionCall(ASTNode *node) {
     std::string UDfuncName = node->children.at(0)->value;
 
-    if (!functionDeclared(UDfuncName)) {
+    if (!isDeclaredFunction(UDfuncName)) {
         throw std::runtime_error("ERROR: Function " + UDfuncName + " is not declared");
     }
 
@@ -48,14 +49,14 @@ std::string Generator::handle_functionCall(ASTNode *node) {
     for (size_t i = 1; i < node->children.size(); ++i) {
         ASTNode* param = node->children.at(i);
         std::string res = generate_code(param);
-        // emit("push " + res);
+        emit("stack", res, "push");
     }
 
-    // emit("call " + UDfuncName);
+    emit("call " + UDfuncName);
 
     // after call, result is "somewhere" — but you might want to make it explicit
     std::string temp = generate_tmp();
-    // emit(temp + " = return_value"); // you need to decide how you model return values
+    emit(temp, "return_value", "=");
     return temp;
 }
 
@@ -64,8 +65,18 @@ std::string opCharToWord(std::string op) {
         default: return op;
         case '+': return "add";
         case '-': return "sub";
-        case '*': return "imul";
-        case '/': return "idiv";
+        case '*': return "mul";
+        case '/': return "div";
+
+        case '&': return "and";
+        case '|': return "or";
+        case '^': return "xor";
+        case '~': return "neg";
+
+        case '<': return "le";
+        case '>': return "gr";
+        case '=': return "eq";
+        case '!': return "not";
 
     }
 }
@@ -93,6 +104,16 @@ std::string Generator::handle_operator(ASTNode *node) {
         }
 
         return temp;
+    } else {
+        if (node->children.size() != 2) {
+            throw std::runtime_error("ERROR: Expected one argument for unary operator");
+        }
+
+        std::string temp = generate_code(node->children.at(1));
+        std::string res = generate_tmp();
+        emit(res, temp, opCharToWord(op));
+
+        return res;
     }
 
     return "ERROR: handle_operator wasn't given an operator?";
@@ -110,6 +131,20 @@ std::string Generator::handle_let_keyword(ASTNode *node) {
 
     variableMap[varname] = StackOffset++;
 
+    emit(varname, temp, "store");
+
+    return temp;
+}
+
+std::string Generator::handle_cons_keyword(ASTNode *node) {
+    if (node->children.size() < 3) {
+        throw std::runtime_error("ERROR: Invalid cons expression: (cons <first> <second>)");
+    }
+
+    std::string left = generate_code(node->children.at(1));
+    std::string right = generate_code(node->children.at(2));
+    std::string temp = generate_tmp();
+    emit(temp, left, "cons", right);
     return temp;
 }
 
@@ -123,18 +158,18 @@ std::string Generator::handle_defun_keyword(ASTNode *node) {
     }
 
     // Emit the function label
-    // emit(functionName + ":");
+    emit(functionName + ":");
 
     for(size_t i=parameters->children.size(); i > 0; i--) {
         variableMap[parameters->children.at(i - 1)->value] = StackOffset++;
-        // emit(parameters->children.at(i - 1)->value + " = pop");
+        emit(parameters->children.at(i - 1)->value, "pop");
     }
 
     // Generate code for the body
     std::string result = generate_code(body);
 
     // Emit a return instruction
-    // emit("return " + result);
+    emit("return_value", result, "=");
 
     return result;
 }
@@ -156,20 +191,19 @@ std::string Generator::handle_if_keyword(ASTNode *node) {
     std::string endLabel = "endLabel" + addr;
     std::string returnValue = "retValue" + addr;
 
-    // emit("if " + temp + " jump " + trueLabel);
-    // emit("jump " + falseLabel);
+    emit(trueLabel, temp, "if", "jump");
+    emit(falseLabel, "", "jump");
 
-    // emit(trueLabel + ":");
-    // std::string trueOut = generate_code(trueBody);
-    // emit(returnValue + " = " + trueOut);
-    // emit("jump " + endLabel);
-    //
-    // emit(falseLabel + ":");
-    // std::string falseOut = generate_code(falseBody);
-    // emit(returnValue + " = " + falseOut);
-    // emit("jump " + endLabel);
-    //
-    // emit(endLabel + ":");
+    emit(trueLabel + ":");
+    std::string trueOut = generate_code(trueBody);
+    emit(returnValue, trueOut, "=");
+    emit(endLabel, "jump");
+
+    emit(falseLabel + ":");
+    std::string falseOut = generate_code(falseBody);
+    emit(returnValue, falseOut, "=");
+
+    emit(endLabel + ":");
 
     return returnValue;
 }
@@ -216,17 +250,20 @@ std::string Generator::handle_print_keyword(ASTNode *node) {
     return "";
 }
 
-std::string Generator::handle_car_keyword(ASTNode *node) {
-    // (car <list>)
-    if(node->children.size() < 2) {
-        throw std::runtime_error("ERROR: Expected: (car <list>)");
+std::string Generator::handle_car_keyword(ASTNode* node) {
+    if (node->children.size() != 2) {
+        throw std::runtime_error("ERROR: Expected usage: (car <list>)");
     }
-    std::string strAddr = generate_code(node->children.at(1)); // address of the list
+
+    std::string listAddr = generate_code(node->children.at(1));
     std::string dst = generate_tmp();
-    emit(dst + " = " + strAddr + "[0]");
+
+    // Emit a high-level IR op like: "t2 = car t1"
+    emit(dst, listAddr, "car");
 
     return dst;
 }
+
 
 std::string Generator::handle_list_keyword(ASTNode *node) {
     std::vector<std::string> elements;
@@ -237,7 +274,7 @@ std::string Generator::handle_list_keyword(ASTNode *node) {
 
     // generate code for each element
     for (int i = 1; i < node->children.size(); i++) {
-        elements.push_back(generate_code(node->children[i]));
+        elements.push_back(generate_code(node->children.at(i)));
     }
 
     // allocate memory
@@ -246,7 +283,7 @@ std::string Generator::handle_list_keyword(ASTNode *node) {
 
     // store elements
     for (int i = 0; i < elements.size(); i++) {
-        emit("store [" + listTemp + " + " + std::to_string(i * 4) + "] = " + elements[i]); // 32 bit integer assumed!!!
+        emit("store [" + listTemp + " + " + std::to_string(i * 4) + "] = " + elements.at(i)); // 32 bit integer assumed!!!
     }
 
     return listTemp;

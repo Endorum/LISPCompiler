@@ -82,13 +82,14 @@ bool Preproc::handleMacros() {
 
 std::string Preproc::normalizeWhitespace(std::string &code) {
     // Variable to track the position while iterating
-    size_t pos = 0;
+    // size_t pos = 0;
+    //
+    // // Replace consecutive newlines with a single space
+    // while ((pos = code.find("\n\n", pos)) != std::string::npos) {
+    //     code.replace(pos, 2, " ");  // Replace "\n\n" with a single "\n"
+    //     pos += 1;  // Move past the replaced newline
+    // } //TODO: the problem is that if the line above is a comment, then the line below might "become" a comment as the line break is removed
 
-    // Replace consecutive newlines with a single space
-    while ((pos = code.find("\n\n", pos)) != std::string::npos) {
-        code.replace(pos, 2, " ");  // Replace "\n\n" with a single "\n"
-        pos += 1;  // Move past the replaced newline
-    }
 
     return code;
 }

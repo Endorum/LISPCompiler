@@ -30,7 +30,7 @@ int main() {
   preproc.resolveAllIncludes();
   preproc.resolveAllMacros();
 
-  // std::cout << input << std::endl;
+  std::cout << input << std::endl;
   // Preprocessor
 
 
@@ -41,7 +41,7 @@ int main() {
 
   std::vector<Token> tokens = tokenizer.getTokens();
 
-  // tokenizer.printTokens();
+  tokenizer.printTokens();
   // Tokenizer
 
 
