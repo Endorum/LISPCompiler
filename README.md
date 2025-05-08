@@ -25,30 +25,47 @@ e.g.
 Numbers: (0-9)^* (.) (0-9)^*
 Symbols: eg x, foo
 Strings: "this is a String"
-Lists: eg (1 2 3)
-booleans: TRUE / FALSE (optional could also use 0/1 (?) )
+Lists: eg '(1 2 3)
 
 # built-in functions:
-Arithmetic: +, -, * ,/
-List operator:
-- car: get first element
-- cdr: rest of list
-- cons: prepend element
-- (list 1 2 3 4) generates an array with these elmts
-- ..(?)
-Comparisons:
-=
-<
->
-Logic:
-and
-or
-not
++, -, *, /, &, |, ^, ~, !, = > <
+keywords:
 
-e.g.:
-(car '(1 2 3))  ; Returns 1
-(cdr '(1 2 3))  ; Returns (2 3)
-(cons 0 '(1 2 3)) ; Returns (0 1 2 3)
+let:
+(let x 5)
+
+defun:
+(defun add (x y) (+ x y) )
+
+if:
+(if (> 2 1) 2 1)
+
+cons:
+(cons 1 (cons 2 3)) -> '(1 2 3)
+(cons 1 '(2 3) ) -> '(1 2 3)
+
+car:
+(car '(1 2 3)) -> 1
+
+cdr:
+(cdr '(1 2 3)) -> '(2 3)
+
+null?:
+(null? '()) -> true
+ 
+toList:
+(toList "test") -> '(116 101 115 116)
+
+toString:
+(toString '(116 101 115 116) -> "test"
+
+length:
+(lenght '(1 2 3)) -> 3
+
+print:
+(print "hello World") -> stdout = "hello World"
+
+the rest can be implemented using user defined functions and macros
 
 # Function definition:
 keyword: defun
@@ -71,12 +88,6 @@ e.g.
 (defun factorial (n)
 (if (= n 0) 1
 (* n (factorial (- n 1)))))
-
-# Builtin functions:
-(str "some string" index) : indexes a string and returns a char
-(length "some string") : returns length of the string
-(print "some string") : prints a string/stringvar/numbervar to stdout
-
 
 # Tokenizer
 The input stream is tokenized into simple tokens with a token type and a value which is just

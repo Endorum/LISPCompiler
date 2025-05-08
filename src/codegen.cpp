@@ -148,6 +148,67 @@ std::string Generator::handle_cons_keyword(ASTNode *node) {
     return temp;
 }
 
+std::string Generator::handle_null_keyword(ASTNode *node) {
+    if (node->children.size() != 2) {
+        throw std::runtime_error("ERROR: Invalid null? expression: (null? <list>)");
+    }
+
+    std::string listAddr = generate_code(node->children.at(1));
+    std::string temp = generate_tmp();
+
+    emit(temp, listAddr, "null?");
+
+    return temp;
+}
+
+std::string Generator::handle_toList_keyword(ASTNode *node) {
+    if (node->children.size() != 2) {
+        throw std::runtime_error("ERROR: Invalid toList expression: (toList <string>)");
+    }
+
+    if(node->children.at(1)->type != NT_String) {
+        throw std::runtime_error("ERROR: Expected a string");
+    }
+
+    std::string strAddr = generate_code(node->children.at(1));
+    std::string temp = generate_tmp();
+
+    /*
+
+    List* string_to_list(const char* str) {
+        if (!str) return NULL;
+        List* result = NULL;
+        for (int i = strlen(str) - 1; i >= 0; i--) {
+            result = cons(str[i], result);
+        }
+        return result;
+    }
+
+     */
+
+    emit(temp, strAddr, "string_to_list");
+
+
+    return temp;
+}
+
+std::string Generator::handle_toString_keyword(ASTNode *node) {
+    if (node->children.size() != 2) {
+        throw std::runtime_error("ERROR: Invalid toString expression: (toString <list>)");
+    }
+
+    if(node->children.at(1)->type != NT_List) {
+        throw std::runtime_error("ERROR: Expected a List");
+    }
+
+    const std::string listAddr = generate_code(node->children.at(1));
+    std::string temp = generate_tmp();
+
+    emit(temp, listAddr, "list_to_string");
+
+    return temp;
+}
+
 std::string Generator::handle_defun_keyword(ASTNode *node) {
     std::string functionName = node->children.at(1)->value;
     ASTNode* parameters = node->children.at(2);
@@ -208,34 +269,23 @@ std::string Generator::handle_if_keyword(ASTNode *node) {
     return returnValue;
 }
 
-std::string Generator::handle_str_keyword(ASTNode *node) {
-    // ('str' string index)
 
-    if(node->children.size() < 3) {
-        throw std::runtime_error("ERROR: Expected: (str <string/variable> <index expr> )");
-    }
-
-    std::string strAddr = generate_code(node->children.at(1)); // address of string
-    std::string index = generate_code(node->children.at(2));    // index
-    std::string tempAddr = generate_tmp();
-    // emit(tempAddr + " = " + strAddr + " + " + index);
-    std::string tempChar = generate_tmp();
-    // emit(tempChar + " = loadbyte " + tempAddr);
-    return tempChar;
-
-
-}
 
 std::string Generator::handle_length_keyword(ASTNode *node) {
-    // (length string)
+    // (length list)
     if(node->children.size() < 2) {
-        throw std::runtime_error("ERROR: Expected: (length <string/stringvariable>)");
+        throw std::runtime_error("ERROR: Expected: (length <list>)");
     }
-    std::string strAddr = generate_code(node->children.at(1)); // address of string
-    std::string res = generate_tmp();
-    emit(res + " = len " + strAddr);
 
-    return res;
+    if(node->children.at(1)->type != NT_List) {
+        throw std::runtime_error("ERROR: Expected a List");
+    }
+
+    std::string listAddr = generate_code(node->children.at(1)); // address of list
+    std::string temp = generate_tmp();
+    emit(temp, listAddr, "listLength");
+
+    return temp;
 }
 
 std::string Generator::handle_print_keyword(ASTNode *node) {
@@ -243,11 +293,16 @@ std::string Generator::handle_print_keyword(ASTNode *node) {
     if(node->children.size() < 2) {
         throw std::runtime_error("ERROR: Expected: (print <string/stringvariable>)");
     }
+
+    if(node->children.at(1)->type != NT_String) {
+        throw std::runtime_error("ERROR: Expected a string");
+    }
+
     std::string strAddr = generate_code(node->children.at(1)); // address of string
 
-    emit("stdout", strAddr, "printInt");
+    emit("stdout", strAddr, "print");
 
-    return "";
+    return strAddr;
 }
 
 std::string Generator::handle_car_keyword(ASTNode* node) {
@@ -264,44 +319,6 @@ std::string Generator::handle_car_keyword(ASTNode* node) {
     return dst;
 }
 
-
-std::string Generator::handle_list_keyword(ASTNode *node) {
-    std::vector<std::string> elements;
-
-    if(node->children.size() < 2) {
-        throw std::runtime_error("ERROR: Expected: (list <element> ...)");
-    }
-
-    // generate code for each element
-    for (int i = 1; i < node->children.size(); i++) {
-        elements.push_back(generate_code(node->children.at(i)));
-    }
-
-    // allocate memory
-    std::string listTemp = generate_tmp();
-    emit(listTemp + " = alloc " + std::to_string(elements.size()));
-
-    // store elements
-    for (int i = 0; i < elements.size(); i++) {
-        emit("store [" + listTemp + " + " + std::to_string(i * 4) + "] = " + elements.at(i)); // 32 bit integer assumed!!!
-    }
-
-    return listTemp;
-}
-
-std::string Generator::handle_at_keyword(ASTNode *node) {
-    if(node->children.size() < 3) {
-        throw std::runtime_error("ERROR: Expected: (at <list> <index>)");
-    }
-
-    std::string list = generate_code(node->children.at(1));
-    std::string index = generate_code(node->children.at(2));
-    std::string dst = generate_tmp();
-
-    emit(dst + " = " + list + "[" + index + "]");
-    return dst;
-}
-
 std::string Generator::handle_cdr_keyword(ASTNode *node) {
     // (cdr <list>)
     if(node->children.size() < 2) {
@@ -312,7 +329,7 @@ std::string Generator::handle_cdr_keyword(ASTNode *node) {
     std::string dst = generate_tmp();
 
     // Return the pointer to the rest of the list, starting from element 2 (offset 4 bytes)
-    emit(dst + " = " + listAddr + " + 4");
+    emit(dst, listAddr, "cdr");
 
     return dst;
 }
