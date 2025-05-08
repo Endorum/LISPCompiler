@@ -28,6 +28,11 @@ struct IRInstruction {
     }
 };
 
+struct Function {
+    std::string name;
+    size_t localVars;
+};
+
 class Generator {
 public:
     size_t temp_count = 0;
@@ -36,6 +41,8 @@ public:
 
     std::unordered_map<std::string, int> variableMap; // store the name as well as the stack offset
     std::unordered_map<std::string, int> functionMap; // store name and labelOffset of function
+
+    std::vector<Function> functions;
 
     int StackOffset = 4;
     int labelOffset = 0;

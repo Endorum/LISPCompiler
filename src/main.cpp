@@ -1,7 +1,8 @@
-#include <fstream>
 #include <iostream>
-#include <sstream>
+#include <fstream>
 #include <string>
+#include <vector>
+#include <stdexcept>
 
 #include "../include/asmgen.hpp"
 #include "../include/codegen.hpp"
@@ -9,77 +10,95 @@
 #include "../include/preproc.hpp"
 #include "../include/tokenizer.hpp"
 
-std::string readFile(const std::string &filename) {
-  std::ifstream file(filename);
-  if (!file) {
-    throw std::runtime_error("Could not open file: " + filename);
-  }
 
-  std::stringstream buffer;
-  buffer << file.rdbuf(); // Read entire file into buffer
-  return buffer.str();
+// Assume all your includes like Preproc, Tokenizer, Parser, Generator, Asmgen, etc., are here
+
+std::string readFile(const std::string& filename) {
+    std::ifstream inFile(filename);
+    if (!inFile) {
+        throw std::runtime_error("Failed to open input file: " + filename);
+    }
+    return std::string((std::istreambuf_iterator<char>(inFile)),
+                        std::istreambuf_iterator<char>());
 }
 
+void writeToFile(const std::string& content, const std::string& filename) {
+    std::ofstream outFile(filename);
+    if (!outFile) {
+        throw std::runtime_error("Failed to open output file: " + filename);
+    }
 
+    outFile << content;
 
-int main() {
-  std::string input = readFile("../test.lisp");
+    if (!outFile) {
+        throw std::runtime_error("Failed to write to file: " + filename);
+    }
+}
 
-  // Preprocessor see preproc.md
-  Preproc preproc(input);
+int main(int argc, char* argv[]) {
+    if (argc != 3) {
+        std::cerr << "Usage: " << argv[0] << " <input_file.lisp> <output_file.asm>\n";
+        return 1;
+    }
 
-  preproc.resolveAllIncludes();
-  preproc.resolveAllMacros();
+    std::string inputFile = argv[1];
+    std::string outputFile = argv[2];
 
-  std::cout << input << std::endl;
-  // Preprocessor
+    try {
+        std::string input = readFile(inputFile);
 
+        // Preprocessor
+        Preproc preproc(input);
+        preproc.resolveAllIncludes();
+        preproc.resolveAllMacros();
 
-  // Tokenizer see toknizer.md
-  Tokenizer tokenizer;
-  tokenizer.setInput(input);
-  tokenizer.tokenize();
+        // Tokenizer
+        Tokenizer tokenizer;
+        tokenizer.setInput(input);
+        tokenizer.tokenize();
+        std::vector<Token> tokens = tokenizer.getTokens();
+        tokenizer.printTokens();
 
-  std::vector<Token> tokens = tokenizer.getTokens();
+        // Parser
+        Parser parser(tokens);
+        std::vector<ASTNode*> program = parser.parse();
+        for (const auto& expr : program) {
+            std::cout << parser.printASTNode(*expr);
+        }
 
-  tokenizer.printTokens();
-  // Tokenizer
+        // IR generation
+        Generator generator(program);
+        generator.findFuncDecls();
+        generator.generateIR();
+        std::vector<IRInstruction> instructions = generator.instructions;
+        for (const auto& instr : instructions) {
+            std::cout << instr.str(true) << std::endl;
+        }
 
+        for (const auto& pair : generator.variableMap) {
+            std::cout << pair.first << " : " << std::to_string(pair.second) << std::endl;
+        }
 
-  // Parser see parser.md
-  Parser parser(tokens);
+        // Assembly generation
+        Asmgen asmgenerator(instructions, generator.variableMap, generator.functions);
+        asmgenerator.generate();
+        std::string asm_out = asmgenerator.getAsm();
+        std::cout << asm_out << std::endl;
 
-  std::vector<ASTNode*> program = parser.parse();
+        // Write to file
+        writeToFile(asm_out, outputFile);
+        std::cout << "Assembly written to: " << outputFile << "\n";
+    } catch (const std::exception& e) {
+        std::cerr << "ERROR: " << e.what() << "\n";
+        return 1;
+    }
 
-  for (const auto& expr : program) {
-    std::cout << parser.printASTNode(*expr);
-  }
-  // Parser
+    std::string nasm = "nasm -f elf32 " + outputFile +" -o " + outputFile + ".o";
+    system(nasm.c_str());
 
-  // IR code generation see codegen.md
-  Generator generator(program);
-  generator.findFuncDecls();
+    // i686-elf-ld -o out out.o
+    std::string ld = "i686-elf-ld -o ../a.out " + outputFile + ".o";
+    system(ld.c_str());
 
-  generator.generateIR();
-
-  std::vector<IRInstruction> instructions = generator.instructions;
-
-  for(const auto& instr : instructions) {
-    std::cout << instr.str(true) << std::endl;
-  }
-  // IR code generation
-
-  for(const auto& pair : generator.variableMap) {
-    std::cout << pair.first << " : " << std::to_string(pair.second) << std::endl;
-  }
-
-
-  // Assembly generation
-  Asmgen asmgenerator(instructions,generator.variableMap);
-  asmgenerator.generate();
-  std::cout << asmgenerator.getAsm() << std::endl;
-  // Assembly generation
-
-
-  return 0;
+    return 0;
 }

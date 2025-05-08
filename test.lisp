@@ -1,5 +1,3 @@
-(defun add (x y)
-  (+ x y)
+(defun main ()
+    (print "Hello World!")
 )
-
-(add 1 2)

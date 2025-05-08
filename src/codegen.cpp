@@ -62,7 +62,7 @@ std::string Generator::handle_functionCall(ASTNode *node) {
     // after call, result is "somewhere" — but you might want to make it explicit
     std::string temp = generate_tmp();
     emit(temp, "return_value", "=");
-    variableMap["return_value"] = StackOffset += 4;
+
     return temp;
 }
 
@@ -246,6 +246,9 @@ std::string Generator::handle_defun_keyword(ASTNode *node) {
     ASTNode* parameters = node->children.at(2);
     ASTNode* body = node->children.at(3);
 
+    Function func;
+    func.name = functionName;
+
     if (!parameters || !body) {
         throw std::runtime_error("ERROR: Expected parameters and body");
     }
@@ -253,16 +256,32 @@ std::string Generator::handle_defun_keyword(ASTNode *node) {
     // Emit the function label
     emit("label", functionName, "defun");
 
+    size_t stackOffBefore = StackOffset;
+    size_t tempCountBefore = temp_count;
+
     for(size_t i=parameters->children.size(); i > 0; i--) {
         variableMap[parameters->children.at(i - 1)->value] = StackOffset += 4;
         emit(parameters->children.at(i - 1)->value, "stack", "pop");
     }
 
+    // size_t parameterCount = parameters->children.size();
+
     // Generate code for the body
     std::string result = generate_code(body);
 
+    size_t tempCountAfter = temp_count;
+    size_t stackAfterBody = StackOffset;
+
+    size_t variables = (stackAfterBody - stackOffBefore) / 4 + (tempCountAfter - tempCountBefore);
+
+    temp_count = 0;
+
     // Emit a return instruction
-    emit("return_value", result, "=");
+    func.localVars = variables;
+    functions.push_back(func);
+
+    emit("return_value", result, "return");
+    variableMap["return_value"] = StackOffset += 4;
 
     return result;
 }
