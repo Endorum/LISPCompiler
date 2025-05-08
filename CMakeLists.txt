@@ -9,4 +9,7 @@ add_executable(LISPCompiler src/main.cpp
         include/codegen.hpp
         src/preproc.cpp
         include/preproc.hpp
-        src/codegen.cpp)
+        src/codegen.cpp
+        include/asmgen.hpp
+        src/asmgen.cpp
+        src/asmgen.cpp)

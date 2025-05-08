@@ -7,22 +7,20 @@
 #include "../include/codegen.hpp"
 
 bool Generator::functionDeclared(std::string UD_funcName) {
-    for(auto funcName : functionNames) {
-        if(UD_funcName == funcName) return true;
+    for(const auto& pair : functionMap) {
+        if(UD_funcName == pair.first) return true;
     }
     return false;
 }
 
 bool Generator::variableDeclared(std::string name) {
     for(const auto& pair : variableMap) {
-        if(pair.first == name) {
-            return true;
-        }
+        if(pair.first == name) return true;
     }
     return false;
 }
 
-void Generator::declareFunctions() {
+void Generator::findFuncDecls() {
     std::unordered_set<std::string> seenFunctions;
 
     for (auto node : program) {
@@ -34,7 +32,7 @@ void Generator::declareFunctions() {
             }
 
             seenFunctions.insert(funcName);
-            functionNames.push_back(funcName);
+            // functionNames.push_back(funcName);
         }
     }
 }
@@ -50,15 +48,26 @@ std::string Generator::handle_functionCall(ASTNode *node) {
     for (size_t i = 1; i < node->children.size(); ++i) {
         ASTNode* param = node->children.at(i);
         std::string res = generate_code(param);
-        emit("push " + res);
+        // emit("push " + res);
     }
 
-    emit("call " + UDfuncName);
+    // emit("call " + UDfuncName);
 
     // after call, result is "somewhere" — but you might want to make it explicit
     std::string temp = generate_tmp();
-    emit(temp + " = return_value"); // you need to decide how you model return values
+    // emit(temp + " = return_value"); // you need to decide how you model return values
     return temp;
+}
+
+std::string opCharToWord(std::string op) {
+    switch (op.at(0)) {
+        default: return op;
+        case '+': return "add";
+        case '-': return "sub";
+        case '*': return "imul";
+        case '/': return "idiv";
+
+    }
 }
 
 std::string Generator::handle_operator(ASTNode *node) {
@@ -78,7 +87,8 @@ std::string Generator::handle_operator(ASTNode *node) {
         for (int i = 2; i < node->children.size(); i++) {
             std::string arg = generate_code(node->children.at(i));
             std::string res = generate_tmp();
-            emit(res + " = " + temp + " " + op + " " + arg);
+            // emit(res + " = " + temp + " " + opCharToWord(op) + " " + arg);
+            emit(res, temp, opCharToWord(op), arg);
             temp = res; // update temp to chain the next operation
         }
 
@@ -97,10 +107,8 @@ std::string Generator::handle_let_keyword(ASTNode *node) {
     std::string varname = node->children.at(1)->value;
 
     std::string temp = generate_code(node->children.at(2));
-    emit("store " + varname + " = " + temp);
 
-
-    variableMap[varname] = nextStackOffset++;
+    variableMap[varname] = StackOffset++;
 
     return temp;
 }
@@ -115,18 +123,18 @@ std::string Generator::handle_defun_keyword(ASTNode *node) {
     }
 
     // Emit the function label
-    emit(functionName + ":");
+    // emit(functionName + ":");
 
     for(size_t i=parameters->children.size(); i > 0; i--) {
-        variableMap[parameters->children.at(i - 1)->value] = nextStackOffset++;
-        emit(parameters->children.at(i - 1)->value + " = pop");
+        variableMap[parameters->children.at(i - 1)->value] = StackOffset++;
+        // emit(parameters->children.at(i - 1)->value + " = pop");
     }
 
     // Generate code for the body
     std::string result = generate_code(body);
 
     // Emit a return instruction
-    emit("return " + result);
+    // emit("return " + result);
 
     return result;
 }
@@ -148,20 +156,20 @@ std::string Generator::handle_if_keyword(ASTNode *node) {
     std::string endLabel = "endLabel" + addr;
     std::string returnValue = "retValue" + addr;
 
-    emit("if " + temp + " jump " + trueLabel);
-    emit("jump " + falseLabel);
+    // emit("if " + temp + " jump " + trueLabel);
+    // emit("jump " + falseLabel);
 
-    emit(trueLabel + ":");
-    std::string trueOut = generate_code(trueBody);
-    emit(returnValue + " = " + trueOut);
-    emit("jump " + endLabel);
-
-    emit(falseLabel + ":");
-    std::string falseOut = generate_code(falseBody);
-    emit(returnValue + " = " + falseOut);
-    emit("jump " + endLabel);
-
-    emit(endLabel + ":");
+    // emit(trueLabel + ":");
+    // std::string trueOut = generate_code(trueBody);
+    // emit(returnValue + " = " + trueOut);
+    // emit("jump " + endLabel);
+    //
+    // emit(falseLabel + ":");
+    // std::string falseOut = generate_code(falseBody);
+    // emit(returnValue + " = " + falseOut);
+    // emit("jump " + endLabel);
+    //
+    // emit(endLabel + ":");
 
     return returnValue;
 }
@@ -176,9 +184,9 @@ std::string Generator::handle_str_keyword(ASTNode *node) {
     std::string strAddr = generate_code(node->children.at(1)); // address of string
     std::string index = generate_code(node->children.at(2));    // index
     std::string tempAddr = generate_tmp();
-    emit(tempAddr + " = " + strAddr + " + " + index);
+    // emit(tempAddr + " = " + strAddr + " + " + index);
     std::string tempChar = generate_tmp();
-    emit(tempChar + " = loadbyte " + tempAddr);
+    // emit(tempChar + " = loadbyte " + tempAddr);
     return tempChar;
 
 
@@ -202,7 +210,8 @@ std::string Generator::handle_print_keyword(ASTNode *node) {
         throw std::runtime_error("ERROR: Expected: (print <string/stringvariable>)");
     }
     std::string strAddr = generate_code(node->children.at(1)); // address of string
-    emit("print " + strAddr);
+
+    emit("stdout", strAddr, "printInt");
 
     return "";
 }

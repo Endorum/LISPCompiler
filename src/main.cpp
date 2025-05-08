@@ -30,7 +30,7 @@ int main() {
   preproc.resolveAllIncludes();
   preproc.resolveAllMacros();
 
-  std::cout << input << std::endl;
+  // std::cout << input << std::endl;
   // Preprocessor
 
 
@@ -41,7 +41,7 @@ int main() {
 
   std::vector<Token> tokens = tokenizer.getTokens();
 
-  tokenizer.printTokens();
+  // tokenizer.printTokens();
   // Tokenizer
 
 
@@ -55,14 +55,14 @@ int main() {
   }
 
   Generator generator(program);
-  generator.declareFunctions();
+  generator.findFuncDecls();
 
-  generator.generate();
+  generator.generateIR();
 
-  std::cout << generator.result << std::endl;
+  std::vector<IRInstruction> instructions = generator.instructions;
 
-  for (int i = 0; i < generator.functionNames.size(); i++) {
-    // printf("function: %s\n", generator.functionNames.at(i).c_str());
+  for(const auto& instr : instructions) {
+    std::cout << instr.str() << std::endl;
   }
 
 

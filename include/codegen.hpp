@@ -13,60 +13,77 @@
 #define OPERATORS "+-*/&|^~>=<!"
 #define BIN_OP "+-*/&|^>=<"
 
+struct IRInstruction {
+    std::string dst;
+    std::string op;
+    std::string src1;
+    std::string src2;
+
+    [[nodiscard]] std::string str(bool debug=false) const {
+
+        if(debug) return "dst: " + dst + " op: " + op + " src1: " + src1 + ((!src2.empty()) ? " src2: " + src2 : "");
+        return  dst + " =" + ((op == "=") ? "" : " " + op)  + " " + src1 + ((!src2.empty()) ? " " + src2 : "");
+    }
+};
+
 class Generator {
 public:
     size_t temp_count = 0;
 
-    std::string result;
+    std::string ir_result;
 
     std::unordered_map<std::string, int> variableMap; // store the name as well as the stack offset
-    int nextStackOffset = 0;
+    std::unordered_map<std::string, int> functionMap; // store name and labelOffset of function
 
-    std::vector<std::unordered_map<std::string, std::string>> scopes;
-
-    std::vector<std::string> functionNames;
+    int StackOffset = 0;
+    int labelOffset = 0;
 
     std::vector<ASTNode*>& program;
+
+    std::vector<IRInstruction> instructions;
 
     explicit Generator(std::vector<ASTNode*>& p): program(p) {}
 
 
-    void emit(const std::string &str) {
-        result += str + "\n";
+    void emit(const std::string& dst, const std::string& src1="", const std::string& op="", const std::string& src2="") {
+        IRInstruction instruction;
+
+        instruction.dst = dst;
+        instruction.src1 = src1;
+        instruction.op = op;
+        instruction.src2 = src2;
+
+        instructions.push_back(instruction);
     }
 
     std::string generate_tmp() {
         return "t" + std::to_string(temp_count++);
     }
 
-    void generate() {
+
+    void generateIR() {
         for(auto node : program) {
             generate_code(node);
         }
     }
 
-    void enterScope() {
-        scopes.push_back({});
-    }
-
-    void exitScope() {
-        scopes.pop_back();
-    }
-
-    std::string declareVariable(const std::string& name, const std::string& temp) {
-        scopes.back()[name] = temp;
-        return temp;
-    }
-
-    std::string resolveVariable(const std::string& name) {
-        for(auto it = scopes.rbegin(); it != scopes.rend(); ++it) {
-            if(it->count(name)) {
-                return it->at(name); // return the internal name (temp)
+    std::string serialize_quoted_list(ASTNode* node) {
+        if (node->type == NT_List) {
+            std::string result = "(";
+            for (size_t i = 0; i < node->children.size(); ++i) {
+                result += serialize_quoted_list(node->children[i]);
+                if (i + 1 < node->children.size()) result += " ";
             }
+            result += ")";
+            return result;
+        } if (node->type == NT_Symbol || node->type == NT_Number) {
+            return node->value;
+        } else {
+            return "<unsupported>";
         }
-
-        throw std::runtime_error("Undefined Variable: " + name);
     }
+
+
 
 
     bool functionDeclared(std::string UD_funcName);
@@ -79,10 +96,89 @@ public:
         return (op == "some other operator i guess?");
     }
 
-    void declareFunctions();
+    void findFuncDecls();
 
     std::string handle_operator(ASTNode* node);
     std::string handle_let_keyword(ASTNode* node);
+
+
+
+    std::string generate_code(ASTNode* node) {
+
+        if(node->type == NT_None) return "Some kind of error";
+
+        if(node->type == NT_List) {
+            // an expression -> evaluate children
+            // if first child is a number something
+            // went wrong as there shouldve been a quote before that
+            // 1. check if its an operator
+            // 2. check for various keywords
+
+            ASTNode* firstChild = node->children.at(0);
+            if(!firstChild)
+                throw std::runtime_error("FirstChild = nullptr?");
+
+
+            if(isOperator(firstChild->value)) {
+                return handle_operator(node);
+            }
+
+            if(firstChild->value == "let") {
+                return handle_let_keyword(node);
+            }
+
+            if(firstChild->value == "defun") {
+                return handle_defun_keyword(node);
+            }
+
+
+        } else {
+            // if its not an expression/list then its an atom
+            if(node->type == NT_Number) {
+                std::string temp = generate_tmp();
+                emit(temp, node->value, "=");
+
+                return temp;
+            }
+
+            if(node->type == NT_Symbol) {
+                if(variableDeclared(node->value)) {
+                    std::string temp = generate_tmp();
+                    // emit(temp + " = load " + node->value);
+                    emit(temp, node->value, "load");
+                    return temp;
+                }
+
+                throw std::runtime_error("Variable " + node->value + " not delcared in this scope");
+            }
+
+            if(node->type == NT_Quote) {
+                std::string temp = generate_tmp();
+
+                std::string data = serialize_quoted_list(node->children.at(0));
+
+                emit(temp, data, "quote");
+                return temp;
+            }
+
+
+        }
+
+        return "0";
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 
     std::string handle_defun_keyword(ASTNode* node);
 
@@ -107,82 +203,6 @@ public:
     std::string handle_at_keyword(ASTNode* node);
 
     std::string handle_cdr_keyword(ASTNode* node);
-
-
-    std::string generate_code(ASTNode* node) {
-
-        if(node->type == NT_None) return "Some kind of error";
-
-        if(node->type == NT_List) {
-            // an expression -> evaluate children
-            // if first child is a number something
-            // went wrong as there shouldve been a quote before that
-            // 1. check if its an operator
-            // 2. check for various keywords
-
-            ASTNode* firstChild = node->children.at(0);
-            if(!firstChild)
-                throw std::runtime_error("FirstChild = nullptr?");
-
-
-            if( isOperator(firstChild->value) ) {
-                return handle_operator(node);
-            }
-
-            if( firstChild->value == "let" ) {
-                return handle_let_keyword(node);
-            }
-
-            if(firstChild->value == "defun") {
-                return handle_defun_keyword(node);
-            }
-
-            if(firstChild->value == "IR") {
-                if(node->children.size() != 3 || node->children.at(1)->type != NT_String || node->children.at(2)->type != NT_Number) {
-                    throw std::runtime_error("Expected a string and an integer");
-                }
-
-                size_t tmpSave = temp_count;
-
-                if(node->children.at(1)) {
-                    emit("\n# IR injection: \n" + node->children.at(1)->value + "\n# End of IR injection\n");
-                }
-
-                temp_count = tmpSave + std::stoi(node->children.at(2)->value);
-
-                return "";
-            }
-
-
-
-
-        } else {
-            // if its not an expression/list then its an atom
-            if(node->type == NT_Number) {
-                std::string temp = generate_tmp();
-                emit(temp + " = " + node->value);
-                return temp;
-            }
-
-            if(node->type == NT_Symbol) {
-                if(variableDeclared(node->value)) {
-                    std::string temp = generate_tmp();
-                    emit(temp + " = load " + node->value);
-                    return temp;
-                }
-
-                throw std::runtime_error("Variable " + node->value + " not delcared in this scope");
-
-
-
-
-            }
-        }
-
-        return "0";
-
-    }
-
 
 };
 
@@ -285,6 +305,8 @@ public:
 // exit(1);
 //
 // return "0";
+
+
 
 
 #endif /*CODEGEN_HPP*/
