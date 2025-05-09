@@ -72,7 +72,7 @@ _start:
         // Temporary variables like t0, t1, t2...
         if (name.size() >= 2 && name.at(0) == 't' && std::isdigit(name.at(1))) {
             int tempIndex = std::stoi(name.substr(1));
-            return -4 * (tempIndex + 1); // [ebp - 4], [ebp - 8], etc.
+            return 4 * (tempIndex + 1); // [ebp - 4], [ebp - 8], etc.
         }
 
 
@@ -87,7 +87,15 @@ _start:
 
     std::string offsetStr(const std::string& name) {
         int offset = getOffset(name);
-        return "[ebp" + (offset < 0 ? " + " + std::to_string(-offset) : " - " + std::to_string(offset)) + "]";
+
+        // if name = t0 etc -> sp - 4 * x
+        // if name = parameter -> bp + 4 * x
+
+        if (name.size() >= 2 && name.at(0) == 't' && std::isdigit(name.at(1))) {
+            return "[ebp - " + std::to_string(offset) + "]";
+        }
+
+        return "[ebp + " + std::to_string(offset) + "]";
     }
 
 
@@ -126,7 +134,8 @@ _start:
         std::string src = instr.src1;
         std::string dst = instr.dst;
 
-
+        // temporary variabes (t0 etc) should be sp - 4 * x
+        // parameters should be bp + 4 * x
 
         std::string src_operand;
 
@@ -275,11 +284,10 @@ _start:
 
         }
 
-        else if(op == "getArg") {
-            // asm_result += getCurrentIntendStr() + "pop eax\n";
-            // asm_result += getCurrentIntendStr() + "mov " + offsetStr(instr.dst) + ", eax\n";
-
-            asm_result += getCurrentIntendStr() + "mov eax, [ebp + " + std::to_string() ;
+        else if(op == "pop") {
+            // do nothing apperently ?
+            // asm_result += getCurrentIntendStr() + "mov eax, " + offsetStr(instr.dst) + "\n";
+            // asm_result += getCurrentIntendStr() + "mov " + offsetStr(instr.src1) + ", eax" +"\n";
         }
 
         else if(op == "push") {
@@ -288,9 +296,7 @@ _start:
         }
 
         else if(op == "return") {
-            asm_result += getCurrentIntendStr() + "mov ebx, " + offsetStr(instr.src1) + "\n";
-            asm_result += getCurrentIntendStr() + "mov eax, ebx\n";
-            asm_result += getCurrentIntendStr() + "mov " + offsetStr("return_value") + ", eax\n";
+            asm_result += getCurrentIntendStr() + "mov eax, " + offsetStr(instr.src1) + "\n";
 
             // stack frame cleanup
             asm_result += getCurrentIntendStr() + "; Stack frame cleanup\n";

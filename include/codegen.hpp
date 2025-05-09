@@ -31,6 +31,7 @@ struct IRInstruction {
 struct Function {
     std::string name;
     size_t localVars;
+    size_t parameters;
 };
 
 class Generator {
@@ -44,7 +45,7 @@ public:
 
     std::vector<Function> functions;
 
-    int StackOffset = 4;
+    int StackOffset = 4; // to leave space for old bp and return address but for some reason it has to start with 4 instead of 8 idk why
     int labelOffset = 0;
 
     std::vector<ASTNode*>& program;
@@ -247,7 +248,15 @@ public:
             if(isDeclaredFunction(firstChild->value)) {
                 return handle_functionCall(node);
             }
+
+            // if(firstChild->type == NT_List) {
+            //     return generate_code(firstChild);
+            // }
+
             else {
+                printf("Node with unrecognized first child:\n");
+
+                std::cout << printASTNode(*node) << std::endl;
                 throw std::runtime_error("\'" + firstChild->value + "\' was not recognized as a built in or userdefined function");
             }
 

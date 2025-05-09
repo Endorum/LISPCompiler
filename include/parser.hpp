@@ -181,3 +181,33 @@ public:
     }
 
 };
+
+inline std::string nodeTypeToString(ASTNode& node) {
+    std::string table[] = {
+        "None",
+        "List",
+        "Symbol",
+        "Number",
+        "String",
+        "Quote",
+    };
+
+    return table[node.type];
+}
+
+inline std::string printASTNode(ASTNode& node, int indent = 0) {
+    std::string res;
+
+    for(int i=0;i<indent;i++) res += "\t";
+
+    res += (node.type != NT_None) ? " Node Type: \'" + nodeTypeToString(node) + "\'" : "";
+    res += (!node.value.empty()) ? " Value: \'"+ node.value + "\'" : "";
+    res += (!node.children.empty()) ? " Children (" + std::to_string(node.children.size()) + "): \n" : "\n";
+    for (const auto& child : node.children) {
+        res += printASTNode(*child, indent + 1);
+    }
+
+
+
+    return res;
+}

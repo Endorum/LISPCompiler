@@ -57,6 +57,16 @@ std::string Generator::handle_functionCall(ASTNode *node) {
         emit("stack", res, "push");
     }
 
+    size_t parameterCount = node->children.size() - 1; // -1 because the first child is the function name
+
+    for(int i=0;i<functions.size();i++) {
+        if(functions.at(i).name == UDfuncName) {
+            if(parameterCount != functions.at(i).parameters) {
+                throw std::runtime_error("ERROR: Invalid parameter count for function: " + UDfuncName +", wanted: " + std::to_string(functions.at(i).parameters) + " provided: " + std::to_string(parameterCount));
+            }
+        }
+    }
+
     emit("function call", UDfuncName, "call");
 
     // after call, result is "somewhere" — but you might want to make it explicit
@@ -307,14 +317,17 @@ std::string Generator::handle_toString_keyword(ASTNode *node) {
 std::string Generator::handle_defun_keyword(ASTNode *node) {
     std::string functionName = node->children.at(1)->value;
     ASTNode* parameters = node->children.at(2);
-    ASTNode* body = node->children.at(3);
+
+    if (!parameters) {
+        throw std::runtime_error("ERROR: Expected parameters");
+    }
+
 
     Function func;
     func.name = functionName;
+    func.parameters = parameters->children.size();
 
-    if (!parameters || !body) {
-        throw std::runtime_error("ERROR: Expected parameters and body");
-    }
+
 
     // Emit the function label
     emit("label", functionName, "defun");
@@ -323,7 +336,7 @@ std::string Generator::handle_defun_keyword(ASTNode *node) {
 
     for(size_t i=parameters->children.size(); i > 0; i--) {
         variableMap[parameters->children.at(i - 1)->value] = StackOffset += 4;
-        emit(parameters->children.at(i - 1)->value, "stack", "getArg"); // <- wrong the arguemnts are NOT popped they are near the bp not the sp
+        // emit(parameters->children.at(i - 1)->value, "stack", "pop"); // <- wrong the arguemnts are NOT popped they are near the bp not the sp
     }
 
     // size_t parameterCount = parameters->children.size();
@@ -331,8 +344,24 @@ std::string Generator::handle_defun_keyword(ASTNode *node) {
     size_t stackOffBefore = StackOffset;
     size_t tempCountBefore = temp_count;
 
+
     // Generate code for the body
-    std::string result = generate_code(body);
+    // make it work multiple lines and only return the result of the last
+    std::string result;
+
+
+    // switch if multi line body for functions should be possible
+    // right now it makes problems but that might be another issue
+    // it seems to be an issue with let or maybe the whole custom variables shit
+    if(true) {
+        for(int i=3;i<node->children.size();i++) {
+            ASTNode *body = node->children.at(i);
+            result = generate_code(body);
+        }
+    } else {
+        ASTNode *body = node->children.at(3);
+        result = generate_code(body);
+    }
 
     size_t tempCountAfter = temp_count;
     size_t stackAfterBody = StackOffset;

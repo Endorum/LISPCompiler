@@ -79,11 +79,17 @@ int main(int argc, char* argv[]) {
             std::cout << pair.first << " : " << std::to_string(pair.second) << std::endl;
         }
 
+        for(const auto& func : generator.functions) {
+            std::cout << "function: " << func.name << ", parameters: " << std::to_string(func.parameters) << std::endl;
+        }
+
+        // return 0;
+
         // Assembly generation
         Asmgen asmgenerator(instructions, generator.variableMap, generator.functions);
         asmgenerator.generate();
         std::string asm_out = asmgenerator.getAsm();
-        std::cout << asm_out << std::endl;
+        // std::cout << asm_out << std::endl;
 
         // Write to file
         writeToFile(asm_out, outputFile);
@@ -99,6 +105,9 @@ int main(int argc, char* argv[]) {
     // i686-elf-ld -o out out.o
     std::string ld = "i686-elf-ld -o ../main " + outputFile + ".o";
     system(ld.c_str());
+
+    std::string pass = "multipass transfer ../main linux:/home/ubuntu/main";
+    system(pass.c_str());
 
     return 0;
 }
