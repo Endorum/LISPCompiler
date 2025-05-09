@@ -35,7 +35,7 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "-g -std=gnu++17 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk -fcolor-diagnostics"
+					"fragment" : "-g -std=gnu++20 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk -fcolor-diagnostics"
 				}
 			],
 			"language" : "CXX",
@@ -45,7 +45,7 @@
 				[
 					1
 				],
-				"standard" : "17"
+				"standard" : "20"
 			},
 			"sourceIndexes" : 
 			[

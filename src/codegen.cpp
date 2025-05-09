@@ -104,8 +104,8 @@ std::string opCharToWord(std::string op) {
         case '^': return "xor";
         case '~': return "neg";
 
-        case '<': return "lt";
-        case '>': return "gt";
+        case '<': return "l";
+        case '>': return "g";
         case '=': return "eq";
         case '!': return "not";
 
@@ -303,19 +303,21 @@ std::string Generator::handle_if_keyword(ASTNode *node) {
     std::string endLabel = "endLabel" + addr;
     std::string returnValue = "retValue" + addr;
 
+    variableMap[returnValue] = StackOffset += 4;
+
     emit(trueLabel, temp, "if", "jump");
     emit(falseLabel, "", "jump");
 
-    emit(trueLabel + ":");
+    emit(trueLabel, "", "label");
     std::string trueOut = generate_code(trueBody);
     emit(returnValue, trueOut, "=");
-    emit(endLabel, "jump");
+    emit(endLabel, "", "jump");
 
-    emit(falseLabel + ":");
+    emit(falseLabel, "", "label");
     std::string falseOut = generate_code(falseBody);
     emit(returnValue, falseOut, "=");
 
-    emit(endLabel + ":");
+    emit(endLabel, "", "label");
 
     return returnValue;
 }

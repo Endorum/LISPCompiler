@@ -51,37 +51,37 @@ build cmake_object_order_depends_target_LISPCompiler: phony || CMakeFiles/LISPCo
 
 build CMakeFiles/LISPCompiler.dir/src/main.cpp.o: CXX_COMPILER__LISPCompiler_unscanned_Debug /Users/alexanderthorbr/Library/Mobile$ Documents/com~apple~CloudDocs/Documents/Programming/C++/LISPCompiler/src/main.cpp || cmake_object_order_depends_target_LISPCompiler
   DEP_FILE = CMakeFiles/LISPCompiler.dir/src/main.cpp.o.d
-  FLAGS = -g -std=gnu++17 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk -fcolor-diagnostics
+  FLAGS = -g -std=gnu++20 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk -fcolor-diagnostics
   OBJECT_DIR = CMakeFiles/LISPCompiler.dir
   OBJECT_FILE_DIR = CMakeFiles/LISPCompiler.dir/src
 
 build CMakeFiles/LISPCompiler.dir/src/parser.cpp.o: CXX_COMPILER__LISPCompiler_unscanned_Debug /Users/alexanderthorbr/Library/Mobile$ Documents/com~apple~CloudDocs/Documents/Programming/C++/LISPCompiler/src/parser.cpp || cmake_object_order_depends_target_LISPCompiler
   DEP_FILE = CMakeFiles/LISPCompiler.dir/src/parser.cpp.o.d
-  FLAGS = -g -std=gnu++17 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk -fcolor-diagnostics
+  FLAGS = -g -std=gnu++20 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk -fcolor-diagnostics
   OBJECT_DIR = CMakeFiles/LISPCompiler.dir
   OBJECT_FILE_DIR = CMakeFiles/LISPCompiler.dir/src
 
 build CMakeFiles/LISPCompiler.dir/src/tokenizer.cpp.o: CXX_COMPILER__LISPCompiler_unscanned_Debug /Users/alexanderthorbr/Library/Mobile$ Documents/com~apple~CloudDocs/Documents/Programming/C++/LISPCompiler/src/tokenizer.cpp || cmake_object_order_depends_target_LISPCompiler
   DEP_FILE = CMakeFiles/LISPCompiler.dir/src/tokenizer.cpp.o.d
-  FLAGS = -g -std=gnu++17 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk -fcolor-diagnostics
+  FLAGS = -g -std=gnu++20 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk -fcolor-diagnostics
   OBJECT_DIR = CMakeFiles/LISPCompiler.dir
   OBJECT_FILE_DIR = CMakeFiles/LISPCompiler.dir/src
 
 build CMakeFiles/LISPCompiler.dir/src/preproc.cpp.o: CXX_COMPILER__LISPCompiler_unscanned_Debug /Users/alexanderthorbr/Library/Mobile$ Documents/com~apple~CloudDocs/Documents/Programming/C++/LISPCompiler/src/preproc.cpp || cmake_object_order_depends_target_LISPCompiler
   DEP_FILE = CMakeFiles/LISPCompiler.dir/src/preproc.cpp.o.d
-  FLAGS = -g -std=gnu++17 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk -fcolor-diagnostics
+  FLAGS = -g -std=gnu++20 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk -fcolor-diagnostics
   OBJECT_DIR = CMakeFiles/LISPCompiler.dir
   OBJECT_FILE_DIR = CMakeFiles/LISPCompiler.dir/src
 
 build CMakeFiles/LISPCompiler.dir/src/codegen.cpp.o: CXX_COMPILER__LISPCompiler_unscanned_Debug /Users/alexanderthorbr/Library/Mobile$ Documents/com~apple~CloudDocs/Documents/Programming/C++/LISPCompiler/src/codegen.cpp || cmake_object_order_depends_target_LISPCompiler
   DEP_FILE = CMakeFiles/LISPCompiler.dir/src/codegen.cpp.o.d
-  FLAGS = -g -std=gnu++17 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk -fcolor-diagnostics
+  FLAGS = -g -std=gnu++20 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk -fcolor-diagnostics
   OBJECT_DIR = CMakeFiles/LISPCompiler.dir
   OBJECT_FILE_DIR = CMakeFiles/LISPCompiler.dir/src
 
 build CMakeFiles/LISPCompiler.dir/src/asmgen.cpp.o: CXX_COMPILER__LISPCompiler_unscanned_Debug /Users/alexanderthorbr/Library/Mobile$ Documents/com~apple~CloudDocs/Documents/Programming/C++/LISPCompiler/src/asmgen.cpp || cmake_object_order_depends_target_LISPCompiler
   DEP_FILE = CMakeFiles/LISPCompiler.dir/src/asmgen.cpp.o.d
-  FLAGS = -g -std=gnu++17 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk -fcolor-diagnostics
+  FLAGS = -g -std=gnu++20 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk -fcolor-diagnostics
   OBJECT_DIR = CMakeFiles/LISPCompiler.dir
   OBJECT_FILE_DIR = CMakeFiles/LISPCompiler.dir/src
 
