@@ -71,6 +71,14 @@ read:
 scan:
 (scan x) -> reads user input into a variable
 
+cond:
+(cond 
+    (<condition1> <expr1>)
+    (<condition2> <expr2>)
+    (<condition3> <expr3>)
+    (else <exprN>)
+)
+
 the rest can be implemented using user defined functions and macros
 
 # Function definition:

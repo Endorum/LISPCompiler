@@ -1,3 +1,7 @@
+(defun add (x y)
+  (+ x y)
+)
+
 (defun main ()
-    (print (car (cons "1\n" (cons "2" "3"))))
+    (add 5 6)
 )

@@ -87,7 +87,7 @@ _start:
 
     std::string offsetStr(const std::string& name) {
         int offset = getOffset(name);
-        return "[ebp" + (offset < 0 ? " - " + std::to_string(-offset) : " + " + std::to_string(offset)) + "]";
+        return "[ebp" + (offset < 0 ? " + " + std::to_string(-offset) : " - " + std::to_string(offset)) + "]";
     }
 
 
@@ -131,8 +131,8 @@ _start:
         std::string src_operand;
 
         if (src == "return_value") {
-            src_operand = offsetStr("return_value");
-            asm_result += getCurrentIntendStr() + "mov eax, " + src_operand + "\n";
+            // src_operand = offsetStr("return_value");
+            // asm_result += getCurrentIntendStr() + "mov eax, " + src_operand + "\n";
         } else if (isNumber(src)) {
             // Immediate constant
             asm_result += getCurrentIntendStr() + "mov eax, " + src + "\n";
@@ -271,13 +271,15 @@ _start:
             asm_result += getCurrentIntendStr() + "; Stack frame\n";
             asm_result += getCurrentIntendStr() + "push ebp\n";
             asm_result += getCurrentIntendStr() + "mov ebp, esp\n";
-            asm_result += getCurrentIntendStr() + "sub esp, " + std::to_string(localVars*4) + "\n"; // <- adjust depending on how many local variables there are
+            asm_result += getCurrentIntendStr() + "sub esp, " + std::to_string((localVars)*4) + "\n"; // <- adjust depending on how many local variables there are
 
         }
 
-        else if(op == "pop") {
-            asm_result += getCurrentIntendStr() + "pop eax\n";
-            asm_result += getCurrentIntendStr() + "mov " + offsetStr(instr.dst) + ", eax\n";
+        else if(op == "getArg") {
+            // asm_result += getCurrentIntendStr() + "pop eax\n";
+            // asm_result += getCurrentIntendStr() + "mov " + offsetStr(instr.dst) + ", eax\n";
+
+            asm_result += getCurrentIntendStr() + "mov eax, [ebp + " + std::to_string() ;
         }
 
         else if(op == "push") {
@@ -411,7 +413,7 @@ _start:
 
 
         else {
-            // throw std::runtime_error("ERROR: Unhandled Instruction: " + op);
+            throw std::runtime_error("ERROR: Unhandled Instruction: " + op);
         }
 
 

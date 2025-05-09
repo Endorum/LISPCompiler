@@ -147,6 +147,8 @@ public:
 
     std::string handle_functionCall(ASTNode * node);
 
+    std::string handle_cond_keyword(ASTNode * node);
+
     std::string generate_code(ASTNode* node) {
 
         if(node->type == NT_None) return "Some kind of error";
@@ -230,6 +232,16 @@ public:
             // (read "filename")
             if(firstChild->value == "read") {
                 return handle_read_keyword(node);
+            }
+
+            // (cond
+            //      (<condition1> <expr1>)
+            //      (<condition2> <expr2>)
+            //      (<condition3> <expr3>)
+            //      (else <exprN>)
+            // )
+            if(firstChild->value == "cond") {
+                return handle_cond_keyword(node);
             }
 
             if(isDeclaredFunction(firstChild->value)) {

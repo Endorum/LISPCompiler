@@ -97,7 +97,7 @@ int main(int argc, char* argv[]) {
     system(nasm.c_str());
 
     // i686-elf-ld -o out out.o
-    std::string ld = "i686-elf-ld -o ../a.out " + outputFile + ".o";
+    std::string ld = "i686-elf-ld -o ../main " + outputFile + ".o";
     system(ld.c_str());
 
     return 0;

@@ -66,6 +66,69 @@ std::string Generator::handle_functionCall(ASTNode *node) {
     return temp;
 }
 
+std::string Generator::handle_cond_keyword(ASTNode *node) {
+    if (node->children.size() < 2) {
+        throw std::runtime_error("ERROR: cond expects at least one clause");
+    }
+
+    std::string addr = generate_tmp(); // base for labels
+    std::string returnValue = "retValue" + addr;
+    variableMap[returnValue] = StackOffset += 4;
+
+    std::string endLabel = "cond_" + addr + "_end";
+
+    bool hasElseClause = false;
+
+    for (int i = 1; i < node->children.size(); ++i) {
+        ASTNode* clause = node->children.at(i);
+
+        if (clause->children.size() != 2) {
+            throw std::runtime_error("ERROR: Each cond clause must have exactly 2 elements");
+        }
+
+        ASTNode* condExpr = clause->children.at(0);
+        ASTNode* bodyExpr = clause->children.at(1);
+
+        // Check for (else ...)
+        if (condExpr->type == NodeType::NT_Symbol && condExpr->value == "else") {
+            hasElseClause = true;
+
+            std::string elseLabel = "cond_" + addr + "_else";
+            emit(elseLabel, "", "label");
+
+            std::string elseOut = generate_code(bodyExpr);
+            emit(returnValue, elseOut, "=");
+            emit(endLabel, "", "jump");
+
+        } else {
+            // Regular (test body) clause
+            std::string condTemp = generate_code(condExpr);
+            std::string clauseLabel = "cond_" + addr + "_clause_" + std::to_string(i);
+            std::string nextClauseLabel = "cond_" + addr + "_next_" + std::to_string(i);
+
+            emit(clauseLabel, condTemp, "if", "jump"); // if condTemp != 0 jump to clauseLabel
+            emit(nextClauseLabel, "", "jump");         // otherwise skip to next clause
+
+            emit(clauseLabel, "", "label");
+            std::string result = generate_code(bodyExpr);
+            emit(returnValue, result, "=");
+            emit(endLabel, "", "jump");
+
+            emit(nextClauseLabel, "", "label");
+        }
+    }
+
+    emit(endLabel, "", "label");
+
+    if (!hasElseClause) {
+        // default return nil/0 if no condition matched
+        emit(returnValue, "0", "=");
+    }
+
+    return returnValue;
+}
+
+
 std::string Generator::handle_read_keyword(ASTNode *node) {
     if (node->children.size() != 2) {
         throw std::runtime_error("ERROR: Expected only a filename");
@@ -256,15 +319,17 @@ std::string Generator::handle_defun_keyword(ASTNode *node) {
     // Emit the function label
     emit("label", functionName, "defun");
 
-    size_t stackOffBefore = StackOffset;
-    size_t tempCountBefore = temp_count;
+
 
     for(size_t i=parameters->children.size(); i > 0; i--) {
         variableMap[parameters->children.at(i - 1)->value] = StackOffset += 4;
-        emit(parameters->children.at(i - 1)->value, "stack", "pop");
+        emit(parameters->children.at(i - 1)->value, "stack", "getArg"); // <- wrong the arguemnts are NOT popped they are near the bp not the sp
     }
 
     // size_t parameterCount = parameters->children.size();
+
+    size_t stackOffBefore = StackOffset;
+    size_t tempCountBefore = temp_count;
 
     // Generate code for the body
     std::string result = generate_code(body);
