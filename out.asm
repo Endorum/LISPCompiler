@@ -10,6 +10,10 @@ _start:
     ret
 ; label defun test
 test:
+    pop esi
+    mov edi, return_address
+    mov [edi], esi
+    push esi
     ; Stack frame
     push ebp
     mov ebp, esp
@@ -73,12 +77,19 @@ falseLabelt7:
 endLabelt7:
     ; return_value return retValuet7
     mov eax, [ebp + 16]
-    ; Stack frame cleanup
-    mov esp, ebp
+    ; Stack frame cleanup13
+    add esp, 52
+    mov edi, return_address
+    mov esi, [edi]
     pop ebp
+    push esi
     ret
 ; label defun main
 main:
+    pop esi
+    mov edi, return_address
+    mov [edi], esi
+    push esi
     ; Stack frame
     push ebp
     mov ebp, esp
@@ -91,12 +102,16 @@ main:
     mov eax, [ebp - 4]
     call _internal_print_string    ; return_value return t0
     mov eax, [ebp - 4]
-    ; Stack frame cleanup
-    mov esp, ebp
+    ; Stack frame cleanup1
+    add esp, 4
+    mov edi, return_address
+    mov esi, [edi]
     pop ebp
+    push esi
     ret
 
 section .data
+return_address: dd main
 list_memory: times 1024 db 0 ; reserved space for cons cells
 list_ptr: dd list_memory ; pointer to next free cell
 str_0: db "yes", 0

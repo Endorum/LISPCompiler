@@ -43,7 +43,7 @@ private:
     std::map<std::string, std::string> stringLabelMap;
     int stringCounter = 0;
     int listPtrCounter = 0;
-    std::string dataSection = "section .data\n";
+    std::string dataSection = "section .data\nreturn_address: dd main\n";
 
     Function currentScope = {"global", 0};
 
@@ -276,6 +276,12 @@ _start:
                 throw std::runtime_error("ERROR: localsVars = -1: Could not find function with label: " + instr.src1);
             }
 
+            // saving return address manually
+            asm_result += getCurrentIntendStr() + "pop esi\n"; // return address from call into esi
+            asm_result += getCurrentIntendStr() + "mov edi, return_address\n";
+            asm_result += getCurrentIntendStr() + "mov [edi], esi\n";
+            asm_result += getCurrentIntendStr() + "push esi\n"; // restoring the return address or something what do i know
+
             // stack frame
             asm_result += getCurrentIntendStr() + "; Stack frame\n";
             asm_result += getCurrentIntendStr() + "push ebp\n";
@@ -299,9 +305,18 @@ _start:
             asm_result += getCurrentIntendStr() + "mov eax, " + offsetStr(instr.src1) + "\n";
 
             // stack frame cleanup
-            asm_result += getCurrentIntendStr() + "; Stack frame cleanup\n";
-            asm_result += getCurrentIntendStr() + "mov esp, ebp\n";
+            asm_result += getCurrentIntendStr() + "; Stack frame cleanup" + std::to_string(currentScope.localVars) + "\n";
+            // asm_result += getCurrentIntendStr() + "mov esp, ebp\n"; // instead:
+            asm_result += getCurrentIntendStr() + "add esp, " + std::to_string(currentScope.localVars*4) + "\n"; // the benefit is that the return should always work
+
+            // manual return address
+
+            asm_result += getCurrentIntendStr() + "mov edi, return_address\n";
+            asm_result += getCurrentIntendStr() + "mov esi, [edi]\n";
+
             asm_result += getCurrentIntendStr() + "pop ebp\n";
+
+            asm_result += getCurrentIntendStr() + "push esi\n";
             asm_result += getCurrentIntendStr() + "ret\n";
             currentIndent = (currentIndent > 1) ? currentIndent-- : 0;
         }
