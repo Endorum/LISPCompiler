@@ -277,10 +277,10 @@ _start:
             }
 
             // saving return address manually
-            asm_result += getCurrentIntendStr() + "pop esi\n"; // return address from call into esi
-            asm_result += getCurrentIntendStr() + "mov edi, return_address\n";
-            asm_result += getCurrentIntendStr() + "mov [edi], esi\n";
-            asm_result += getCurrentIntendStr() + "push esi\n"; // restoring the return address or something what do i know
+            // asm_result += getCurrentIntendStr() + "pop esi\n"; // return address from call into esi
+            // asm_result += getCurrentIntendStr() + "mov edi, return_address\n";
+            // asm_result += getCurrentIntendStr() + "mov [edi], esi\n";
+            // asm_result += getCurrentIntendStr() + "push esi\n"; // restoring the return address or something what do i know
 
             // stack frame
             asm_result += getCurrentIntendStr() + "; Stack frame\n";
@@ -311,12 +311,7 @@ _start:
 
             // manual return address
 
-            asm_result += getCurrentIntendStr() + "mov edi, return_address\n";
-            asm_result += getCurrentIntendStr() + "mov esi, [edi]\n";
-
             asm_result += getCurrentIntendStr() + "pop ebp\n";
-
-            asm_result += getCurrentIntendStr() + "push esi\n";
             asm_result += getCurrentIntendStr() + "ret\n";
             currentIndent = (currentIndent > 1) ? currentIndent-- : 0;
         }
