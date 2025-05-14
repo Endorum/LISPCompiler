@@ -1,0 +1,3 @@
+/Users/alexanderthorbr/Documents/Programming/C++/Uni/TaskA/Task_A_Vorlage/_deps/freetype-subbuild/CMakeFiles/freetype-populate.dir
+/Users/alexanderthorbr/Documents/Programming/C++/Uni/TaskA/Task_A_Vorlage/_deps/freetype-subbuild/CMakeFiles/edit_cache.dir
+/Users/alexanderthorbr/Documents/Programming/C++/Uni/TaskA/Task_A_Vorlage/_deps/freetype-subbuild/CMakeFiles/rebuild_cache.dir

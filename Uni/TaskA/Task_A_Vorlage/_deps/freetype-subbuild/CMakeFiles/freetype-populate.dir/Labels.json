@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/Users/alexanderthorbr/Documents/Programming/C++/Uni/TaskA/Task_A_Vorlage/_deps/freetype-subbuild/CMakeFiles/freetype-populate"
+		},
+		{
+			"file" : "/Users/alexanderthorbr/Documents/Programming/C++/Uni/TaskA/Task_A_Vorlage/_deps/freetype-subbuild/CMakeFiles/freetype-populate.rule"
+		},
+		{
+			"file" : "/Users/alexanderthorbr/Documents/Programming/C++/Uni/TaskA/Task_A_Vorlage/_deps/freetype-subbuild/CMakeFiles/freetype-populate-complete.rule"
+		},
+		{
+			"file" : "/Users/alexanderthorbr/Documents/Programming/C++/Uni/TaskA/Task_A_Vorlage/_deps/freetype-subbuild/freetype-populate-prefix/src/freetype-populate-stamp/freetype-populate-build.rule"
+		},
+		{
+			"file" : "/Users/alexanderthorbr/Documents/Programming/C++/Uni/TaskA/Task_A_Vorlage/_deps/freetype-subbuild/freetype-populate-prefix/src/freetype-populate-stamp/freetype-populate-configure.rule"
+		},
+		{
+			"file" : "/Users/alexanderthorbr/Documents/Programming/C++/Uni/TaskA/Task_A_Vorlage/_deps/freetype-subbuild/freetype-populate-prefix/src/freetype-populate-stamp/freetype-populate-download.rule"
+		},
+		{
+			"file" : "/Users/alexanderthorbr/Documents/Programming/C++/Uni/TaskA/Task_A_Vorlage/_deps/freetype-subbuild/freetype-populate-prefix/src/freetype-populate-stamp/freetype-populate-install.rule"
+		},
+		{
+			"file" : "/Users/alexanderthorbr/Documents/Programming/C++/Uni/TaskA/Task_A_Vorlage/_deps/freetype-subbuild/freetype-populate-prefix/src/freetype-populate-stamp/freetype-populate-mkdir.rule"
+		},
+		{
+			"file" : "/Users/alexanderthorbr/Documents/Programming/C++/Uni/TaskA/Task_A_Vorlage/_deps/freetype-subbuild/freetype-populate-prefix/src/freetype-populate-stamp/freetype-populate-patch.rule"
+		},
+		{
+			"file" : "/Users/alexanderthorbr/Documents/Programming/C++/Uni/TaskA/Task_A_Vorlage/_deps/freetype-subbuild/freetype-populate-prefix/src/freetype-populate-stamp/freetype-populate-test.rule"
+		},
+		{
+			"file" : "/Users/alexanderthorbr/Documents/Programming/C++/Uni/TaskA/Task_A_Vorlage/_deps/freetype-subbuild/freetype-populate-prefix/src/freetype-populate-stamp/freetype-populate-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"freetype-populate"
+		],
+		"name" : "freetype-populate"
+	}
+}

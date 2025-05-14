@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="CMakePresetLoader"><![CDATA[{
+  "useNewFormat": true
+}]]></component>
+  <component name="CMakeReloadState">
+    <option name="reloaded" value="true" />
+  </component>
+  <component name="CMakeRunConfigurationManager">
+    <generated />
+  </component>
+  <component name="CMakeSettings">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" ENABLED="true" CONFIG_NAME="Debug" />
+    </configurations>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="43b7adb3-cf30-4f56-9628-8d3d0bce46d4" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../../LISPCompiler Kopie/include/parser.hpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../LISPCompiler Kopie/include/tokenizer.hpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../LISPCompiler Kopie/src/parser.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../LISPCompiler Kopie/src/tokenizer.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../LISPCompiler/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../LISPCompiler/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../LISPCompiler/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../../LISPCompiler/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../LISPCompiler/cmake-build-debug/.cmake/api/v1/reply/cache-v2-dd15688e26ec61881570.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../LISPCompiler/cmake-build-debug/.cmake/api/v1/reply/cmakeFiles-v1-3cc8cc28cbdefca092a2.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../LISPCompiler/cmake-build-debug/.cmake/api/v1/reply/codemodel-v2-477ae326f55366fbefec.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../LISPCompiler/cmake-build-debug/.cmake/api/v1/reply/index-2025-03-31T00-21-20-0132.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../LISPCompiler/cmake-build-debug/.cmake/api/v1/reply/target-LISPCompiler-Debug-215f9d96ead42db7589b.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../LISPCompiler/cmake-build-debug/.cmake/api/v1/reply/toolchains-v1-73ba5002afb33725fe0c.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../LISPCompiler/cmake-build-debug/CMakeCache.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../../LISPCompiler/cmake-build-debug/CMakeCache.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../LISPCompiler/cmake-build-debug/CMakeFiles/3.28.1/CMakeCCompiler.cmake" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../LISPCompiler/cmake-build-debug/CMakeFiles/3.28.1/CMakeCXXCompiler.cmake" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../LISPCompiler/cmake-build-debug/CMakeFiles/3.28.1/CMakeDetermineCompilerABI_C.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../LISPCompiler/cmake-build-debug/CMakeFiles/3.28.1/CMakeDetermineCompilerABI_CXX.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../LISPCompiler/cmake-build-debug/CMakeFiles/3.28.1/CMakeSystem.cmake" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../LISPCompiler/cmake-build-debug/CMakeFiles/3.28.1/CompilerIdC/CMakeCCompilerId.c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../LISPCompiler/cmake-build-debug/CMakeFiles/3.28.1/CompilerIdC/CMakeCCompilerId.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../LISPCompiler/cmake-build-debug/CMakeFiles/3.28.1/CompilerIdCXX/CMakeCXXCompilerId.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../LISPCompiler/cmake-build-debug/CMakeFiles/3.28.1/CompilerIdCXX/CMakeCXXCompilerId.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../LISPCompiler/cmake-build-debug/CMakeFiles/CMakeConfigureLog.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/../../LISPCompiler/cmake-build-debug/CMakeFiles/CMakeConfigureLog.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../LISPCompiler/cmake-build-debug/CMakeFiles/clion-Debug-log.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../../LISPCompiler/cmake-build-debug/CMakeFiles/clion-Debug-log.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../LISPCompiler/cmake-build-debug/Testing/Temporary/LastTest.log" beforeDir="false" afterPath="$PROJECT_DIR$/../../LISPCompiler/cmake-build-debug/Testing/Temporary/LastTest.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../LISPCompiler/cmake-build-debug/build.ninja" beforeDir="false" afterPath="$PROJECT_DIR$/../../LISPCompiler/cmake-build-debug/build.ninja" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../LISPCompiler/main.cpp" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "Endorum"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/Endorum/LISPCompiler.git",
+    "accountId": "580da2f4-0657-43c1-8a50-81991ca17c82"
+  }
+}]]></component>
+  <component name="ProjectApplicationVersion">
+    <option name="ide" value="CLion" />
+    <option name="majorVersion" value="2024" />
+    <option name="minorVersion" value="1.6" />
+    <option name="productBranch" value="Classic" />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "customColor": "",
+  "associatedIndex": 2
+}]]></component>
+  <component name="ProjectId" id="2wYeQIvyAwwoBRUQmhTcq0BJYcD" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.RadMigrateCodeStyle": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "git-widget-placeholder": "master",
+    "settings.editor.selected.configurable": "project.propVCSSupport.Confirmation"
+  }
+}]]></component>
+  <component name="RunManager">
+    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="43b7adb3-cf30-4f56-9628-8d3d0bce46d4" name="Changes" comment="" />
+      <created>1725118981094</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1725118981094</updated>
+      <workItem from="1746222921834" duration="14000" />
+    </task>
+    <servers />
+  </component>
+  <component name="VCPKGProject">
+    <isAutomaticCheckingOnLaunch value="false" />
+    <isAutomaticFoundErrors value="true" />
+    <isAutomaticReloadCMake value="true" />
+  </component>
+</project>

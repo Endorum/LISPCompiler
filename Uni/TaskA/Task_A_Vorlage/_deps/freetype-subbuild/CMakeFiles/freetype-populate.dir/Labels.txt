@@ -1,0 +1,14 @@
+# Target labels
+ freetype-populate
+# Source files and their labels
+/Users/alexanderthorbr/Documents/Programming/C++/Uni/TaskA/Task_A_Vorlage/_deps/freetype-subbuild/CMakeFiles/freetype-populate
+/Users/alexanderthorbr/Documents/Programming/C++/Uni/TaskA/Task_A_Vorlage/_deps/freetype-subbuild/CMakeFiles/freetype-populate.rule
+/Users/alexanderthorbr/Documents/Programming/C++/Uni/TaskA/Task_A_Vorlage/_deps/freetype-subbuild/CMakeFiles/freetype-populate-complete.rule
+/Users/alexanderthorbr/Documents/Programming/C++/Uni/TaskA/Task_A_Vorlage/_deps/freetype-subbuild/freetype-populate-prefix/src/freetype-populate-stamp/freetype-populate-build.rule
+/Users/alexanderthorbr/Documents/Programming/C++/Uni/TaskA/Task_A_Vorlage/_deps/freetype-subbuild/freetype-populate-prefix/src/freetype-populate-stamp/freetype-populate-configure.rule
+/Users/alexanderthorbr/Documents/Programming/C++/Uni/TaskA/Task_A_Vorlage/_deps/freetype-subbuild/freetype-populate-prefix/src/freetype-populate-stamp/freetype-populate-download.rule
+/Users/alexanderthorbr/Documents/Programming/C++/Uni/TaskA/Task_A_Vorlage/_deps/freetype-subbuild/freetype-populate-prefix/src/freetype-populate-stamp/freetype-populate-install.rule
+/Users/alexanderthorbr/Documents/Programming/C++/Uni/TaskA/Task_A_Vorlage/_deps/freetype-subbuild/freetype-populate-prefix/src/freetype-populate-stamp/freetype-populate-mkdir.rule
+/Users/alexanderthorbr/Documents/Programming/C++/Uni/TaskA/Task_A_Vorlage/_deps/freetype-subbuild/freetype-populate-prefix/src/freetype-populate-stamp/freetype-populate-patch.rule
+/Users/alexanderthorbr/Documents/Programming/C++/Uni/TaskA/Task_A_Vorlage/_deps/freetype-subbuild/freetype-populate-prefix/src/freetype-populate-stamp/freetype-populate-test.rule
+/Users/alexanderthorbr/Documents/Programming/C++/Uni/TaskA/Task_A_Vorlage/_deps/freetype-subbuild/freetype-populate-prefix/src/freetype-populate-stamp/freetype-populate-update.rule
