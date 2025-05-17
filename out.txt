@@ -1,0 +1,171 @@
+Token:
+    type:  LPAREN
+    value: (
+
+Token:
+    type:  ATOM
+    value: defun
+
+Token:
+    type:  ATOM
+    value: add
+
+Token:
+    type:  LPAREN
+    value: (
+
+Token:
+    type:  ATOM
+    value: x
+
+Token:
+    type:  ATOM
+    value: y
+
+Token:
+    type:  RPAREN
+    value: )
+
+Token:
+    type:  LPAREN
+    value: (
+
+Token:
+    type:  ATOM
+    value: +
+
+Token:
+    type:  ATOM
+    value: x
+
+Token:
+    type:  ATOM
+    value: y
+
+Token:
+    type:  RPAREN
+    value: )
+
+Token:
+    type:  RPAREN
+    value: )
+
+Token:
+    type:  LPAREN
+    value: (
+
+Token:
+    type:  ATOM
+    value: defun
+
+Token:
+    type:  ATOM
+    value: main
+
+Token:
+    type:  LPAREN
+    value: (
+
+Token:
+    type:  RPAREN
+    value: )
+
+Token:
+    type:  LPAREN
+    value: (
+
+Token:
+    type:  ATOM
+    value: add
+
+Token:
+    type:  NUMBER
+    value: 1
+
+Token:
+    type:  NUMBER
+    value: 2
+
+Token:
+    type:  RPAREN
+    value: )
+
+Token:
+    type:  RPAREN
+    value: )
+
+ Node Type: 'List' Children (4): 
+	 Node Type: 'Symbol' Value: 'defun'
+	 Node Type: 'Symbol' Value: 'add'
+	 Node Type: 'List' Children (2): 
+		 Node Type: 'Symbol' Value: 'x'
+		 Node Type: 'Symbol' Value: 'y'
+	 Node Type: 'List' Children (3): 
+		 Node Type: 'Symbol' Value: '+'
+		 Node Type: 'Symbol' Value: 'x'
+		 Node Type: 'Symbol' Value: 'y'
+ Node Type: 'List' Children (4): 
+	 Node Type: 'Symbol' Value: 'defun'
+	 Node Type: 'Symbol' Value: 'main'
+	 Node Type: 'List'
+	 Node Type: 'List' Children (3): 
+		 Node Type: 'Symbol' Value: 'add'
+		 Node Type: 'Number' Value: '1'
+		 Node Type: 'Number' Value: '2'
+dst: value: label type: IMM_STR
+defun
+src1: value: add type: IMM_STR
+
+dst: value: t1 type: TEMP loc: ecx offset: 1
+LOAD
+src1: value: x type: PARAM loc: ebp + 8 offset: 0
+
+dst: value: t2 type: TEMP loc: edx offset: 2
+LOAD
+src1: value: y type: PARAM loc: ebp + 12 offset: 1
+
+dst: value: t0 type: TEMP loc: eax offset: 0
+add
+src1: value: t1 type: TEMP loc: ecx offset: 1
+src2: value: t2 type: TEMP loc: edx offset: 2
+
+dst: value: return_value type: TEMP loc: eax offset: 0
+return
+src1: value: t0 type: TEMP loc: eax offset: 0
+
+dst: value: label type: IMM_STR
+defun
+src1: value: main type: IMM_STR
+
+dst: value: t0 type: TEMP loc: eax offset: 0
+ASSIGN
+src1: value: 1 type: IMM_NUM
+
+dst: value: t1 type: TEMP loc: ecx offset: 1
+ASSIGN
+src1: value: 2 type: IMM_NUM
+
+dst: value:  type: NONE
+PUSH
+src1: value: t1 type: TEMP loc: ecx offset: 1
+
+dst: value:  type: NONE
+PUSH
+src1: value: t0 type: TEMP loc: eax offset: 0
+
+dst: value:  type: NONE
+CALL
+src1: value: add type: NONE
+
+dst: value:  type: NONE
+ADD_ESP
+src1: value: 8 type: IMM_NUM
+
+dst: value: t2 type: TEMP loc: edx offset: 2
+ASSIGN
+src1: value: eax type: REG
+
+dst: value: return_value type: TEMP loc: eax offset: 0
+return
+src1: value: t2 type: TEMP loc: edx offset: 2
+

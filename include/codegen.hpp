@@ -13,90 +13,178 @@
 #define OPERATORS "+-*/&|^~>=<!"
 #define BIN_OP "+-*/&|^>=<"
 
-struct IRInstruction {
-    std::string dst;
-    std::string op;
-    std::string src1;
-    std::string src2;
+typedef enum VarType{
+    VT_NONE,
+    PARAM,       // PARAMument in a function  [rbp + offset]
+    LOCAL,     // User defined using let  [rbp - offset]
+    TEMP,      // like t0 etc.            reused or mapped to registers
+    IMM_NUM,   // like 1 2 3 123.134     
+    IMM_STR,   // self explanitory
+    REG,       // eax mostly
+}VarType;
 
-    [[nodiscard]] std::string str(bool debug=false) const {
-
-        if(debug) {
-            return "dst: '" + dst + "' op: '" + op + "' src1: '" + src1 + "' src2: '" + src2 + "'";
-        }
-        return  dst + ((op == "=") ? " =" : " " + op)  + " " + src1 + ((!src2.empty()) ? " " + src2 : "");
+inline std::string VarTypeToString(VarType type){
+    switch (type){
+        default: return "NONE";
+        case PARAM: return "PARAM";
+        case LOCAL: return "LOCAL";
+        case TEMP: return "TEMP";
+        case IMM_NUM: return "IMM_NUM";
+        case IMM_STR: return "IMM_STR";
+        case REG: return "REG";
     }
+}
+
+struct Value{
+    
+    std::string value;
+    VarType type = VT_NONE;
+
+    // ebp + i*4 when type == PARAM
+    // ebp - i*4 when type == LOCAL 
+    // and if type == TEMP: 
+    /*
+        0 : eax
+        1 : ecx
+        2 : edx
+        3 : ebx
+    */
+    std::string loc = "";
+    size_t offSet = 0;
+
+    
+
+    Value() = default;
+    Value(const std::string& n, VarType t = VT_NONE)
+        : value(n), type(t) {}
+
+    std::string str(){
+        return "value: " + value + " type: " + VarTypeToString(type) + ((!loc.empty()) ? (" loc: " + loc + " offset: " + std::to_string(offSet)) : "");
+    }
+
+};
+
+struct IRInstruction {
+    Value dst;
+    std::string op;
+    Value src1;
+    Value src2;
+    
+
+    std::string str(){
+        std::string dstString = "dst: " + dst.str();
+        
+        std::string src1String = (!src1.value.empty()) ? "src1: " + src1.str() + "\n": "";
+        std::string src2String = (!src2.value.empty()) ? "src2: " + src2.str() + "\n": "";
+        return dstString + "\n" + op + "\n" + src1String + src2String;
+    }
+
 };
 
 struct Function {
     std::string name;
-    size_t localVars;
-    size_t parameters;
+    
+    size_t localVarCount = 0;
+
+    size_t paramCount = 0;
+    size_t stackFrameSize = 0;
+
+    
+
+    std::vector<IRInstruction> instructions;
 };
 
 class Generator {
 public:
-    size_t temp_count = 0;
+    
+    std::vector<ASTNode*>& ast;
 
-    std::string ir_result;
-
-    std::unordered_map<std::string, int> variableMap; // store the name as well as the stack offset
-    std::unordered_map<std::string, int> functionMap; // store name and labelOffset of function
-
-    std::vector<Function> functions;
-
-    int StackOffset = 4; // to leave space for old bp and return address but for some reason it has to start with 4 instead of 8 idk why
-    int labelOffset = 0;
-
-    std::vector<ASTNode*>& program;
+    std::vector<std::string> declaredFunctions;
+    std::vector<Function> functions; 
+    Function current_function;
+    
+    std::unordered_map<std::string, Value> global_variables;
+    std::unordered_map<std::string, Value> variable_table; // track local variables including parameters
 
     std::vector<IRInstruction> instructions;
 
-    explicit Generator(std::vector<ASTNode*>& p): program(p) {}
+
+
+    explicit Generator(std::vector<ASTNode*>& p): ast(p) {}
 
 
     void printError(const std::string& msg);
 
-    void assignOffsets() {
-        int offsetCounter = 1; // start from -4, -8, ...
 
-        for (const auto& instr : instructions) {
-            auto registerVar = [&](const std::string& name) {
-                if (!name.empty() && variableMap.find(name) == variableMap.end()) {
-                    variableMap[name] = -4 * offsetCounter++;
-                }
-            };
+    void emit(Value dst, std::string op);
+    void emit(Value dst, std::string op, Value src1);
+    void emit(Value dst, std::string op, Value src1, Value src2);
 
-            registerVar(instr.dst);
-            registerVar(instr.src1);
-            registerVar(instr.src2);
+    size_t local_count = 0; // for all let variables
+    size_t temp_count = 0;  // for all temps (t0 ...)
+    size_t spill_start = 0; // calculated after locals are declared
+
+    std::string getPARAMLocation(size_t index) {
+        return "ebp + " + std::to_string(8 + index * 4);
+    }
+
+    std::string getLocalLocation(size_t index) {
+        return "ebp - " + std::to_string((index + 1) * 4);
+    }
+
+
+    std::string getTempOffset(size_t index){
+        switch (temp_count){
+            default: break;
+            case 0: return "eax";
+            case 1: return "ecx";
+            case 2: return "edx";
+            case 3: return "ebx";
         }
+        size_t spill_index = index - 4;
+        return "ebp - " + std::to_string((spill_start + spill_index + 1) * 4); // spill after locals
     }
 
-
-
-    void emit(const std::string& dst, const std::string& src1="", const std::string& op="", const std::string& src2="") {
-        IRInstruction instruction;
-
-        instruction.dst = dst;
-        instruction.src1 = src1;
-        instruction.op = op;
-        instruction.src2 = src2;
-
-        instructions.push_back(instruction);
+    Value generate_tmp() {
+        Value temp;
+        temp.value = "t" + std::to_string(temp_count);
+        temp.type = TEMP;
+        temp.offSet = temp_count;
+        temp.loc = getTempOffset(temp_count);
+        temp_count++;
+        return temp;
     }
 
-    std::string generate_tmp() {
-        return "t" + std::to_string(temp_count++);
+    Value create_local(const std::string& name) {
+        Value local;
+        local.value = name;
+        local.type = LOCAL;
+        local.offSet = local_count;
+        local.loc = getLocalLocation(local_count);
+        local_count++;
+        return local;
+    }
+
+    Value create_parameter(const std::string& name, size_t index){
+        Value param;
+        param.value = name;
+        param.type = PARAM;
+        param.offSet = index; // index of parameter
+        param.loc = "ebp + " + std::to_string(8 + index * 4); // 8 to let room for old bp and ret addr
+        return param;
+    }
+
+    void prepareFunctionFrame() {
+        // call this after parsing function header
+        spill_start = local_count;
+        temp_count = 0; // reset for each function
     }
 
 
     void generateIR() {
-        for(auto node : program) {
+        for(auto node : ast) {
             generate_code(node);
         }
-
-        // assignOffsets();
     }
 
     std::string serialize_quoted_list(ASTNode* node) {
@@ -130,29 +218,30 @@ public:
 
     void findFuncDecls();
 
-    std::string handle_operator(ASTNode* node);
-    std::string handle_let_keyword(ASTNode* node);
-    std::string handle_defun_keyword(ASTNode* node);
-    std::string handle_if_keyword(ASTNode* node);
-    std::string handle_cons_keyword(ASTNode* node);
-    std::string handle_car_keyword(ASTNode* node);
-    std::string handle_cdr_keyword(ASTNode* node);
-    std::string handle_null_keyword(ASTNode * node);
-    std::string handle_toList_keyword(ASTNode * node);
-    std::string handle_toString_keyword(ASTNode * node);
-    std::string handle_length_keyword(ASTNode * node);
-    std::string handle_print_keyword(ASTNode * node);
-    std::string handle_read_keyword(ASTNode * node);
-    std::string handle_scan_keyword(ASTNode *node);
+    Value handle_operator(ASTNode* node);
+    Value handle_let_keyword(ASTNode* node);
+    Value handle_defun_keyword(ASTNode* node);
+    Value handle_functionCall(ASTNode* node);
 
-
-    std::string handle_functionCall(ASTNode * node);
-
-    std::string handle_cond_keyword(ASTNode * node);
-
-    std::string generate_code(ASTNode* node) {
-
-        if(node->type == NT_None) return "Some kind of error";
+    // Value handle_if_keyword(ASTNode* node);
+    // Value handle_cons_keyword(ASTNode* node);
+    // Value handle_car_keyword(ASTNode* node);
+    // Value handle_cdr_keyword(ASTNode* node);
+    // Value handle_null_keyword(ASTNode * node);
+    // Value handle_toList_keyword(ASTNode * node);
+    // Value handle_toString_keyword(ASTNode * node);
+    // Value handle_length_keyword(ASTNode * node);
+    // Value handle_print_keyword(ASTNode * node);
+    // Value handle_read_keyword(ASTNode * node);
+    // Value handle_scan_keyword(ASTNode *node);
+    // Value handle_cond_keyword(ASTNode * node);
+    Value generate_code(ASTNode* node) {
+        if(!node){
+            throw std::runtime_error("ERROR: node == nullptr");
+        }
+        if(node->type == NT_None) {
+            throw std::runtime_error("ERROR: node->type == NT_None");
+        }
 
         if(node->type == NT_List) {
             // an expression -> evaluate children
@@ -168,13 +257,7 @@ public:
 
 
             if(isOperator(firstChild->value)) {
-
                 return handle_operator(node);
-            }
-
-            // (let x 5)
-            if(firstChild->value == "let") {
-                return handle_let_keyword(node);
             }
 
             // (defun add (x y) (+ x y) )
@@ -182,76 +265,18 @@ public:
                 return handle_defun_keyword(node);
             }
 
-            // (if (> x y) x y))
-            if(firstChild->value == "if") {
-                return handle_if_keyword(node);
+
+            // (let x 5)
+            if(firstChild->value == "let") {
+                return handle_let_keyword(node);
             }
 
-            // constructs a new pair
-            // (cons 1 '(2 3)) -> (1 2 3)
-            // (cons 1 (cons 2 3)) -> (1 2 3)
-            if(firstChild->value == "cons") {
-                return handle_cons_keyword(node);
-            }
-
-            // (car '(1 2 3)) -> 1
-            if(firstChild->value == "car") {
-                return handle_car_keyword(node);
-            }
-
-            // (cdr '(1 2 3)) -> (2 3)
-            if(firstChild->value == "cdr") {
-                return handle_cdr_keyword(node);
-            }
-
-            if(firstChild->value == "null?") {
-                return handle_null_keyword(node);
-            }
-
-            // (toList "test") -> '(116(t) 101(e) 115(s) 116(t))
-            // this way i can unify string length and list length as well as the indexing etc.
-            // and car and cdr etc. could still be used.
-            if(firstChild->value == "toList") {
-                return handle_toList_keyword(node);
-            }
-
-            // (toString '(116 101 115 116) -> "test"
-            if(firstChild->value == "toString") {
-                return handle_toString_keyword(node);
-            }
-
-            // (lenght '(1 2 3)) -> 3
-            if(firstChild->value == "length") {
-                return handle_length_keyword(node);
-            }
-
-            // (print "hello World") stdout -> "hello World"
-            if(firstChild->value == "print") {
-                return handle_print_keyword(node);
-            }
-
-            // (read "filename")
-            if(firstChild->value == "read") {
-                return handle_read_keyword(node);
-            }
-
-            // (cond
-            //      (<condition1> <expr1>)
-            //      (<condition2> <expr2>)
-            //      (<condition3> <expr3>)
-            //      (else <exprN>)
-            // )
-            if(firstChild->value == "cond") {
-                return handle_cond_keyword(node);
-            }
-
+            
             if(isDeclaredFunction(firstChild->value)) {
                 return handle_functionCall(node);
             }
 
-            // if(firstChild->type == NT_List) {
-            //     return generate_code(firstChild);
-            // }
+            
 
             else {
                 printf("Node with unrecognized first child:\n");
@@ -264,45 +289,118 @@ public:
         } else {
             // if its not an expression/list then its an atom
             if(node->type == NT_Number) {
-                std::string temp = generate_tmp();
-                emit(temp, node->value, "=");
+                Value immVal(node->value, IMM_NUM);
+                Value dst = generate_tmp();
 
-                return temp;
+                emit(dst, "ASSIGN", immVal);
+
+                return dst;
             }
 
             if(node->type == NT_Symbol) {
-                if(isDeclaredVariable(node->value)) {
-                    std::string temp = generate_tmp();
-
-                    emit(temp, node->value, "load");
-                    return temp;
+                auto it = variable_table.find(node->value);
+                if (it == variable_table.end()) {
+                    throw std::runtime_error("ERROR: Variable '" + node->value + "' not declared in current scope.");
                 }
 
-                throw std::runtime_error("Variable " + node->value + " not delcared in this scope");
+                Value src = it->second;
+                Value dst = generate_tmp();
+                emit(dst, "LOAD", src); // or "ASSIGN", depending on your IR naming
+
+                return dst;
             }
 
-            if(node->type == NT_String) {
-                std::string temp = generate_tmp();
-                emit(temp, node->value, "loadstr");
-                return temp;
-            }
+            // if(node->type == NT_String) {
+            //     std::string temp = generate_tmp();
+            //     emit(temp, node->value, "loadstr");
+            //     return temp;
+            // }
 
-            if(node->type == NT_Quote) {
-                std::string temp = generate_tmp();
+            // if(node->type == NT_Quote) {
+            //     std::string temp = generate_tmp();
 
-                std::string data = serialize_quoted_list(node->children.at(0));
+            //     std::string data = serialize_quoted_list(node->children.at(0));
 
-                emit(temp, data, "quote");
-                return temp;
-            }
+            //     emit(temp, data, "quote");
+            //     return temp;
+            // }
 
 
         }
-
-        return "ERROR theres probably missing a return somewhere";
-
+        
+        throw std::runtime_error("ERROR theres probably missing a return somewhere: " + printASTNode(*node));
     }
 
 };
 
 #endif /*CODEGEN_HPP*/
+
+
+// // (if (> x y) x y))
+// if(firstChild->value == "if") {
+//     return handle_if_keyword(node);
+// }
+
+// // constructs a new pair
+// // (cons 1 '(2 3)) -> (1 2 3)
+// // (cons 1 (cons 2 3)) -> (1 2 3)
+// if(firstChild->value == "cons") {
+//     return handle_cons_keyword(node);
+// }
+
+// // (car '(1 2 3)) -> 1
+// if(firstChild->value == "car") {
+//     return handle_car_keyword(node);
+// }
+
+// // (cdr '(1 2 3)) -> (2 3)
+// if(firstChild->value == "cdr") {
+//     return handle_cdr_keyword(node);
+// }
+
+// if(firstChild->value == "null?") {
+//     return handle_null_keyword(node);
+// }
+
+// // (toList "test") -> '(116(t) 101(e) 115(s) 116(t))
+// // this way i can unify string length and list length as well as the indexing etc.
+// // and car and cdr etc. could still be used.
+// if(firstChild->value == "toList") {
+//     return handle_toList_keyword(node);
+// }
+
+// // (toString '(116 101 115 116) -> "test"
+// if(firstChild->value == "toString") {
+//     return handle_toString_keyword(node);
+// }
+
+// // (lenght '(1 2 3)) -> 3
+// if(firstChild->value == "length") {
+//     return handle_length_keyword(node);
+// }
+
+// // (print "hello World") stdout -> "hello World"
+// if(firstChild->value == "print") {
+//     return handle_print_keyword(node);
+// }
+
+// // (read "filename")
+// if(firstChild->value == "read") {
+//     return handle_read_keyword(node);
+// }
+
+// (cond
+//      (<condition1> <expr1>)
+//      (<condition2> <expr2>)
+//      (<condition3> <expr3>)
+//      (else <exprN>)
+// )
+// if(firstChild->value == "cond") {
+//     return handle_cond_keyword(node);
+// }
+
+
+
+// if(firstChild->type == NT_List) {
+//     return generate_code(firstChild);
+// }

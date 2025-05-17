@@ -4,7 +4,7 @@
 #include <vector>
 #include <stdexcept>
 
-#include "../include/asmgen.hpp"
+// #include "../include/asmgen.hpp"
 #include "../include/codegen.hpp"
 #include "../include/parser.hpp"
 #include "../include/preproc.hpp"
@@ -59,58 +59,61 @@ int main(int argc, char* argv[]) {
         std::vector<Token> tokens = tokenizer.getTokens();
         tokenizer.printTokens();
 
+        
         // Parser
         Parser parser(tokens);
         std::vector<ASTNode*> program = parser.parse();
         for (const auto& expr : program) {
             std::cout << parser.printASTNode(*expr);
         }
-
+        
+        
         // IR generation
         Generator generator(program);
         generator.findFuncDecls();
         generator.generateIR();
         std::vector<IRInstruction> instructions = generator.instructions;
-        for (const auto& instr : instructions) {
-            std::cout << instr.str(true) << std::endl;
+        for (auto& instr : instructions) {
+            std::cout << instr.str() << std::endl;
         }
+        return 0;
 
-        for (const auto& pair : generator.variableMap) {
-            std::cout << pair.first << " : " << std::to_string(pair.second) << std::endl;
-        }
+        // for (const auto& pair : generator.variableMap) {
+        //     std::cout << pair.first << " : " << std::to_string(pair.second) << std::endl;
+        // }
 
-        for(const auto& func : generator.functions) {
-            std::cout << "function: " << func.name << ", parameters: " << std::to_string(func.parameters) << std::endl;
-        }
+        // for(const auto& func : generator.functions) {
+        //     std::cout << "function: " << func.name << ", parameters: " << std::to_string(func.parameters) << std::endl;
+        // }
 
-        // return 0;
+        // // return 0;
 
-        // Assembly generation
-        Asmgen asmgenerator(instructions, generator.variableMap, generator.functions);
-        asmgenerator.generate();
-        std::string asm_out = asmgenerator.getAsm();
-        // std::cout << asm_out << std::endl;
+        // // Assembly generation
+        // Asmgen asmgenerator(instructions, generator.variableMap, generator.functions);
+        // asmgenerator.generate();
+        // std::string asm_out = asmgenerator.getAsm();
+        // // std::cout << asm_out << std::endl;
 
-        // Write to file
-        writeToFile(asm_out, outputFile);
-        std::cout << "Assembly written to: " << outputFile << "\n";
+        // // Write to file
+        // writeToFile(asm_out, outputFile);
+        // std::cout << "Assembly written to: " << outputFile << "\n";
     } catch (const std::exception& e) {
         std::cerr << "ERROR: " << e.what() << "\n";
         return 1;
     }
 
-    std::string nasm = "nasm -f elf32 " + outputFile +" -o " + outputFile + ".o";
-    system(nasm.c_str());
+    // std::string nasm = "nasm -f elf32 " + outputFile +" -o " + outputFile + ".o";
+    // system(nasm.c_str());
 
-    // i686-elf-ld -o out out.o
-    std::string ld = "i686-elf-ld -o main " + outputFile + ".o";
-    system(ld.c_str());
+    // // i686-elf-ld -o out out.o
+    // std::string ld = "i686-elf-ld -o main " + outputFile + ".o";
+    // system(ld.c_str());
 
-    std::string pass = "multipass transfer main linux:/home/ubuntu/main";
-    system(pass.c_str());
+    // std::string pass = "multipass transfer main linux:/home/ubuntu/main";
+    // system(pass.c_str());
 
-    std::string clean = "rm *.o";
-    system(clean.c_str());
+    // std::string clean = "rm *.o";
+    // system(clean.c_str());
 
     return 0;
 }

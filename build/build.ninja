@@ -84,13 +84,6 @@ build CMakeFiles/LISPCompiler.dir/src/codegen.cpp.o: CXX_COMPILER__LISPCompiler_
   OBJECT_DIR = CMakeFiles/LISPCompiler.dir
   OBJECT_FILE_DIR = CMakeFiles/LISPCompiler.dir/src
 
-build CMakeFiles/LISPCompiler.dir/src/asmgen.cpp.o: CXX_COMPILER__LISPCompiler_unscanned_Debug /Users/alexanderthorbr/Programming/C++/LISPCompiler/src/asmgen.cpp || cmake_object_order_depends_target_LISPCompiler
-  CONFIG = Debug
-  DEP_FILE = CMakeFiles/LISPCompiler.dir/src/asmgen.cpp.o.d
-  FLAGS = -g -std=gnu++20
-  OBJECT_DIR = CMakeFiles/LISPCompiler.dir
-  OBJECT_FILE_DIR = CMakeFiles/LISPCompiler.dir/src
-
 
 # =============================================================================
 # Link build statements for EXECUTABLE target LISPCompiler
@@ -99,7 +92,7 @@ build CMakeFiles/LISPCompiler.dir/src/asmgen.cpp.o: CXX_COMPILER__LISPCompiler_u
 #############################################
 # Link the executable LISPCompiler
 
-build LISPCompiler: CXX_EXECUTABLE_LINKER__LISPCompiler_Debug CMakeFiles/LISPCompiler.dir/src/main.cpp.o CMakeFiles/LISPCompiler.dir/src/parser.cpp.o CMakeFiles/LISPCompiler.dir/src/tokenizer.cpp.o CMakeFiles/LISPCompiler.dir/src/preproc.cpp.o CMakeFiles/LISPCompiler.dir/src/codegen.cpp.o CMakeFiles/LISPCompiler.dir/src/asmgen.cpp.o
+build LISPCompiler: CXX_EXECUTABLE_LINKER__LISPCompiler_Debug CMakeFiles/LISPCompiler.dir/src/main.cpp.o CMakeFiles/LISPCompiler.dir/src/parser.cpp.o CMakeFiles/LISPCompiler.dir/src/tokenizer.cpp.o CMakeFiles/LISPCompiler.dir/src/preproc.cpp.o CMakeFiles/LISPCompiler.dir/src/codegen.cpp.o
   CONFIG = Debug
   FLAGS = -g
   OBJECT_DIR = CMakeFiles/LISPCompiler.dir
