@@ -6,18 +6,19 @@
 #define ASMGEN_HPP
 #include <string>
 #include <map>
+#include <regex>
 
 #define START_SYMBOL "_start"
 #define LIST_SPACE 1024
 
-#include "codegen.hpp"
+#include "ir_codegen.hpp"
 
 
 class Asmgen {
 
 public:
-    Asmgen(std::vector<IRInstruction>& instructions, std::unordered_map<std::string, int>& offsets, std::vector<Function>& funcs)
-        : input(instructions), varOffsets(offsets), funcs(funcs) {}
+    Asmgen(std::vector<IRInstruction>& instructions, std::unordered_map<std::string, Value> variable_table, std::vector<Function> functions)
+        : input(instructions), variable_table(variable_table), functions(functions) {}
 
     void generate() {
         asm_result += asm_overhead + "\n";
@@ -28,6 +29,8 @@ public:
         for(auto instr : input) {
             generate_asm(instr);
         }
+
+        cleanup();
     }
 
     std::string getAsm() {
@@ -37,8 +40,8 @@ public:
 private:
     std::string asm_result;
     std::vector<IRInstruction> input;
-    std::unordered_map<std::string, int> varOffsets;
-    std::vector<Function> funcs;
+    std::unordered_map<std::string, Value> variable_table;
+    std::vector<Function> functions;
 
     std::map<std::string, std::string> stringLabelMap;
     int stringCounter = 0;
@@ -60,45 +63,6 @@ _start:
     int 0x80
     ret)";
 
-    int getOffset(const std::string& name) const {
-        // User-defined variables
-
-        std::unordered_map<std::string, int>::const_iterator it = varOffsets.find(name);
-        if (it != varOffsets.end()) {
-            int offset = varOffsets.at(name);
-            return offset; // positive offsets (e.g., [ebp + 0])
-        }
-
-        // Temporary variables like t0, t1, t2...
-        if (name.size() >= 2 && name.at(0) == 't' && std::isdigit(name.at(1))) {
-            int tempIndex = std::stoi(name.substr(1));
-            return 4 * (tempIndex + 1); // [ebp - 4], [ebp - 8], etc.
-        }
-
-
-
-
-
-        throw std::runtime_error("Unknown variable name or temporary: " + name);
-    }
-
-
-
-
-    std::string offsetStr(const std::string& name) {
-        int offset = getOffset(name);
-
-        // if name = t0 etc -> sp - 4 * x
-        // if name = parameter -> bp + 4 * x
-
-        if (name.size() >= 2 && name.at(0) == 't' && std::isdigit(name.at(1))) {
-            return "[ebp - " + std::to_string(offset) + "]";
-        }
-
-        return "[ebp + " + std::to_string(offset) + "]";
-    }
-
-
     bool isBinaryArithmeticOp(std::string op) {
         return (
             op == "add"  ||
@@ -113,49 +77,57 @@ _start:
 
     int currentIndent = 0;
 
-    std::string getCurrentIntendStr() const{
+    std::string getCurrentIndentStr() const{
         return (currentIndent != 0) ? "    " : "";
+    }
+
+    Function getFunction(std::string name){
+        for(auto& func : functions){
+            if(func.name == name) return func;
+        }
+        throw std::runtime_error("Function " + name + " not declared");
     }
 
     void generateBinaryArithmeticOp(const IRInstruction& instr) {
         if(instr.op == "idiv") {
-            asm_result += getCurrentIntendStr() + "mov eax, " + offsetStr(instr.src1) + "\n";
+            asm_result += getCurrentIndentStr() + "mov eax, " + instr.src1.loc + "\n";
             asm_result += "    cdq\n"; // sign extend eax into edx:eax
-            asm_result += "    idiv dword " + offsetStr(instr.src2) + "\n";
-            asm_result += "    mov " + offsetStr(instr.dst) + ", eax\n";
+            asm_result += "    idiv dword " + instr.src2.loc + "\n";
+            asm_result += "    mov " + instr.dst.loc + ", eax\n";
             return;
         }
-        asm_result += getCurrentIntendStr() + "mov eax, " + offsetStr(instr.src1) + "\n";
-        asm_result += getCurrentIntendStr() + instr.op + " eax, " + offsetStr(instr.src2) + "\n";
-        asm_result += getCurrentIntendStr() + "mov " + offsetStr(instr.dst) + ", eax\n";
+        asm_result += getCurrentIndentStr() + "mov eax, " + instr.src1.loc + "\n";
+        asm_result += getCurrentIndentStr() + instr.op + " eax, " + instr.src2.loc + "\n";
+        asm_result += getCurrentIndentStr() + "mov " + instr.dst.loc + ", eax\n";
     }
 
-    void generateAssignment(const IRInstruction &instr) {
-        std::string src = instr.src1;
-        std::string dst = instr.dst;
+    std::string _mov(Value dst, Value src) {
+        std::string code;
 
-        // temporary variabes (t0 etc) should be sp - 4 * x
-        // parameters should be bp + 4 * x
+        bool dstIsMem = dst.loc.find('[') != std::string::npos;
+        bool srcIsMem = src.loc.find('[') != std::string::npos;
 
-        std::string src_operand;
-
-        if (src == "return_value") {
-            // src_operand = offsetStr("return_value");
-            // asm_result += getCurrentIntendStr() + "mov eax, " + src_operand + "\n";
-        } else if (isNumber(src)) {
-            // Immediate constant
-            asm_result += getCurrentIntendStr() + "mov eax, " + src + "\n";
-        } else if (src.starts_with("str_")) {
-            // It's a string label loaded with `loadstr`
-            asm_result += getCurrentIntendStr() + "mov eax, " + src + "\n";
+        if (dstIsMem && srcIsMem) {
+            // Memory to memory: use ecx as temporary because edx is used for idiv and imul
+            code += "mov ecx, " + src.loc + "\n";
+            code += getCurrentIndentStr() + "mov " + dst.loc + ", ecx\n";
         } else {
-            // Assume it's a temporary or variable with an offset
-            src_operand = offsetStr(src);
-            asm_result += getCurrentIntendStr() + "mov eax, " + src_operand + "\n";
+            code += "mov " + dst.loc + ", " + src.loc + "\n";
         }
 
-        // Store into destination offset
-        asm_result += getCurrentIntendStr() + "mov " + offsetStr(dst) + ", eax\n";
+        return code;
+    }
+
+
+    void generateAssignment(const IRInstruction &instr) {
+        Value src = instr.src1;
+        Value dst = instr.dst;
+
+        if (src.type == IMM_NUM){
+            asm_result += getCurrentIndentStr() + "mov dword " + dst.loc + ", " + src.value + "\n";
+        }else{
+            asm_result += getCurrentIndentStr() + _mov(dst, src);
+        }
     }
 
     bool isNumber(const std::string& s) {
@@ -168,15 +140,15 @@ _start:
 
 
     void generateCmps(const IRInstruction & instr) {
-        asm_result += getCurrentIntendStr() + "mov eax, " + offsetStr(instr.src1) + "\n";
-        asm_result += getCurrentIntendStr() + "cmp eax, " + offsetStr(instr.src2) + "\n";
+        asm_result += getCurrentIndentStr() + "mov eax, " + instr.src1.loc + "\n";
+        asm_result += getCurrentIndentStr() + "cmp eax, " + instr.src2.loc + "\n";
         if(instr.op == "eq") {
-            asm_result += getCurrentIntendStr() + "sete" + " al\n";
+            asm_result += getCurrentIndentStr() + "sete" + " al\n";
         }else {
-            asm_result += getCurrentIntendStr() + "set" + instr.op + " al\n";
+            asm_result += getCurrentIndentStr() + "set" + instr.op + " al\n";
         }
-        asm_result += getCurrentIntendStr() + "movzx eax, al\n";
-        asm_result += getCurrentIntendStr() + "mov " + offsetStr(instr.dst) + ", eax\n";
+        asm_result += getCurrentIndentStr() + "movzx eax, al\n";
+        asm_result += getCurrentIndentStr() + "mov " + instr.dst.loc + ", eax\n";
 
     }
 
@@ -216,16 +188,27 @@ _start:
         return result.str();
     }
 
+    /*
+    cleanup things like
+
+    mov [ebp - 8], eax
+    mov eax, [ebp - 8]
+
+    which can just be removed
+    
+    */
+    std::string cleanup();
+
+
     std::string generate_asm(IRInstruction& instr) {
         const std::string op = instr.op;
         if(op.empty()) {
-            // throw std::runtime_error("ERROR: op was empty");
-            return "";
+            throw std::runtime_error("ERROR: op was empty");
         }
 
-        asm_result += getCurrentIntendStr() +"; " + instr.str(false) + "\n";
+        // asm_result += getCurrentIndentStr() +"; " + instr.str() + "\n";
 
-        if(op == "=") {
+        if(op == "assign") {
             generateAssignment(instr);
         }
 
@@ -234,196 +217,185 @@ _start:
         }
 
         else if(op == "neg") {
-            asm_result += getCurrentIntendStr() + "mov eax, " + offsetStr(instr.src1) + "\n";
-            asm_result += getCurrentIntendStr() + "neg eax\n";
-            asm_result += getCurrentIntendStr() + "mov " + offsetStr(instr.dst) + ", eax\n";
+            asm_result += getCurrentIndentStr() + "mov eax, " + instr.src1.loc + "\n";
+            asm_result += getCurrentIndentStr() + "neg eax\n";
+            asm_result += getCurrentIndentStr() + "mov " + instr.dst.loc + ", eax\n";
         }
 
         else if(op == "not") {
-            asm_result += getCurrentIntendStr() + "mov eax, " + offsetStr(instr.src1) + "\n";
-            asm_result += getCurrentIntendStr() + "not eax\n";
-            asm_result += getCurrentIntendStr() + "mov " + offsetStr(instr.dst) + ", eax\n";
+            asm_result += getCurrentIndentStr() + "mov eax, " + instr.src1.loc + "\n";
+            asm_result += getCurrentIndentStr() + "not eax\n";
+            asm_result += getCurrentIndentStr() + "mov " + instr.dst.loc + ", eax\n";
         }
 
-        else if(op == "l" || op == "g" || op == "eq") {
-            generateCmps(instr);
-        }
+        // else if(op == "l" || op == "g" || op == "eq") {
+        //     generateCmps(instr);
+        // }
 
-        else if(op == "store") {
-            asm_result += getCurrentIntendStr() + "mov eax, " + offsetStr(instr.src1) + "\n";
-            asm_result += getCurrentIntendStr() + "mov " + offsetStr(instr.dst) + ", eax\n";
-        }
+        // else if(op == "store") {
+        //     asm_result += getCurrentIndentStr() + "mov eax, " + instr.src1.loc + "\n";
+        //     asm_result += getCurrentIndentStr() + "mov " + instr.dst.loc + ", eax\n";
+        // }
 
         else if(op == "load") {
-            asm_result += getCurrentIntendStr() + "mov eax, " + offsetStr(instr.src1) + "\n";
-            asm_result += getCurrentIntendStr() + "mov " + offsetStr(instr.dst) + ", eax\n";
+            asm_result += getCurrentIndentStr() + _mov(instr.dst, instr.src1);
         }
 
         else if(op == "defun") {
-            asm_result += instr.src1 + ":\n";
             currentIndent++;
 
-            size_t localVars = -1;
-            for(const auto& func : funcs) {
-                if(func.name == instr.src1) {
-                    localVars = func.localVars;
-                    currentScope = func;
-                }
-            }
+            std::string funcName = instr.src1.value;
 
+            Function func = getFunction(funcName);
+            
+            asm_result += funcName + ":\n";
 
-            if(localVars == -1) {
-                throw std::runtime_error("ERROR: localsVars = -1: Could not find function with label: " + instr.src1);
-            }
-
-            // saving return address manually
-            // asm_result += getCurrentIntendStr() + "pop esi\n"; // return address from call into esi
-            // asm_result += getCurrentIntendStr() + "mov edi, return_address\n";
-            // asm_result += getCurrentIntendStr() + "mov [edi], esi\n";
-            // asm_result += getCurrentIntendStr() + "push esi\n"; // restoring the return address or something what do i know
-
+            int local_bytes = func.localVarCount * 4;
             // stack frame
-            asm_result += getCurrentIntendStr() + "; Stack frame\n";
-            asm_result += getCurrentIntendStr() + "push ebp\n";
-            asm_result += getCurrentIntendStr() + "mov ebp, esp\n";
-            asm_result += getCurrentIntendStr() + "sub esp, " + std::to_string((localVars)*4) + "\n"; // <- adjust depending on how many local variables there are
+            asm_result += getCurrentIndentStr() + "push ebp\n";
+            asm_result += getCurrentIndentStr() + "mov ebp, esp\n";
+            asm_result += getCurrentIndentStr() + "sub esp, " + std::to_string(local_bytes) + "\n"; // adjusting the stack for local vars (let)
 
         }
 
-        else if(op == "pop") {
-            // do nothing apperently ?
-            // asm_result += getCurrentIntendStr() + "mov eax, " + offsetStr(instr.dst) + "\n";
-            // asm_result += getCurrentIntendStr() + "mov " + offsetStr(instr.src1) + ", eax" +"\n";
-        }
+        // else if(op == "pop") {
+        //     // do nothing apperently ?
+        //     // asm_result += getCurrentIndentStr() + "mov eax, " + instr.dst.loc + "\n";
+        //     // asm_result += getCurrentIndentStr() + "mov " + instr.src1.loc + ", eax" +"\n";
+        // }
 
         else if(op == "push") {
-            asm_result += getCurrentIntendStr() + "mov eax, " + offsetStr(instr.src1) + "\n";
-            asm_result += getCurrentIntendStr() + "push eax\n";
+            if (instr.src1.type == IMM_NUM) {
+                asm_result += getCurrentIndentStr() + "mov eax, " + instr.src1.value + "\n";
+                asm_result += getCurrentIndentStr() + "push dword eax\n";
+            } else {
+                // instr.src1.loc is a register or memory location, can push directly
+                asm_result += getCurrentIndentStr() + "push dword " + instr.src1.loc + "\n";
+            }
+
         }
 
         else if(op == "return") {
-            asm_result += getCurrentIntendStr() + "mov eax, " + offsetStr(instr.src1) + "\n";
-
-            // stack frame cleanup
-            asm_result += getCurrentIntendStr() + "; Stack frame cleanup" + std::to_string(currentScope.localVars) + "\n";
-            // asm_result += getCurrentIntendStr() + "mov esp, ebp\n"; // instead:
-            asm_result += getCurrentIntendStr() + "add esp, " + std::to_string(currentScope.localVars*4) + "\n"; // the benefit is that the return should always work
-
-            // manual return address
-
-            asm_result += getCurrentIntendStr() + "pop ebp\n";
-            asm_result += getCurrentIntendStr() + "ret\n";
-            currentIndent = (currentIndent > 1) ? currentIndent-- : 0;
+            asm_result += getCurrentIndentStr() + _mov(instr.dst,instr.src1);
+            asm_result += getCurrentIndentStr() + "mov esp, ebp\n";
+            asm_result += getCurrentIndentStr() + "pop ebp\n";
+            asm_result += getCurrentIndentStr() + "ret\n";
+            currentIndent--;
         }
 
 
         else if(op == "call") {
-            asm_result += getCurrentIntendStr() + "call " + instr.src1 + "\n";
+            asm_result += getCurrentIndentStr() + "call " + instr.src1.value + "\n";
         }
 
-        else if(op == "loadstr") {
-            std::string str = instr.src1;
-            std::string label;
-
-            if(stringLabelMap.find(str) == stringLabelMap.end()) {
-                // string hasnt been added yet
-                label = "str_" + std::to_string(stringCounter++);
-                stringLabelMap[str] = label;
-
-                dataSection += label + ": db " + formatStringForNASM(str) + ", 0\n";
-            }else {
-                label = stringLabelMap[str];
-            }
-
-            std::string dstOffset = offsetStr(instr.dst);
-            asm_result += getCurrentIntendStr() + "mov eax, " + label + "\n";
-            asm_result += getCurrentIntendStr() + "mov " + dstOffset + ", eax\n";
+        // esp is restored simply using mov esp, ebp, nvm its necessary
+        else if(op == "add_esp"){
+            asm_result += getCurrentIndentStr() + "add esp, " + std::to_string(std::stoi(instr.src1.value)) + "\n";
         }
 
-        else if(op == "print") {
-            std::string stringAddr = offsetStr(instr.src1);
-            asm_result += getCurrentIntendStr() + "mov eax, " + stringAddr + "\n";
-            asm_result += getCurrentIntendStr() + "call _internal_print_string";
-        }
+        // else if(op == "loadstr") {
+        //     std::string str = instr.src1;
+        //     std::string label;
 
-        else if(op == "if") {
-            std::string trueLabel = instr.dst;
-            std::string srcOffset = offsetStr(instr.src1);
-            if(instr.src2 == "jump") {
-                asm_result += getCurrentIntendStr() + "mov eax, " + srcOffset + "\n";
-                asm_result += getCurrentIntendStr() + "cmp eax, 0\n";
-                asm_result += getCurrentIntendStr() + "jne " + trueLabel + "\n";
-            }else {
-                throw std::runtime_error("ERROR: only jump work right now");
-            }
-        }
+        //     if(stringLabelMap.find(str) == stringLabelMap.end()) {
+        //         // string hasnt been added yet
+        //         label = "str_" + std::to_string(stringCounter++);
+        //         stringLabelMap[str] = label;
 
-        else if(op == "label") {
-            std::string label = instr.dst;
-            asm_result += label + ":\n";
-        }
+        //         dataSection += label + ": db " + formatStringForNASM(str) + ", 0\n";
+        //     }else {
+        //         label = stringLabelMap[str];
+        //     }
 
-        else if(op == "jump") {
-            std::string label = instr.dst;
-            asm_result += getCurrentIntendStr() + "jmp " + label + "\n";
-        }
+        //     std::string dstOffset = instr.dst.loc;
+        //     asm_result += getCurrentIndentStr() + "mov eax, " + label + "\n";
+        //     asm_result += getCurrentIndentStr() + "mov " + dstOffset + ", eax\n";
+        // }
 
-        else if(op == "cons") {
-            const std::string dst = offsetStr(instr.dst);
-            const std::string leftSide = offsetStr(instr.src1);
-            const std::string rightSide = offsetStr(instr.src2);
+        // else if(op == "print") {
+        //     std::string stringAddr = instr.src1.loc;
+        //     asm_result += getCurrentIndentStr() + "mov eax, " + stringAddr + "\n";
+        //     asm_result += getCurrentIndentStr() + "call _internal_print_string";
+        // }
 
-            // load car (src1) into eax
-            asm_result += getCurrentIntendStr() + "; load car (src1) into eax\n";
-            asm_result += getCurrentIntendStr() + "mov eax, " + leftSide + "\n";
+        // else if(op == "if") {
+        //     std::string trueLabel = instr.dst;
+        //     std::string srcOffset = instr.src1.loc;
+        //     if(instr.src2 == "jump") {
+        //         asm_result += getCurrentIndentStr() + "mov eax, " + srcOffset + "\n";
+        //         asm_result += getCurrentIndentStr() + "cmp eax, 0\n";
+        //         asm_result += getCurrentIndentStr() + "jne " + trueLabel + "\n";
+        //     }else {
+        //         throw std::runtime_error("ERROR: only jump work right now");
+        //     }
+        // }
 
-            // store car into [list_ptr]
-            asm_result += getCurrentIntendStr() + "; store car into [list_ptr]\n";
-            asm_result += getCurrentIntendStr() + "mov ebx, [list_ptr]\n";
-            asm_result += getCurrentIntendStr() + "mov [ebx], eax\n";
+        // else if(op == "label") {
+        //     std::string label = instr.dst;
+        //     asm_result += label + ":\n";
+        // }
 
-            // load cdr (src2) into eax
-            asm_result += getCurrentIntendStr() + "; load cdr (src2) into eax\n";
-            asm_result += getCurrentIntendStr() + "mov eax, " + rightSide + "\n";
+        // else if(op == "jump") {
+        //     std::string label = instr.dst;
+        //     asm_result += getCurrentIndentStr() + "jmp " + label + "\n";
+        // }
 
-            // Load cdr into [list_ptr + 4]
-            asm_result += getCurrentIntendStr() + "; Load cdr into [list_ptr + 4]\n";
-            asm_result += getCurrentIntendStr() + "mov ebx, [list_ptr]\n";
-            asm_result += getCurrentIntendStr() + "mov [ebx + 4], eax\n";
+        // else if(op == "cons") {
+        //     const std::string dst = instr.dst.loc;
+        //     const std::string leftSide = instr.src1.loc;
+        //     const std::string rightSide = instr.src2.loc;
 
-            // Store address of cons cell into dst
-            asm_result += getCurrentIntendStr() + "; Store address of cons cell into dst\n";
-            asm_result += getCurrentIntendStr() + "mov eax, [list_ptr]\n";
-            asm_result += getCurrentIntendStr() + "mov " + dst + ", eax\n";
+        //     // load car (src1) into eax
+        //     asm_result += getCurrentIndentStr() + "; load car (src1) into eax\n";
+        //     asm_result += getCurrentIndentStr() + "mov eax, " + leftSide + "\n";
 
-            listPtrCounter += 8;
-            if(listPtrCounter > LIST_SPACE) {
-                throw std::runtime_error("Too many cons cells -> increase LIST_SPACE. currently at: " + std::to_string(LIST_SPACE) + "bytes");
-            }
+        //     // store car into [list_ptr]
+        //     asm_result += getCurrentIndentStr() + "; store car into [list_ptr]\n";
+        //     asm_result += getCurrentIndentStr() + "mov ebx, [list_ptr]\n";
+        //     asm_result += getCurrentIndentStr() + "mov [ebx], eax\n";
 
-            // Increment list pointer by 8 for next allocation
-            asm_result += getCurrentIntendStr() + "; Increment list pointer by 8 for next allocation\n";
-            asm_result += getCurrentIntendStr() + "add dword [list_ptr], 8\n";
-        }
+        //     // load cdr (src2) into eax
+        //     asm_result += getCurrentIndentStr() + "; load cdr (src2) into eax\n";
+        //     asm_result += getCurrentIndentStr() + "mov eax, " + rightSide + "\n";
+
+        //     // Load cdr into [list_ptr + 4]
+        //     asm_result += getCurrentIndentStr() + "; Load cdr into [list_ptr + 4]\n";
+        //     asm_result += getCurrentIndentStr() + "mov ebx, [list_ptr]\n";
+        //     asm_result += getCurrentIndentStr() + "mov [ebx + 4], eax\n";
+
+        //     // Store address of cons cell into dst
+        //     asm_result += getCurrentIndentStr() + "; Store address of cons cell into dst\n";
+        //     asm_result += getCurrentIndentStr() + "mov eax, [list_ptr]\n";
+        //     asm_result += getCurrentIndentStr() + "mov " + dst + ", eax\n";
+
+        //     listPtrCounter += 8;
+        //     if(listPtrCounter > LIST_SPACE) {
+        //         throw std::runtime_error("Too many cons cells -> increase LIST_SPACE. currently at: " + std::to_string(LIST_SPACE) + "bytes");
+        //     }
+
+        //     // Increment list pointer by 8 for next allocation
+        //     asm_result += getCurrentIndentStr() + "; Increment list pointer by 8 for next allocation\n";
+        //     asm_result += getCurrentIndentStr() + "add dword [list_ptr], 8\n";
+        // }
 
 
-        else if(op == "car") {
-            const std::string dst = offsetStr(instr.dst);
-            const std::string src = offsetStr(instr.src1);
+        // else if(op == "car") {
+        //     const std::string dst = instr.dst.loc;
+        //     const std::string src = instr.src1.loc;
 
-            asm_result += getCurrentIntendStr() + "mov ebx, " + src + "\n";       // Load pointer to cons cell
-            asm_result += getCurrentIntendStr() + "mov eax, [ebx]\n";             // Load car (first 4 bytes)
-            asm_result += getCurrentIntendStr() + "mov " + dst + ", eax\n";       // Store car into dst
-        }
+        //     asm_result += getCurrentIndentStr() + "mov ebx, " + src + "\n";       // Load pointer to cons cell
+        //     asm_result += getCurrentIndentStr() + "mov eax, [ebx]\n";             // Load car (first 4 bytes)
+        //     asm_result += getCurrentIndentStr() + "mov " + dst + ", eax\n";       // Store car into dst
+        // }
 
-        else if(op == "cdr") {
-            const std::string dst = offsetStr(instr.dst);
-            const std::string src = offsetStr(instr.src1);
+        // else if(op == "cdr") {
+        //     const std::string dst = instr.dst.loc;
+        //     const std::string src = instr.src1.loc;
 
-            asm_result += getCurrentIntendStr() + "mov ebx, " + src + "\n";       // Load pointer to cons cell
-            asm_result += getCurrentIntendStr() + "mov eax, [ebx + 4]\n";             // Load car (first 4 bytes)
-            asm_result += getCurrentIntendStr() + "mov " + dst + ", eax\n";       // Store car into dst
-        }
+        //     asm_result += getCurrentIndentStr() + "mov ebx, " + src + "\n";       // Load pointer to cons cell
+        //     asm_result += getCurrentIndentStr() + "mov eax, [ebx + 4]\n";             // Load car (first 4 bytes)
+        //     asm_result += getCurrentIndentStr() + "mov " + dst + ", eax\n";       // Store car into dst
+        // }
 
 
 

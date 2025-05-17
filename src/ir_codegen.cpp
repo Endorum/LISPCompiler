@@ -4,7 +4,7 @@
 
 #include <unordered_set>
 
-#include "../include/codegen.hpp"
+#include "../include/ir_codegen.hpp"
 
 
 void Generator::printError(const std::string &msg) {
@@ -151,8 +151,9 @@ Value Generator::handle_let_keyword(ASTNode *node) {
     localVar.offSet = local_count++;  // Track how many locals exist
     localVar.loc = getLocalLocation(localVar.offSet);
 
+
     // Store the initializer value into the local variable
-    emit(localVar, "ASSIGN", initVal);
+    emit(localVar, "assign", initVal);
 
     // Register in symbol table
     variable_table[varname] = localVar;
@@ -177,13 +178,15 @@ Value Generator::handle_defun_keyword(ASTNode *node) {
     func.paramCount = parameters->children.size();
     current_function = func;
     
+
+    
     
     // Emit the function label
     emit(Value("label", IMM_STR), "defun", Value(functionName, IMM_STR));
     
     
     // handle parameters
-
+    
     temp_count = 0;
     local_count = 0;
 
@@ -194,18 +197,27 @@ Value Generator::handle_defun_keyword(ASTNode *node) {
         variable_table[paramName] = param;
     }
 
+    spill_start = local_count;
+
     // multi line body
     Value result;
 
+    size_t localVarBefore = local_count;
     for(int i=3;i<node->children.size();i++){
         result = generate_code(node->children.at(i));
+        //  += countLocalsInFunction(node->children.at(i));
     }
+    
+    func.localVarCount = local_count - localVarBefore;
+    
 
     Value dst;
     dst.value = "return_value";
     dst.type = TEMP;
     dst.offSet = 0;
     dst.loc = "eax";
+
+    functions.push_back(func);
 
     emit(dst, "return", result);
 
@@ -237,19 +249,21 @@ Value Generator::handle_functionCall(ASTNode *node) {
     }
 
     for(int i=args.size();  i-- > 0; ){
-        emit({}, "PUSH", {args.at(i)});
+        emit({}, "push", {args.at(i)});
     }
 
-    emit({}, "CALL", funcName);
+    emit({}, "call", funcName);
 
+    // esp is restored simply using mov esp, ebp, nvm its necessary
     if(!args.empty()){
-        emit({}, "ADD_ESP", {Value(std::to_string(args.size() * 4), IMM_NUM)});
+        emit({}, "add_esp", {Value(std::to_string(args.size() * 4), IMM_NUM)});
     }
 
     // Get return value from eax
     Value ret = generate_tmp();
-    
-    emit(ret, "ASSIGN", {Value("eax", REG)});
+    Value src = Value();
+    src.loc = "eax";
+    emit(ret, "assign", src);
 
     return ret;
 }

@@ -59,7 +59,7 @@ struct Value{
         : value(n), type(t) {}
 
     std::string str(){
-        return "value: " + value + " type: " + VarTypeToString(type) + ((!loc.empty()) ? (" loc: " + loc + " offset: " + std::to_string(offSet)) : "");
+        return ((!value.empty()) ? "value: " + value + ((type != VT_NONE) ? " type: " + VarTypeToString(type) : "") + ((!loc.empty()) ? (" loc: " + loc ) : "") : "");
     }
 
 };
@@ -103,14 +103,15 @@ public:
     std::vector<Function> functions; 
     Function current_function;
     
-    std::unordered_map<std::string, Value> global_variables;
     std::unordered_map<std::string, Value> variable_table; // track local variables including parameters
 
     std::vector<IRInstruction> instructions;
 
 
 
-    explicit Generator(std::vector<ASTNode*>& p): ast(p) {}
+    explicit Generator(std::vector<ASTNode*>& p): ast(p) {
+        current_function.name = "GLOBAL";
+    }
 
 
     void printError(const std::string& msg);
@@ -122,27 +123,53 @@ public:
 
     size_t local_count = 0; // for all let variables
     size_t temp_count = 0;  // for all temps (t0 ...)
-    size_t spill_start = 0; // calculated after locals are declared
+    size_t spill_start = 1; // calculated after locals are declared
 
     std::string getPARAMLocation(size_t index) {
-        return "ebp + " + std::to_string(8 + index * 4);
+        return "[ebp + " + std::to_string(8 + index * 4) + "]";
     }
 
     std::string getLocalLocation(size_t index) {
-        return "ebp - " + std::to_string((index + 1) * 4);
+        return "[ebp - " + std::to_string((index + 1) * 4)+"]";
+    }
+
+    int countLocalsInFunction(ASTNode* functionBody) {
+        int count = 0;
+
+        // Walk the AST subtree recursively:
+        std::function<void(ASTNode*)> walk = [&](ASTNode* node) {
+            if (!node) return;
+
+            if (node->type == NT_List && !node->children.empty()) {
+                ASTNode* first = node->children[0];
+                if (first->value == "let") {
+                    count++;
+                }
+                for (auto child : node->children) {
+                    walk(child);
+                }
+            } else {
+                // For atoms or other nodes, no locals here
+            }
+        };
+
+        walk(functionBody);
+
+        return count;
     }
 
 
-    std::string getTempOffset(size_t index){
-        switch (temp_count){
-            default: break;
-            case 0: return "eax";
-            case 1: return "ecx";
-            case 2: return "edx";
-            case 3: return "ebx";
-        }
-        size_t spill_index = index - 4;
-        return "ebp - " + std::to_string((spill_start + spill_index + 1) * 4); // spill after locals
+
+    std::string getTempOffset(int index){
+        // cant use the registers anymore as they are needed for asm gen e.g. idiv 
+        // switch (temp_count){
+        //     default: break;
+        //     case 0: return "eax";
+        //     case 1: return "ecx";
+        //     case 2: return "edx";
+        //     case 3: return "ebx";
+        // }
+        return "[ebp - " + std::to_string(++local_count * 4) + "]"; // spill after locals
     }
 
     Value generate_tmp() {
@@ -170,7 +197,7 @@ public:
         param.value = name;
         param.type = PARAM;
         param.offSet = index; // index of parameter
-        param.loc = "ebp + " + std::to_string(8 + index * 4); // 8 to let room for old bp and ret addr
+        param.loc = "[ebp + " + std::to_string(8 + index * 4) + "]"; // 8 to let room for old bp and ret addr
         return param;
     }
 
@@ -290,11 +317,16 @@ public:
             // if its not an expression/list then its an atom
             if(node->type == NT_Number) {
                 Value immVal(node->value, IMM_NUM);
-                Value dst = generate_tmp();
+                immVal.loc = node->value;
 
-                emit(dst, "ASSIGN", immVal);
+                // isnt that much simpler? (commented out in case i still need it) i do because later i just use instr.loc 
+                // but thats an easy fix just put the number into instr.loc 
 
-                return dst;
+                // Value dst = generate_tmp();
+
+                // emit(dst, "assign", immVal);
+
+                return immVal;
             }
 
             if(node->type == NT_Symbol) {
@@ -305,7 +337,7 @@ public:
 
                 Value src = it->second;
                 Value dst = generate_tmp();
-                emit(dst, "LOAD", src); // or "ASSIGN", depending on your IR naming
+                emit(dst, "load", src); // or "assign", depending on your IR naming
 
                 return dst;
             }

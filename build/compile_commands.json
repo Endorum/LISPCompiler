@@ -25,8 +25,14 @@
 },
 {
   "directory": "/Users/alexanderthorbr/Programming/C++/LISPCompiler/build",
-  "command": "/usr/bin/clang++ -g -std=gnu++20 -o CMakeFiles/LISPCompiler.dir/src/codegen.cpp.o -c /Users/alexanderthorbr/Programming/C++/LISPCompiler/src/codegen.cpp",
-  "file": "/Users/alexanderthorbr/Programming/C++/LISPCompiler/src/codegen.cpp",
-  "output": "CMakeFiles/LISPCompiler.dir/src/codegen.cpp.o"
+  "command": "/usr/bin/clang++ -g -std=gnu++20 -o CMakeFiles/LISPCompiler.dir/src/ir_codegen.cpp.o -c /Users/alexanderthorbr/Programming/C++/LISPCompiler/src/ir_codegen.cpp",
+  "file": "/Users/alexanderthorbr/Programming/C++/LISPCompiler/src/ir_codegen.cpp",
+  "output": "CMakeFiles/LISPCompiler.dir/src/ir_codegen.cpp.o"
+},
+{
+  "directory": "/Users/alexanderthorbr/Programming/C++/LISPCompiler/build",
+  "command": "/usr/bin/clang++ -g -std=gnu++20 -o CMakeFiles/LISPCompiler.dir/src/asmgen.cpp.o -c /Users/alexanderthorbr/Programming/C++/LISPCompiler/src/asmgen.cpp",
+  "file": "/Users/alexanderthorbr/Programming/C++/LISPCompiler/src/asmgen.cpp",
+  "output": "CMakeFiles/LISPCompiler.dir/src/asmgen.cpp.o"
 }
 ]

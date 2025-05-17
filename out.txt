@@ -16,11 +16,11 @@ Token:
 
 Token:
     type:  ATOM
-    value: x
+    value: m
 
 Token:
     type:  ATOM
-    value: y
+    value: n
 
 Token:
     type:  RPAREN
@@ -36,11 +36,11 @@ Token:
 
 Token:
     type:  ATOM
-    value: x
+    value: m
 
 Token:
     type:  ATOM
-    value: y
+    value: n
 
 Token:
     type:  RPAREN
@@ -76,15 +76,55 @@ Token:
 
 Token:
     type:  ATOM
+    value: let
+
+Token:
+    type:  ATOM
+    value: x
+
+Token:
+    type:  NUMBER
+    value: 5
+
+Token:
+    type:  RPAREN
+    value: )
+
+Token:
+    type:  LPAREN
+    value: (
+
+Token:
+    type:  ATOM
+    value: let
+
+Token:
+    type:  ATOM
+    value: y
+
+Token:
+    type:  NUMBER
+    value: 6
+
+Token:
+    type:  RPAREN
+    value: )
+
+Token:
+    type:  LPAREN
+    value: (
+
+Token:
+    type:  ATOM
     value: add
 
 Token:
-    type:  NUMBER
-    value: 1
+    type:  ATOM
+    value: x
 
 Token:
-    type:  NUMBER
-    value: 2
+    type:  ATOM
+    value: y
 
 Token:
     type:  RPAREN
@@ -98,74 +138,90 @@ Token:
 	 Node Type: 'Symbol' Value: 'defun'
 	 Node Type: 'Symbol' Value: 'add'
 	 Node Type: 'List' Children (2): 
-		 Node Type: 'Symbol' Value: 'x'
-		 Node Type: 'Symbol' Value: 'y'
+		 Node Type: 'Symbol' Value: 'm'
+		 Node Type: 'Symbol' Value: 'n'
 	 Node Type: 'List' Children (3): 
 		 Node Type: 'Symbol' Value: '+'
-		 Node Type: 'Symbol' Value: 'x'
-		 Node Type: 'Symbol' Value: 'y'
- Node Type: 'List' Children (4): 
+		 Node Type: 'Symbol' Value: 'm'
+		 Node Type: 'Symbol' Value: 'n'
+ Node Type: 'List' Children (6): 
 	 Node Type: 'Symbol' Value: 'defun'
 	 Node Type: 'Symbol' Value: 'main'
 	 Node Type: 'List'
 	 Node Type: 'List' Children (3): 
+		 Node Type: 'Symbol' Value: 'let'
+		 Node Type: 'Symbol' Value: 'x'
+		 Node Type: 'Number' Value: '5'
+	 Node Type: 'List' Children (3): 
+		 Node Type: 'Symbol' Value: 'let'
+		 Node Type: 'Symbol' Value: 'y'
+		 Node Type: 'Number' Value: '6'
+	 Node Type: 'List' Children (3): 
 		 Node Type: 'Symbol' Value: 'add'
-		 Node Type: 'Number' Value: '1'
-		 Node Type: 'Number' Value: '2'
+		 Node Type: 'Symbol' Value: 'x'
+		 Node Type: 'Symbol' Value: 'y'
 dst: value: label type: IMM_STR
 defun
 src1: value: add type: IMM_STR
 
-dst: value: t1 type: TEMP loc: ecx offset: 1
-LOAD
-src1: value: x type: PARAM loc: ebp + 8 offset: 0
+dst: value: t1 type: TEMP loc: [ebp - 8]
+load
+src1: value: m type: PARAM loc: [ebp + 8]
 
-dst: value: t2 type: TEMP loc: edx offset: 2
-LOAD
-src1: value: y type: PARAM loc: ebp + 12 offset: 1
+dst: value: t2 type: TEMP loc: [ebp - 12]
+load
+src1: value: n type: PARAM loc: [ebp + 12]
 
-dst: value: t0 type: TEMP loc: eax offset: 0
+dst: value: t0 type: TEMP loc: [ebp - 4]
 add
-src1: value: t1 type: TEMP loc: ecx offset: 1
-src2: value: t2 type: TEMP loc: edx offset: 2
+src1: value: t1 type: TEMP loc: [ebp - 8]
+src2: value: t2 type: TEMP loc: [ebp - 12]
 
-dst: value: return_value type: TEMP loc: eax offset: 0
+dst: value: return_value type: TEMP loc: eax
 return
-src1: value: t0 type: TEMP loc: eax offset: 0
+src1: value: t0 type: TEMP loc: [ebp - 4]
 
 dst: value: label type: IMM_STR
 defun
 src1: value: main type: IMM_STR
 
-dst: value: t0 type: TEMP loc: eax offset: 0
-ASSIGN
-src1: value: 1 type: IMM_NUM
+dst: value: x type: LOCAL loc: [ebp - 4]
+assign
+src1: value: 5 type: IMM_NUM loc: 5
 
-dst: value: t1 type: TEMP loc: ecx offset: 1
-ASSIGN
-src1: value: 2 type: IMM_NUM
+dst: value: y type: LOCAL loc: [ebp - 8]
+assign
+src1: value: 6 type: IMM_NUM loc: 6
 
-dst: value:  type: NONE
-PUSH
-src1: value: t1 type: TEMP loc: ecx offset: 1
+dst: value: t0 type: TEMP loc: [ebp - 12]
+load
+src1: value: x type: LOCAL loc: [ebp - 4]
 
-dst: value:  type: NONE
-PUSH
-src1: value: t0 type: TEMP loc: eax offset: 0
+dst: value: t1 type: TEMP loc: [ebp - 16]
+load
+src1: value: y type: LOCAL loc: [ebp - 8]
 
-dst: value:  type: NONE
-CALL
-src1: value: add type: NONE
+dst: 
+push
+src1: value: t1 type: TEMP loc: [ebp - 16]
 
-dst: value:  type: NONE
-ADD_ESP
+dst: 
+push
+src1: value: t0 type: TEMP loc: [ebp - 12]
+
+dst: 
+call
+src1: value: add
+
+dst: 
+add_esp
 src1: value: 8 type: IMM_NUM
 
-dst: value: t2 type: TEMP loc: edx offset: 2
-ASSIGN
-src1: value: eax type: REG
+dst: value: t2 type: TEMP loc: [ebp - 20]
+assign
 
-dst: value: return_value type: TEMP loc: eax offset: 0
+dst: value: return_value type: TEMP loc: eax
 return
-src1: value: t2 type: TEMP loc: edx offset: 2
+src1: value: t2 type: TEMP loc: [ebp - 20]
 
+Assembly written to: testout.asm

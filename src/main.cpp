@@ -4,8 +4,8 @@
 #include <vector>
 #include <stdexcept>
 
-// #include "../include/asmgen.hpp"
-#include "../include/codegen.hpp"
+#include "../include/asmgen.hpp"
+#include "../include/ir_codegen.hpp"
 #include "../include/parser.hpp"
 #include "../include/preproc.hpp"
 #include "../include/tokenizer.hpp"
@@ -76,7 +76,7 @@ int main(int argc, char* argv[]) {
         for (auto& instr : instructions) {
             std::cout << instr.str() << std::endl;
         }
-        return 0;
+
 
         // for (const auto& pair : generator.variableMap) {
         //     std::cout << pair.first << " : " << std::to_string(pair.second) << std::endl;
@@ -88,15 +88,15 @@ int main(int argc, char* argv[]) {
 
         // // return 0;
 
-        // // Assembly generation
-        // Asmgen asmgenerator(instructions, generator.variableMap, generator.functions);
-        // asmgenerator.generate();
-        // std::string asm_out = asmgenerator.getAsm();
-        // // std::cout << asm_out << std::endl;
+        // Assembly generation
+        Asmgen asmgenerator(instructions, generator.variable_table, generator.functions);
+        asmgenerator.generate();
+        std::string asm_out = asmgenerator.getAsm();
+        // std::cout << asm_out << std::endl;
 
-        // // Write to file
-        // writeToFile(asm_out, outputFile);
-        // std::cout << "Assembly written to: " << outputFile << "\n";
+        // Write to file
+        writeToFile(asm_out, outputFile);
+        std::cout << "Assembly written to: " << outputFile << "\n";
     } catch (const std::exception& e) {
         std::cerr << "ERROR: " << e.what() << "\n";
         return 1;
