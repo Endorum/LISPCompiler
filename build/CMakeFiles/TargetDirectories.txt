@@ -1,0 +1,3 @@
+/Users/alexanderthorbr/Programming/C++/LISPCompiler/build/CMakeFiles/LISPCompiler.dir
+/Users/alexanderthorbr/Programming/C++/LISPCompiler/build/CMakeFiles/edit_cache.dir
+/Users/alexanderthorbr/Programming/C++/LISPCompiler/build/CMakeFiles/rebuild_cache.dir

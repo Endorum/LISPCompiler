@@ -50,7 +50,7 @@ private:
 
     std::string start = START_SYMBOL;
     std::string asm_overhead = R"(
-%include "../stdlib.asm"
+%include "stdlib.asm"
 section .text
 global _start
 _start:

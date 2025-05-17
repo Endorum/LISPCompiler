@@ -3,6 +3,7 @@ project(LISPCompiler)
 
 set(CMAKE_CXX_STANDARD 20)
 
+
 add_executable(LISPCompiler src/main.cpp
         src/parser.cpp
         src/tokenizer.cpp

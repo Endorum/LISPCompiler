@@ -103,11 +103,14 @@ int main(int argc, char* argv[]) {
     system(nasm.c_str());
 
     // i686-elf-ld -o out out.o
-    std::string ld = "i686-elf-ld -o ../main " + outputFile + ".o";
+    std::string ld = "i686-elf-ld -o main " + outputFile + ".o";
     system(ld.c_str());
 
-    std::string pass = "multipass transfer ../main linux:/home/ubuntu/main";
+    std::string pass = "multipass transfer main linux:/home/ubuntu/main";
     system(pass.c_str());
+
+    std::string clean = "rm *.o";
+    system(clean.c_str());
 
     return 0;
 }

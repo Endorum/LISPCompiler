@@ -1,0 +1,8 @@
+# ninja log v6
+1	2131	1747434191340864076	CMakeFiles/LISPCompiler.dir/src/parser.cpp.o	3c4e219e3d0088b4
+2	2314	1747434191341085002	CMakeFiles/LISPCompiler.dir/src/tokenizer.cpp.o	1720ab10d4028dba
+1693	1768	1747497528499727124	LISPCompiler	636d74cd807653e2
+9	1965	1747497206792156802	CMakeFiles/LISPCompiler.dir/src/asmgen.cpp.o	f7b25b216dc4d215
+2	2778	1747434191341615748	CMakeFiles/LISPCompiler.dir/src/codegen.cpp.o	36d74cc5e50cc329
+8	1692	1747497526815443396	CMakeFiles/LISPCompiler.dir/src/main.cpp.o	f33390d737e78aa5
+2	3528	1747434191341286833	CMakeFiles/LISPCompiler.dir/src/preproc.cpp.o	6d03e3aae38a310e

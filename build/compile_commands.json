@@ -1,0 +1,38 @@
+[
+{
+  "directory": "/Users/alexanderthorbr/Programming/C++/LISPCompiler/build",
+  "command": "/usr/bin/clang++ -g -std=gnu++20 -o CMakeFiles/LISPCompiler.dir/src/main.cpp.o -c /Users/alexanderthorbr/Programming/C++/LISPCompiler/src/main.cpp",
+  "file": "/Users/alexanderthorbr/Programming/C++/LISPCompiler/src/main.cpp",
+  "output": "CMakeFiles/LISPCompiler.dir/src/main.cpp.o"
+},
+{
+  "directory": "/Users/alexanderthorbr/Programming/C++/LISPCompiler/build",
+  "command": "/usr/bin/clang++ -g -std=gnu++20 -o CMakeFiles/LISPCompiler.dir/src/parser.cpp.o -c /Users/alexanderthorbr/Programming/C++/LISPCompiler/src/parser.cpp",
+  "file": "/Users/alexanderthorbr/Programming/C++/LISPCompiler/src/parser.cpp",
+  "output": "CMakeFiles/LISPCompiler.dir/src/parser.cpp.o"
+},
+{
+  "directory": "/Users/alexanderthorbr/Programming/C++/LISPCompiler/build",
+  "command": "/usr/bin/clang++ -g -std=gnu++20 -o CMakeFiles/LISPCompiler.dir/src/tokenizer.cpp.o -c /Users/alexanderthorbr/Programming/C++/LISPCompiler/src/tokenizer.cpp",
+  "file": "/Users/alexanderthorbr/Programming/C++/LISPCompiler/src/tokenizer.cpp",
+  "output": "CMakeFiles/LISPCompiler.dir/src/tokenizer.cpp.o"
+},
+{
+  "directory": "/Users/alexanderthorbr/Programming/C++/LISPCompiler/build",
+  "command": "/usr/bin/clang++ -g -std=gnu++20 -o CMakeFiles/LISPCompiler.dir/src/preproc.cpp.o -c /Users/alexanderthorbr/Programming/C++/LISPCompiler/src/preproc.cpp",
+  "file": "/Users/alexanderthorbr/Programming/C++/LISPCompiler/src/preproc.cpp",
+  "output": "CMakeFiles/LISPCompiler.dir/src/preproc.cpp.o"
+},
+{
+  "directory": "/Users/alexanderthorbr/Programming/C++/LISPCompiler/build",
+  "command": "/usr/bin/clang++ -g -std=gnu++20 -o CMakeFiles/LISPCompiler.dir/src/codegen.cpp.o -c /Users/alexanderthorbr/Programming/C++/LISPCompiler/src/codegen.cpp",
+  "file": "/Users/alexanderthorbr/Programming/C++/LISPCompiler/src/codegen.cpp",
+  "output": "CMakeFiles/LISPCompiler.dir/src/codegen.cpp.o"
+},
+{
+  "directory": "/Users/alexanderthorbr/Programming/C++/LISPCompiler/build",
+  "command": "/usr/bin/clang++ -g -std=gnu++20 -o CMakeFiles/LISPCompiler.dir/src/asmgen.cpp.o -c /Users/alexanderthorbr/Programming/C++/LISPCompiler/src/asmgen.cpp",
+  "file": "/Users/alexanderthorbr/Programming/C++/LISPCompiler/src/asmgen.cpp",
+  "output": "CMakeFiles/LISPCompiler.dir/src/asmgen.cpp.o"
+}
+]
