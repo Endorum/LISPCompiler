@@ -9,6 +9,7 @@
 #include <regex>
 
 #define START_SYMBOL "_start"
+#define CLEANUP true
 
 // so space for around 100k list items
 // 1048576 = 2^20
@@ -31,7 +32,7 @@ public:
             generate_asm(instr);
         }
         
-        cleanup();
+        if(CLEANUP) cleanup();
         dataSection += "list_ptr: dd list_memory ; pointer to next free cell\n";
         dataSection += "section .bss\n";
         dataSection += "list_memory: resb " + std::to_string(LIST_SPACE) + "; reserved (uninitialized!!) space for cons cells\n";
@@ -211,6 +212,8 @@ _start:
             throw std::runtime_error("ERROR: op was empty");
         }
 
+        asm_result += getCurrentIndentStr() + ";; " + op + " " + instr.dst.value + ", " + instr.src1.value + ", " + instr.src2.value +"\n";
+
         // asm_result += getCurrentIndentStr() +"; " + instr.str() + "\n";
 
         if(op == "assign") {
@@ -233,9 +236,61 @@ _start:
             asm_result += getCurrentIndentStr() + "mov " + instr.dst.loc + ", eax\n";
         }
 
+        else if(op == "mod") {
+            asm_result += getCurrentIndentStr() + "mov eax, " + instr.src1.loc + "\n";
+            asm_result += getCurrentIndentStr() + "cdq\n"; // sign-extend eax into edx:eax
+            asm_result += getCurrentIndentStr() + "mov ebx, dword " + instr.src2.loc + "\n"; // sign-extend eax into edx:eax
+            asm_result += getCurrentIndentStr() + "idiv dword ebx\n";
+            asm_result += getCurrentIndentStr() + "mov " + instr.dst.loc + ", edx\n"; // remainder → dst
+        }
+
+
         else if(op == "l" || op == "g" || op == "eq") {
             generateCmps(instr);
         }
+
+        else if(op == "noteq"){
+            asm_result += getCurrentIndentStr() + "mov eax, " + instr.src1.loc + "\n";
+            asm_result += getCurrentIndentStr() + "cmp eax, " + instr.src2.loc + "\n";
+            asm_result += getCurrentIndentStr() + "setne" + " al\n";
+            asm_result += getCurrentIndentStr() + "movzx eax, al\n";
+            asm_result += getCurrentIndentStr() + "mov " + instr.dst.loc + ", eax\n";
+        }
+
+        else if (op == "addeq" || op == "subeq" || op == "imuleq" || op == "idiveq") {
+            // if (instr.src1.type != LOCAL) {
+            //     throw std::runtime_error("Can only use compound assignment on local variables");
+            // }
+
+            std::string op_instr;
+            if (op == "addeq")      op_instr = "add";
+            else if (op == "subeq") op_instr = "sub";
+
+            if(op != "idiveq") asm_result += getCurrentIndentStr() + "mov eax, " + instr.src2.loc + "\n"; // value to add sub mul div (the right side like (+= x 2))
+
+            if (op == "addeq" || op == "subeq") {
+                asm_result += getCurrentIndentStr() + "mov ebx, " + instr.src1.loc + "\n";       // load original local
+                asm_result += getCurrentIndentStr() + op_instr + " ebx, eax\n";                  // ebx = ebx ± eax
+                asm_result += getCurrentIndentStr() + "mov " + instr.src1.loc + ", ebx\n";       // store back to local
+            }
+
+            else if (op == "imuleq") {
+                asm_result += getCurrentIndentStr() + "mov ebx, " + instr.src1.loc + "\n";       // load local
+                asm_result += getCurrentIndentStr() + "imul ebx, eax\n";                         // ebx *= eax
+                asm_result += getCurrentIndentStr() + "mov " + instr.src1.loc + ", ebx\n";       // store back to local
+            }
+
+            else if (op == "idiveq") {
+                // For signed division, use eax for dividend, edx for high bits (clear to 0 for 32-bit division)
+                asm_result += getCurrentIndentStr() + "mov eax, " + instr.src1.loc + "\n";
+                asm_result += getCurrentIndentStr() + "cdq\n";                                    // sign extend eax -> edx:eax
+                asm_result += getCurrentIndentStr() + "mov ebx, " + instr.src2.loc + "\n";       // divisor
+                asm_result += getCurrentIndentStr() + "idiv ebx\n";                               // eax = eax / ebx
+                asm_result += getCurrentIndentStr() + "mov " + instr.src1.loc + ", eax\n";       // store back to local
+            }
+        }
+
+
 
         else if(op == "load") {
             asm_result += getCurrentIndentStr() + _mov(instr.dst, instr.src1);
@@ -291,15 +346,20 @@ _start:
             std::string str = instr.src1.value;
             std::string label;
 
-            if(stringLabelMap.find(str) == stringLabelMap.end()) {
-                // string hasnt been added yet
-                label = "str_" + std::to_string(stringCounter++);
-                stringLabelMap[str] = label;
+            // if(stringLabelMap.find(str) == stringLabelMap.end()) {
+            //     // string hasnt been added yet
+            //     label = "str_" + std::to_string(stringCounter++);
+            //     stringLabelMap[str] = label;
 
-                dataSection += label + ": db " + formatStringForNASM(str) + ", 0\n";
-            }else {
-                label = stringLabelMap[str];
-            }
+            //     dataSection += label + ": db " + formatStringForNASM(str) + ", 0\n";
+            // }else {
+            //     label = stringLabelMap[str];
+            // }
+
+            label = "str_" + std::to_string(stringCounter++);
+            stringLabelMap[str] = label;
+
+            dataSection += label + ": db " + formatStringForNASM(str) + ", 0\n";
 
             std::string dstOffset = instr.dst.loc;
             asm_result += getCurrentIndentStr() + "mov eax, " + label + "\n";
@@ -320,7 +380,8 @@ _start:
 
             asm_result += getCurrentIndentStr() + "mov eax, " + cond.loc + "\n";
             asm_result += getCurrentIndentStr() + "cmp eax, 0\n";
-            asm_result += getCurrentIndentStr() + "jne " + trueLabel + "\n";
+            asm_result += getCurrentIndentStr() + "je  " + falseLabel + "\n";
+            asm_result += getCurrentIndentStr() + "jmp " + trueLabel + "\n";
 
         }
 
@@ -363,23 +424,45 @@ _start:
         }
 
 
-        // else if(op == "car") {
-        //     const std::string dst = instr.dst.loc;
-        //     const std::string src = instr.src1.loc;
+        else if(op == "car") {
+            const std::string dst = instr.dst.loc;
+            const std::string src = instr.src1.loc;
 
-        //     asm_result += getCurrentIndentStr() + "mov ebx, " + src + "\n";       // Load pointer to cons cell
-        //     asm_result += getCurrentIndentStr() + "mov eax, [ebx]\n";             // Load car (first 4 bytes)
-        //     asm_result += getCurrentIndentStr() + "mov " + dst + ", eax\n";       // Store car into dst
-        // }
+            asm_result += getCurrentIndentStr() + "mov ebx, " + src + "\n";       // Load pointer to cons cell
+            asm_result += getCurrentIndentStr() + "mov eax, [ebx]\n";             // Load car (first 4 bytes)
+            asm_result += getCurrentIndentStr() + "mov " + dst + ", eax\n";       // Store car into dst
+        }
 
-        // else if(op == "cdr") {
-        //     const std::string dst = instr.dst.loc;
-        //     const std::string src = instr.src1.loc;
+        else if(op == "cdr") {
+            const std::string dst = instr.dst.loc;
+            const std::string src = instr.src1.loc;
 
-        //     asm_result += getCurrentIndentStr() + "mov ebx, " + src + "\n";       // Load pointer to cons cell
-        //     asm_result += getCurrentIndentStr() + "mov eax, [ebx + 4]\n";             // Load car (first 4 bytes)
-        //     asm_result += getCurrentIndentStr() + "mov " + dst + ", eax\n";       // Store car into dst
-        // }
+            asm_result += getCurrentIndentStr() + "mov ebx, " + src + "\n";       // Load pointer to cons cell
+            asm_result += getCurrentIndentStr() + "mov eax, [ebx + 4]\n";         // Load cdr (second 4 bytes)
+            asm_result += getCurrentIndentStr() + "mov " + dst + ", eax\n";       // Store cdr into dst
+        }
+
+        else if(op == "deref"){
+            const std::string dst = instr.dst.loc;
+            const std::string src = instr.src1.loc;
+
+            //TODO: some kind of type safety
+
+            
+            asm_result += getCurrentIndentStr() + "mov eax, " + src + "\n";
+            asm_result += getCurrentIndentStr() + "movzx ebx, byte [eax]\n";
+            asm_result += getCurrentIndentStr() + "mov " + dst + ", ebx\n";
+        }
+
+        else if(op == "setchar"){
+            const std::string ptrLoc = instr.dst.loc;
+            const std::string indexLoc = instr.src1.loc;
+            const std::string character = instr.src2.loc;
+            asm_result += getCurrentIndentStr() + "mov eax, " + ptrLoc + "\n";
+            asm_result += getCurrentIndentStr() + "add eax, " + indexLoc + "\n";
+            asm_result += getCurrentIndentStr() + "mov ecx, " + character + "\n"; // character saved in ecx
+            asm_result += getCurrentIndentStr() + "mov [eax], cl\n"; // write into memory
+        }
 
 
 

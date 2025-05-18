@@ -71,12 +71,13 @@ void Generator::findFuncDecls() {
 
 
 std::string opCharToWord(std::string op) {
-    switch (op.at(0)) {
-        default: return op;
+    if(op.size() == 1) switch (op.at(0)) {
+        default: break;
         case '+': return "add";
         case '-': return "sub";
         case '*': return "imul";
         case '/': return "idiv";
+        case '%': return "mod";
 
         case '&': return "and";
         case '|': return "or";
@@ -87,14 +88,59 @@ std::string opCharToWord(std::string op) {
         case '>': return "g";
         case '=': return "eq";
         case '!': return "not";
-
     }
+
+    if(op == "!="){
+        return "noteq";
+    }else if(op == "+="){
+        return "addeq";
+    }else if(op == "-="){
+        return "subeq";
+    }else if(op == "*="){
+        return "imuleq";
+    }else if(op == "/="){
+        return "idiveq";
+    }else if(op == "++"){
+        return "inc";
+    }else if(op == "--"){
+        return "dec";
+    }
+
+
+
+    return op;
+}
+
+std::string Generator::wordToChar(std::string op){
+    if(op == "add") return "+";
+    if(op == "sub") return "-";
+    if(op == "mul") return "*";
+    if(op == "div") return "/";
+    if(op == "mod") return "%";
+
+    if(op == "and") return "&";
+    if(op == "or") return "|";
+    if(op == "xor") return "^";
+    if(op == "neg") return "~";
+    if(op == "not") return "!"; 
+
+    if(op == "less") return "<"; 
+    if(op == "greater") return ">"; 
+    if(op == "equal") return "="; 
+
+    if(op == "noteq") return "!=";
+    if(op == "inc") return "++";
+    if(op == "dec") return "--";
+
+    return op;
 }
 
 Value Generator::handle_operator(ASTNode *node) {
 
 
     std::string op = node->children.at(0)->value;
+
+    op = wordToChar(op);
 
     // binary op
     if( !(op == "~" || op == "!") ) {
@@ -108,7 +154,13 @@ Value Generator::handle_operator(ASTNode *node) {
         Value left = generate_code(node->children.at(1));
         Value right = generate_code(node->children.at(2));
 
-        emit(dst, opCharToWord(op), left, right);
+        if(op != "+=" && op != "-=" && op != "*=" && op != "/="){
+            emit(dst, opCharToWord(op), left, right);
+        }else{
+            ASTNode* local = node->children.at(1);
+            Value loc_local = variable_table[local->value];
+            emit(loc_local, opCharToWord(op), loc_local, right);
+        }
 
 
         return dst;
@@ -151,6 +203,12 @@ Value Generator::handle_let_keyword(ASTNode *node) {
     localVar.offSet = local_count++;  // Track how many locals exist
     localVar.loc = getLocalLocation(localVar.offSet);
 
+    if(node->children.at(2)->type == NT_String){
+        localVar.valueType = IMM_STR;
+    }else if(node->children.at(2)->type == NT_Symbol){
+        localVar.valueType = LOCAL;
+    }
+
 
     // Store the initializer value into the local variable
     emit(localVar, "assign", initVal);
@@ -159,6 +217,48 @@ Value Generator::handle_let_keyword(ASTNode *node) {
     variable_table[varname] = localVar;
 
     return localVar;
+}
+
+Value Generator::handle_set_keyword(ASTNode *node){
+    if (node->children.size() < 3) {
+        throw std::runtime_error("ERROR: Invalid set expression");
+    }
+
+    if (node->children.at(1)->type != NT_Symbol) {
+        throw std::runtime_error("ERROR: Expected a Symbol for the variable name");
+    }
+
+    std::string varname = node->children.at(1)->value;
+
+    if(variable_table.find(varname) == variable_table.end()){
+        throw std::runtime_error("Cant set variable, " + varname + " not declared in this scope");
+    }
+
+    Value var = variable_table[varname];
+
+    // Evaluate the initializer expression
+    Value initVal = generate_code(node->children.at(2));
+
+    variable_table[varname] = initVal;
+
+    // Allocate a new local variable slot
+    // Value localVar;
+    // localVar.value = varname;
+    // localVar.type = LOCAL;
+    // localVar.offSet = local_count++;  // Track how many locals exist
+    // localVar.loc = getLocalLocation(localVar.offSet);
+
+    // if(node->children.at(2)->type == NT_String){
+    //     localVar.valueType = IMM_STR;
+    // }else if(node->children.at(2)->type == NT_Symbol){
+    //     localVar.valueType = LOCAL;
+    // }
+
+
+    // Store the initializer value into the local variable
+    emit(var, "assign", initVal);
+
+    return var;
 }
 
 
@@ -198,6 +298,11 @@ Value Generator::handle_defun_keyword(ASTNode *node) {
     }
 
     spill_start = local_count;
+
+    // check if body is empty
+    if(node->children.size() < 4){
+        throw std::runtime_error("Missing a function body for function: \'" + func.name + "\'");
+    }
 
     // multi line body
     Value result;
@@ -279,7 +384,7 @@ Value Generator::handle_if_keyword(ASTNode *node) {
     Value condValue = generate_code(cond);
     Value result = generate_tmp();
 
-    std::string id = "_" + std::to_string(labelId);
+    std::string id = "_" + std::to_string(labelId++);
     std::string labelTrue = "label_if_true" + id;
     std::string labelFalse = "label_if_false" + id;
     std::string labelEnd = "label_if_end" + id;
@@ -348,7 +453,7 @@ Value Generator::handle_cond_keyword(ASTNode *node) {
         }else{
             Value condValue = generate_code(test);
             emit(Value(clauseLabel), "if", condValue, Value(NextClauseLabel));
-            emit(Value(NextClauseLabel), "jump");
+            // emit(Value(NextClauseLabel), "jump");
             emit(Value(clauseLabel), "label");
             Value bodyResult = generate_code(expr);
             emit(res, "assign", bodyResult);
@@ -377,6 +482,124 @@ Value Generator::handle_cons_keyword(ASTNode *node) {
     Value temp = generate_tmp();
     emit(temp, "cons", left, right);
     return temp;
+}
+
+
+Value Generator::handle_car_keyword(ASTNode* node) {
+    if (node->children.size() != 2) {
+        throw std::runtime_error("ERROR: Expected usage: (car <list>)");
+    }
+
+    Value listAddr = generate_code(node->children.at(1));
+    Value dst = generate_tmp();
+
+    // Emit a high-level IR op like: "t2 = car t1"
+    emit(dst, "car", listAddr);
+
+    return dst;
+}
+
+Value Generator::handle_cdr_keyword(ASTNode *node) {
+    // (cdr <list>)
+    if(node->children.size() < 2) {
+        throw std::runtime_error("ERROR: Expected: (cdr <list>)");
+    }
+
+    Value listAddr = generate_code(node->children.at(1)); // address of the list
+    Value dst = generate_tmp();
+
+    // Return the pointer to the rest of the list, starting from element 2 (offset 4 bytes)
+    emit(dst, "cdr", listAddr);
+
+    return dst;
+}
+
+Value Generator::handle_deref_keyword(ASTNode* node){
+    if(node->children.size() < 2) {
+        throw std::runtime_error("ERROR: Expected: (deref <variable / const string>)");
+    }
+
+
+    ASTNode* addr = node->children.at(1);
+    Value Addr = generate_code(addr);
+    Value dst = generate_tmp(); // stores value at dst which is stored at [Addr]
+
+    if(addr->type == NT_Symbol){
+        // try to find out if the symbol can be dereferenced, so right now if it points to a string
+        const std::string& name = addr->value;
+        auto it = variable_table.find(name);
+        if(it == variable_table.end()){
+            throw std::runtime_error("deref called on undefined symbol " + printASTNode(*node));    
+        }
+
+        const Value& info = it->second;
+
+        // if(info.type != VarType::IMM_STR && info.type != VarType::LOCAL){
+        //     throw std::runtime_error("deref can only be used on string and locals right now" + printASTNode(*node));
+        // }
+
+    }else if(addr->type == NT_String){
+        // this always works
+    }else if(addr->type == NT_Number){
+        throw std::runtime_error("An immediate can not be dereferenced " + printASTNode(*node));
+    }else if(addr->type == NT_List){
+        // should work depending on the result of the list ofcourese
+    }else{
+        throw std::runtime_error("deref operand must be a symbol, string literal or an expression\n" + printASTNode(*node));
+    }
+
+    emit(dst, "deref", Addr);
+
+    return dst;
+}
+
+Value Generator::handle_while_keyword(ASTNode* node){
+    if(node->children.size() < 3){
+        throw std::runtime_error("Invalid while expression" + printASTNode(*node));
+    }
+
+    
+    std::string id = "_" + std::to_string(labelId++);
+    std::string labelStart = "label_while_start" + id;
+    std::string labelBody = "label_while_body" + id;
+    std::string labelEnd = "label_while_end" + id;
+    
+    emit(Value(labelStart), "label");
+    
+    Value cond = generate_code(node->children.at(1));
+    emit(Value(labelBody), "if", cond, Value(labelEnd));
+    // emit(Value(labelEnd), "jump");
+    emit(Value(labelBody), "label");
+
+
+    Value lastOutput;
+    int i=2;
+    for(;i<node->children.size();i++){
+        lastOutput = generate_code(node->children.at(i));
+    }
+    // lastOutput = generate_code(node->children.at(i));
+
+    emit(Value(labelStart), "jump");
+
+    emit(Value(labelEnd), "label");
+    
+
+    
+    return lastOutput;
+}
+
+Value Generator::handle_setchar_keyword(ASTNode* node){
+    if(node->children.size() != 4){
+        throw std::runtime_error("invalid setchar expression");
+    }
+
+    Value ptr = generate_code(node->children.at(1));
+    Value index = generate_code(node->children.at(2));
+    Value character = generate_code(node->children.at(3));
+
+    emit(Value(ptr), "setchar", index, character);
+
+    return ptr;
 }
 
 // std::string Generator::handle_null_keyword(ASTNode *node) {
@@ -455,34 +678,7 @@ Value Generator::handle_cons_keyword(ASTNode *node) {
 
 
 
-// std::string Generator::handle_car_keyword(ASTNode* node) {
-//     if (node->children.size() != 2) {
-//         throw std::runtime_error("ERROR: Expected usage: (car <list>)");
-//     }
 
-//     std::string listAddr = generate_code(node->children.at(1));
-//     std::string dst = generate_tmp();
-
-//     // Emit a high-level IR op like: "t2 = car t1"
-//     emit(dst, listAddr, "car");
-
-//     return dst;
-// }
-
-// std::string Generator::handle_cdr_keyword(ASTNode *node) {
-//     // (cdr <list>)
-//     if(node->children.size() < 2) {
-//         throw std::runtime_error("ERROR: Expected: (cdr <list>)");
-//     }
-
-//     std::string listAddr = generate_code(node->children.at(1)); // address of the list
-//     std::string dst = generate_tmp();
-
-//     // Return the pointer to the rest of the list, starting from element 2 (offset 4 bytes)
-//     emit(dst, listAddr, "cdr");
-
-//     return dst;
-// }
 
 
 

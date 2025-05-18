@@ -5,7 +5,7 @@ void Tokenizer::tokenize() {
   while (position < input.size()) {
     char c = input.at(position);
 
-    if (isspace(c)) {
+    if (isspace(c) || c == ',') { // ignoring commas so that function parameters can be seperated by commas
       position++;
     } else if (c == ';') {
       skipComment();
@@ -53,7 +53,7 @@ Token Tokenizer::readSymbol() {
 
   while (position < input.size()) {
     char c = input.at(position);
-    if (isspace(c) || c == '(' || c == ')' || c == '"' || c == '\'' || c == ';') {
+    if (isspace(c) || c == '(' || c == ')' || c == '"' || c == '\'' || c == ';' || c == ',') {
       break;
     }
     position++;

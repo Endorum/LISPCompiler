@@ -78,9 +78,9 @@ int main(int argc, char* argv[]) {
         }
 
 
-        // for (const auto& pair : generator.variableMap) {
-        //     std::cout << pair.first << " : " << std::to_string(pair.second) << std::endl;
-        // }
+        for (const auto& pair : generator.variable_table) {
+            std::cout << pair.first << " : " << pair.second.valueType  << std::endl;
+        }
 
         // for(const auto& func : generator.functions) {
         //     std::cout << "function: " << func.name << ", parameters: " << std::to_string(func.parameters) << std::endl;

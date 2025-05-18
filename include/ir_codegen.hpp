@@ -10,8 +10,8 @@
 #include "parser.hpp"
 
 
-#define OPERATORS "+-*/&|^~>=<!"
-#define BIN_OP "+-*/&|^>=<"
+#define OPERATORS "+-*/&|^~>=<!%"
+#define BIN_OP "+-*/&|^>=<%"
 
 typedef enum VarType{
     VT_NONE,
@@ -40,17 +40,11 @@ struct Value{
     std::string value;
     VarType type = VT_NONE;
 
-    // ebp + i*4 when type == PARAM
-    // ebp - i*4 when type == LOCAL 
-    // and if type == TEMP: 
-    /*
-        0 : eax
-        1 : ecx
-        2 : edx
-        3 : ebx
-    */
     std::string loc = "";
     size_t offSet = 0;
+
+    // in let the dst variable should pass information about the type
+    VarType valueType = VT_NONE; // for preventing segfaults when doing deref etc
 
     
 
@@ -59,7 +53,7 @@ struct Value{
         : value(n), type(t) {}
 
     std::string str(){
-        return ((!value.empty()) ? "value: " + value + ((type != VT_NONE) ? " type: " + VarTypeToString(type) : "") + ((!loc.empty()) ? (" loc: " + loc ) : "") : "");
+        return ((!value.empty()) ? "value: " + value + ((type != VT_NONE) ? " type: " + VarTypeToString(type) : "") + ((!loc.empty()) ? (" loc: " + loc ) : "") + " ValueType: " + VarTypeToString(valueType) : "");
     }
 
 };
@@ -239,17 +233,28 @@ public:
     bool isDeclaredFunction(std::string UD_funcName);
     bool isDeclaredVariable(std::string name);
 
+    std::string wordToChar(std::string op);
+
     bool isOperator(std::string op) {
+        op = wordToChar(op);
+
         if(op.size() == 1) {
             return std::string(OPERATORS).find(op.at(0)) != std::string::npos;
         }
-        return (op == "some other operator i guess?");
+        return (
+            op == "!=" ||
+            op == "+=" ||
+            op == "-=" ||
+            op == "*=" ||
+            op == "/=" || 0
+        );
     }
 
     void findFuncDecls();
 
     Value handle_operator(ASTNode* node);
     Value handle_let_keyword(ASTNode* node);
+    Value handle_set_keyword(ASTNode* node);
     Value handle_defun_keyword(ASTNode* node);
     Value handle_functionCall(ASTNode* node);
 
@@ -258,9 +263,13 @@ public:
     Value handle_cond_keyword(ASTNode * node);
 
     Value handle_cons_keyword(ASTNode* node);
+    Value handle_car_keyword(ASTNode* node);
+    Value handle_cdr_keyword(ASTNode* node);
 
-    // Value handle_car_keyword(ASTNode* node);
-    // Value handle_cdr_keyword(ASTNode* node);
+    Value handle_deref_keyword(ASTNode* node);
+    Value handle_while_keyword(ASTNode* node);
+    Value handle_setchar_keyword(ASTNode* node);
+
     // Value handle_null_keyword(ASTNode * node);
     // Value handle_toList_keyword(ASTNode * node);
     // Value handle_toString_keyword(ASTNode * node);
@@ -304,6 +313,10 @@ public:
                 return handle_let_keyword(node);
             }
 
+            if(firstChild->value == "set") { // just an alias witch checking if variable is declared
+                return handle_set_keyword(node);
+            }
+
             if(firstChild->value == "if") {
                 return handle_if_keyword(node);
             }
@@ -318,6 +331,27 @@ public:
 
             if(firstChild->value == "cons"){
                 return handle_cons_keyword(node);
+            }
+
+            if(firstChild->value == "car"){
+                return handle_car_keyword(node);
+            }
+
+            if(firstChild->value == "cdr"){
+                return handle_cdr_keyword(node);
+            }
+
+            // (deref x) reads value stored AT x ( [x] )
+            if(firstChild->value == "deref"){
+                return handle_deref_keyword(node);
+            }
+
+            if(firstChild->value == "while"){
+                return handle_while_keyword(node);
+            }
+
+            if(firstChild->value == "setchar"){
+                return handle_setchar_keyword(node);
             }
 
             
@@ -359,11 +393,17 @@ public:
                 }
                 auto it = variable_table.find(node->value);
                 if (it == variable_table.end()) {
-                    throw std::runtime_error("ERROR: Variable '" + node->value + "' not declared in current scope.");
+                    std::string scope = "";
+                    for(const auto& pair : variable_table){
+                        scope += "Variable: \'" + pair.first + "\'\n";
+                    }
+                    throw std::runtime_error("ERROR: Variable '" + node->value + "' not declared in current scope. \nScope:\n" + scope);
                 }
 
                 Value src = it->second;
                 Value dst = generate_tmp();
+
+                dst.valueType = src.type;
                 emit(dst, "load", src); // or "assign", depending on your IR naming
 
                 return dst;
@@ -371,7 +411,9 @@ public:
 
             if(node->type == NT_String) {
                 Value temp = generate_tmp();
-                emit(temp, "loadstr", Value(node->value));
+                Value str = Value(node->value, IMM_STR);
+                temp.valueType = IMM_STR;
+                emit(temp, "loadstr", str);
                 return temp;
             }
 
