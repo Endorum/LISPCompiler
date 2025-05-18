@@ -23,18 +23,19 @@ public:
     void generate() {
         asm_result += asm_overhead + "\n";
 
-        dataSection += "list_memory: times " + std::to_string(LIST_SPACE) + " db 0 ; reserved space for cons cells\n";
-        dataSection += "list_ptr: dd list_memory ; pointer to next free cell\n";
-
+        
         for(auto instr : input) {
             generate_asm(instr);
         }
-
+        
         cleanup();
+        dataSection += "list_ptr: dd list_memory ; pointer to next free cell\n";
+        dataSection += "list_memory: times " + std::to_string(LIST_SPACE) + " db 0 ; reserved space for cons cells\n";
+        asm_result += dataSection;
     }
 
     std::string getAsm() {
-        return asm_result + "\n"  + dataSection;
+        return asm_result + "\n";
     }
 
 private:
@@ -46,7 +47,7 @@ private:
     std::map<std::string, std::string> stringLabelMap;
     int stringCounter = 0;
     int listPtrCounter = 0;
-    std::string dataSection = "section .data\nreturn_address: dd main\n";
+    std::string dataSection = "section .data\n";
 
     Function currentScope = {"global", 0};
 
@@ -228,14 +229,9 @@ _start:
             asm_result += getCurrentIndentStr() + "mov " + instr.dst.loc + ", eax\n";
         }
 
-        // else if(op == "l" || op == "g" || op == "eq") {
-        //     generateCmps(instr);
-        // }
-
-        // else if(op == "store") {
-        //     asm_result += getCurrentIndentStr() + "mov eax, " + instr.src1.loc + "\n";
-        //     asm_result += getCurrentIndentStr() + "mov " + instr.dst.loc + ", eax\n";
-        // }
+        else if(op == "l" || op == "g" || op == "eq") {
+            generateCmps(instr);
+        }
 
         else if(op == "load") {
             asm_result += getCurrentIndentStr() + _mov(instr.dst, instr.src1);
@@ -257,12 +253,6 @@ _start:
             asm_result += getCurrentIndentStr() + "sub esp, " + std::to_string(local_bytes) + "\n"; // adjusting the stack for local vars (let)
 
         }
-
-        // else if(op == "pop") {
-        //     // do nothing apperently ?
-        //     // asm_result += getCurrentIndentStr() + "mov eax, " + instr.dst.loc + "\n";
-        //     // asm_result += getCurrentIndentStr() + "mov " + instr.src1.loc + ", eax" +"\n";
-        // }
 
         else if(op == "push") {
             if (instr.src1.type == IMM_NUM) {
@@ -293,52 +283,52 @@ _start:
             asm_result += getCurrentIndentStr() + "add esp, " + std::to_string(std::stoi(instr.src1.value)) + "\n";
         }
 
-        // else if(op == "loadstr") {
-        //     std::string str = instr.src1;
-        //     std::string label;
+        else if(op == "loadstr") {
+            std::string str = instr.src1.value;
+            std::string label;
 
-        //     if(stringLabelMap.find(str) == stringLabelMap.end()) {
-        //         // string hasnt been added yet
-        //         label = "str_" + std::to_string(stringCounter++);
-        //         stringLabelMap[str] = label;
+            if(stringLabelMap.find(str) == stringLabelMap.end()) {
+                // string hasnt been added yet
+                label = "str_" + std::to_string(stringCounter++);
+                stringLabelMap[str] = label;
 
-        //         dataSection += label + ": db " + formatStringForNASM(str) + ", 0\n";
-        //     }else {
-        //         label = stringLabelMap[str];
-        //     }
+                dataSection += label + ": db " + formatStringForNASM(str) + ", 0\n";
+            }else {
+                label = stringLabelMap[str];
+            }
 
-        //     std::string dstOffset = instr.dst.loc;
-        //     asm_result += getCurrentIndentStr() + "mov eax, " + label + "\n";
-        //     asm_result += getCurrentIndentStr() + "mov " + dstOffset + ", eax\n";
-        // }
+            std::string dstOffset = instr.dst.loc;
+            asm_result += getCurrentIndentStr() + "mov eax, " + label + "\n";
+            asm_result += getCurrentIndentStr() + "mov " + dstOffset + ", eax\n";
+        }
 
-        // else if(op == "print") {
-        //     std::string stringAddr = instr.src1.loc;
-        //     asm_result += getCurrentIndentStr() + "mov eax, " + stringAddr + "\n";
-        //     asm_result += getCurrentIndentStr() + "call _internal_print_string";
-        // }
+        else if(op == "print") {
+            std::string stringAddr = instr.src1.loc;
+            asm_result += getCurrentIndentStr() + "mov eax, " + stringAddr + "\n";
+            asm_result += getCurrentIndentStr() + "call _internal_print_string\n";
+        }
 
-        // else if(op == "if") {
-        //     std::string trueLabel = instr.dst;
-        //     std::string srcOffset = instr.src1.loc;
-        //     if(instr.src2 == "jump") {
-        //         asm_result += getCurrentIndentStr() + "mov eax, " + srcOffset + "\n";
-        //         asm_result += getCurrentIndentStr() + "cmp eax, 0\n";
-        //         asm_result += getCurrentIndentStr() + "jne " + trueLabel + "\n";
-        //     }else {
-        //         throw std::runtime_error("ERROR: only jump work right now");
-        //     }
-        // }
+        else if(op == "if") {
+            std::string trueLabel = instr.dst.value;
+            std::string falseLabel = instr.src2.value;
 
-        // else if(op == "label") {
-        //     std::string label = instr.dst;
-        //     asm_result += label + ":\n";
-        // }
+            Value cond = instr.src1;
 
-        // else if(op == "jump") {
-        //     std::string label = instr.dst;
-        //     asm_result += getCurrentIndentStr() + "jmp " + label + "\n";
-        // }
+            asm_result += getCurrentIndentStr() + "mov eax, " + cond.loc + "\n";
+            asm_result += getCurrentIndentStr() + "cmp eax, 0\n";
+            asm_result += getCurrentIndentStr() + "jne " + trueLabel + "\n";
+
+        }
+
+        else if(op == "label") {
+            std::string label = instr.dst.value;
+            asm_result += label + ":\n";
+        }
+
+        else if(op == "jump") {
+            std::string label = instr.dst.value;
+            asm_result += getCurrentIndentStr() + "jmp " + label + "\n";
+        }
 
         // else if(op == "cons") {
         //     const std::string dst = instr.dst.loc;

@@ -1,7 +1,6 @@
-(defun add (m n)
-  (+ m n)
-)
+#include "stdio.lisp"
+
 
 (defun main()
-  (add (add 1 2) (add 3 4))
+  (print (digitToString 1234))
 )

@@ -268,6 +268,104 @@ Value Generator::handle_functionCall(ASTNode *node) {
     return ret;
 }
 
+Value Generator::handle_if_keyword(ASTNode *node) {
+    if(node->children.size() != 4) {
+        throw std::runtime_error("ERROR: Expected: (if (<cond>) (<true body>) (<false body>) )");
+    }
+    ASTNode* cond = node->children.at(1);
+    ASTNode* trueBody = node->children.at(2);
+    ASTNode* falseBody = node->children.at(3);
+
+    Value condValue = generate_code(cond);
+    Value result = generate_tmp();
+
+    std::string id = "_" + std::to_string(labelId);
+    std::string labelTrue = "label_if_true" + id;
+    std::string labelFalse = "label_if_false" + id;
+    std::string labelEnd = "label_if_end" + id;
+
+    emit(Value(labelTrue), "if", condValue, Value(labelFalse));
+
+    emit(Value(labelFalse), "label");
+    Value resIfFalse = generate_code(falseBody);
+    emit(result, "assign", resIfFalse);
+    emit(Value(labelEnd),"jump");
+    
+    emit(Value(labelTrue), "label");
+    Value resIfTrue = generate_code(trueBody);
+    emit(result, "assign", resIfTrue);
+
+    emit(Value(labelEnd), "label");
+
+
+
+    return result;
+}
+
+Value Generator::handle_print_keyword(ASTNode *node) {
+    // (print string/stringvar/var)
+    if(node->children.size() < 2) {
+        throw std::runtime_error("ERROR: Expected: (print <string/stringvariable>)");
+    }
+
+    Value strAddr = generate_code(node->children.at(1)); // address of string
+
+    emit(Value("stdout"), "print", strAddr);
+
+    return strAddr;
+}
+
+Value Generator::handle_cond_keyword(ASTNode *node) {
+    if (node->children.size() < 2) {
+        throw std::runtime_error("ERROR: cond expects at least one clause");
+    }
+
+    Value res = generate_tmp();
+    std::string id = "_" + std::to_string(labelId++);
+    std::string labelEnd = "label_cond_end" + id;
+    bool hasElse = false;
+
+
+    for(int i=1;i<node->children.size();i++){
+        ASTNode* clause = node->children.at(i);
+
+        if(clause->children.size() != 2){
+            throw std::runtime_error("Each cond clause must have exactly 2 elements");
+        }
+
+        ASTNode* test = clause->children.at(0);
+        ASTNode* expr = clause->children.at(1);
+
+        std::string clauseLabel = "label_clause_" + std::to_string(i) + id;
+        std::string NextClauseLabel = "label_next_" + std::to_string(i) + id;
+
+        if(test->type == NT_Symbol && test->value == "else"){
+            hasElse = true;
+            emit(Value(clauseLabel), "label");
+            Value elseResult = generate_code(expr);
+            emit(res, "assign", elseResult);
+            emit(Value(labelEnd), "jump");
+        }else{
+            Value condValue = generate_code(test);
+            emit(Value(clauseLabel), "if", condValue, Value(NextClauseLabel));
+            emit(Value(NextClauseLabel), "jump");
+            emit(Value(clauseLabel), "label");
+            Value bodyResult = generate_code(expr);
+            emit(res, "assign", bodyResult);
+            emit(Value(labelEnd), "jump");
+            emit(Value(NextClauseLabel), "label");
+        }
+    }
+
+    emit(Value(labelEnd), "label");
+
+    if(!hasElse){
+        // emit(res, "assign", Value("0",IMM_NUM));
+        throw std::runtime_error("Expected an else");
+    }
+
+    return res;
+}
 
 // std::string Generator::handle_cons_keyword(ASTNode *node) {
 //     if (node->children.size() < 3) {
@@ -337,41 +435,7 @@ Value Generator::handle_functionCall(ASTNode *node) {
 
 
 
-// std::string Generator::handle_if_keyword(ASTNode *node) {
-//     if(node->children.size() != 4) {
-//         throw std::runtime_error("ERROR: Expected: (if (<cond>) (<true body>) (<false body>) )");
-//     }
-//     ASTNode* cond = node->children.at(1);
-//     ASTNode* trueBody = node->children.at(2);
-//     ASTNode* falseBody = node->children.at(3);
 
-//     std::string temp = generate_code(cond); // temp = (cond) ? 1 : 0
-
-//     std::string addr = generate_tmp();
-
-//     std::string trueLabel = "trueLabel" + addr;
-//     std::string falseLabel = "falseLabel" + addr;
-//     std::string endLabel = "endLabel" + addr;
-//     std::string returnValue = "retValue" + addr;
-
-//     variableMap[returnValue] = StackOffset += 4;
-
-//     emit(trueLabel, temp, "if", "jump");
-//     emit(falseLabel, "", "jump");
-
-//     emit(trueLabel, "", "label");
-//     std::string trueOut = generate_code(trueBody);
-//     emit(returnValue, trueOut, "=");
-//     emit(endLabel, "", "jump");
-
-//     emit(falseLabel, "", "label");
-//     std::string falseOut = generate_code(falseBody);
-//     emit(returnValue, falseOut, "=");
-
-//     emit(endLabel, "", "label");
-
-//     return returnValue;
-// }
 
 
 
@@ -389,19 +453,7 @@ Value Generator::handle_functionCall(ASTNode *node) {
 //     return temp;
 // }
 
-// std::string Generator::handle_print_keyword(ASTNode *node) {
-//     // (print string/stringvar/var)
-//     if(node->children.size() < 2) {
-//         throw std::runtime_error("ERROR: Expected: (print <string/stringvariable>)");
-//     }
 
-
-//     std::string strAddr = generate_code(node->children.at(1)); // address of string
-
-//     emit("stdout", strAddr, "print");
-
-//     return strAddr;
-// }
 
 // std::string Generator::handle_car_keyword(ASTNode* node) {
 //     if (node->children.size() != 2) {
@@ -432,67 +484,7 @@ Value Generator::handle_functionCall(ASTNode *node) {
 //     return dst;
 // }
 
-// std::string Generator::handle_cond_keyword(ASTNode *node) {
-//     if (node->children.size() < 2) {
-//         throw std::runtime_error("ERROR: cond expects at least one clause");
-//     }
 
-//     std::string addr = generate_tmp(); // base for labels
-//     std::string returnValue = "retValue" + addr;
-//     variableMap[returnValue] = StackOffset += 4;
-
-//     std::string endLabel = "cond_" + addr + "_end";
-
-//     bool hasElseClause = false;
-
-//     for (int i = 1; i < node->children.size(); ++i) {
-//         ASTNode* clause = node->children.at(i);
-
-//         if (clause->children.size() != 2) {
-//             throw std::runtime_error("ERROR: Each cond clause must have exactly 2 elements");
-//         }
-
-//         ASTNode* condExpr = clause->children.at(0);
-//         ASTNode* bodyExpr = clause->children.at(1);
-
-//         // Check for (else ...)
-//         if (condExpr->type == NodeType::NT_Symbol && condExpr->value == "else") {
-//             hasElseClause = true;
-
-//             std::string elseLabel = "cond_" + addr + "_else";
-//             emit(elseLabel, "", "label");
-
-//             std::string elseOut = generate_code(bodyExpr);
-//             emit(returnValue, elseOut, "=");
-//             emit(endLabel, "", "jump");
-
-//         } else {
-//             // Regular (test body) clause
-//             std::string condTemp = generate_code(condExpr);
-//             std::string clauseLabel = "cond_" + addr + "_clause_" + std::to_string(i);
-//             std::string nextClauseLabel = "cond_" + addr + "_next_" + std::to_string(i);
-
-//             emit(clauseLabel, condTemp, "if", "jump"); // if condTemp != 0 jump to clauseLabel
-//             emit(nextClauseLabel, "", "jump");         // otherwise skip to next clause
-
-//             emit(clauseLabel, "", "label");
-//             std::string result = generate_code(bodyExpr);
-//             emit(returnValue, result, "=");
-//             emit(endLabel, "", "jump");
-
-//             emit(nextClauseLabel, "", "label");
-//         }
-//     }
-
-//     emit(endLabel, "", "label");
-
-//     if (!hasElseClause) {
-//         // default return nil/0 if no condition matched
-//         emit(returnValue, "0", "=");
-//     }
-
-//     return returnValue;
-// }
 
 
 // std::string Generator::handle_read_keyword(ASTNode *node) {

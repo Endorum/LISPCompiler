@@ -8,7 +8,7 @@ Token:
 
 Token:
     type:  ATOM
-    value: add
+    value: digitToString
 
 Token:
     type:  LPAREN
@@ -16,11 +16,7 @@ Token:
 
 Token:
     type:  ATOM
-    value: m
-
-Token:
-    type:  ATOM
-    value: n
+    value: x
 
 Token:
     type:  RPAREN
@@ -32,15 +28,343 @@ Token:
 
 Token:
     type:  ATOM
-    value: +
+    value: cond
+
+Token:
+    type:  LPAREN
+    value: (
+
+Token:
+    type:  LPAREN
+    value: (
 
 Token:
     type:  ATOM
-    value: m
+    value: =
 
 Token:
     type:  ATOM
-    value: n
+    value: x
+
+Token:
+    type:  NUMBER
+    value: 0
+
+Token:
+    type:  RPAREN
+    value: )
+
+Token:
+    type:  STRING
+    value: 0
+
+Token:
+    type:  RPAREN
+    value: )
+
+Token:
+    type:  LPAREN
+    value: (
+
+Token:
+    type:  LPAREN
+    value: (
+
+Token:
+    type:  ATOM
+    value: =
+
+Token:
+    type:  ATOM
+    value: x
+
+Token:
+    type:  NUMBER
+    value: 1
+
+Token:
+    type:  RPAREN
+    value: )
+
+Token:
+    type:  STRING
+    value: 1
+
+Token:
+    type:  RPAREN
+    value: )
+
+Token:
+    type:  LPAREN
+    value: (
+
+Token:
+    type:  LPAREN
+    value: (
+
+Token:
+    type:  ATOM
+    value: =
+
+Token:
+    type:  ATOM
+    value: x
+
+Token:
+    type:  NUMBER
+    value: 2
+
+Token:
+    type:  RPAREN
+    value: )
+
+Token:
+    type:  STRING
+    value: 2
+
+Token:
+    type:  RPAREN
+    value: )
+
+Token:
+    type:  LPAREN
+    value: (
+
+Token:
+    type:  LPAREN
+    value: (
+
+Token:
+    type:  ATOM
+    value: =
+
+Token:
+    type:  ATOM
+    value: x
+
+Token:
+    type:  NUMBER
+    value: 3
+
+Token:
+    type:  RPAREN
+    value: )
+
+Token:
+    type:  STRING
+    value: 3
+
+Token:
+    type:  RPAREN
+    value: )
+
+Token:
+    type:  LPAREN
+    value: (
+
+Token:
+    type:  LPAREN
+    value: (
+
+Token:
+    type:  ATOM
+    value: =
+
+Token:
+    type:  ATOM
+    value: x
+
+Token:
+    type:  NUMBER
+    value: 4
+
+Token:
+    type:  RPAREN
+    value: )
+
+Token:
+    type:  STRING
+    value: 4
+
+Token:
+    type:  RPAREN
+    value: )
+
+Token:
+    type:  LPAREN
+    value: (
+
+Token:
+    type:  LPAREN
+    value: (
+
+Token:
+    type:  ATOM
+    value: =
+
+Token:
+    type:  ATOM
+    value: x
+
+Token:
+    type:  NUMBER
+    value: 5
+
+Token:
+    type:  RPAREN
+    value: )
+
+Token:
+    type:  STRING
+    value: 5
+
+Token:
+    type:  RPAREN
+    value: )
+
+Token:
+    type:  LPAREN
+    value: (
+
+Token:
+    type:  LPAREN
+    value: (
+
+Token:
+    type:  ATOM
+    value: =
+
+Token:
+    type:  ATOM
+    value: x
+
+Token:
+    type:  NUMBER
+    value: 6
+
+Token:
+    type:  RPAREN
+    value: )
+
+Token:
+    type:  STRING
+    value: 6
+
+Token:
+    type:  RPAREN
+    value: )
+
+Token:
+    type:  LPAREN
+    value: (
+
+Token:
+    type:  LPAREN
+    value: (
+
+Token:
+    type:  ATOM
+    value: =
+
+Token:
+    type:  ATOM
+    value: x
+
+Token:
+    type:  NUMBER
+    value: 7
+
+Token:
+    type:  RPAREN
+    value: )
+
+Token:
+    type:  STRING
+    value: 7
+
+Token:
+    type:  RPAREN
+    value: )
+
+Token:
+    type:  LPAREN
+    value: (
+
+Token:
+    type:  LPAREN
+    value: (
+
+Token:
+    type:  ATOM
+    value: =
+
+Token:
+    type:  ATOM
+    value: x
+
+Token:
+    type:  NUMBER
+    value: 8
+
+Token:
+    type:  RPAREN
+    value: )
+
+Token:
+    type:  STRING
+    value: 8
+
+Token:
+    type:  RPAREN
+    value: )
+
+Token:
+    type:  LPAREN
+    value: (
+
+Token:
+    type:  LPAREN
+    value: (
+
+Token:
+    type:  ATOM
+    value: =
+
+Token:
+    type:  ATOM
+    value: x
+
+Token:
+    type:  NUMBER
+    value: 9
+
+Token:
+    type:  RPAREN
+    value: )
+
+Token:
+    type:  STRING
+    value: 9
+
+Token:
+    type:  RPAREN
+    value: )
+
+Token:
+    type:  LPAREN
+    value: (
+
+Token:
+    type:  ATOM
+    value: else
+
+Token:
+    type:  STRING
+    value: ERROR
+
+Token:
+    type:  RPAREN
+    value: )
 
 Token:
     type:  RPAREN
@@ -76,19 +400,7 @@ Token:
 
 Token:
     type:  ATOM
-    value: let
-
-Token:
-    type:  ATOM
-    value: x
-
-Token:
-    type:  NUMBER
-    value: 5
-
-Token:
-    type:  RPAREN
-    value: )
+    value: print
 
 Token:
     type:  LPAREN
@@ -96,35 +408,15 @@ Token:
 
 Token:
     type:  ATOM
-    value: let
-
-Token:
-    type:  ATOM
-    value: y
+    value: digitToString
 
 Token:
     type:  NUMBER
-    value: 6
+    value: 1234
 
 Token:
     type:  RPAREN
     value: )
-
-Token:
-    type:  LPAREN
-    value: (
-
-Token:
-    type:  ATOM
-    value: add
-
-Token:
-    type:  ATOM
-    value: x
-
-Token:
-    type:  ATOM
-    value: y
 
 Token:
     type:  RPAREN
@@ -136,46 +428,443 @@ Token:
 
  Node Type: 'List' Children (4): 
 	 Node Type: 'Symbol' Value: 'defun'
-	 Node Type: 'Symbol' Value: 'add'
-	 Node Type: 'List' Children (2): 
-		 Node Type: 'Symbol' Value: 'm'
-		 Node Type: 'Symbol' Value: 'n'
-	 Node Type: 'List' Children (3): 
-		 Node Type: 'Symbol' Value: '+'
-		 Node Type: 'Symbol' Value: 'm'
-		 Node Type: 'Symbol' Value: 'n'
- Node Type: 'List' Children (6): 
+	 Node Type: 'Symbol' Value: 'digitToString'
+	 Node Type: 'List' Children (1): 
+		 Node Type: 'Symbol' Value: 'x'
+	 Node Type: 'List' Children (12): 
+		 Node Type: 'Symbol' Value: 'cond'
+		 Node Type: 'List' Children (2): 
+			 Node Type: 'List' Children (3): 
+				 Node Type: 'Symbol' Value: '='
+				 Node Type: 'Symbol' Value: 'x'
+				 Node Type: 'Number' Value: '0'
+			 Node Type: 'String' Value: '0'
+		 Node Type: 'List' Children (2): 
+			 Node Type: 'List' Children (3): 
+				 Node Type: 'Symbol' Value: '='
+				 Node Type: 'Symbol' Value: 'x'
+				 Node Type: 'Number' Value: '1'
+			 Node Type: 'String' Value: '1'
+		 Node Type: 'List' Children (2): 
+			 Node Type: 'List' Children (3): 
+				 Node Type: 'Symbol' Value: '='
+				 Node Type: 'Symbol' Value: 'x'
+				 Node Type: 'Number' Value: '2'
+			 Node Type: 'String' Value: '2'
+		 Node Type: 'List' Children (2): 
+			 Node Type: 'List' Children (3): 
+				 Node Type: 'Symbol' Value: '='
+				 Node Type: 'Symbol' Value: 'x'
+				 Node Type: 'Number' Value: '3'
+			 Node Type: 'String' Value: '3'
+		 Node Type: 'List' Children (2): 
+			 Node Type: 'List' Children (3): 
+				 Node Type: 'Symbol' Value: '='
+				 Node Type: 'Symbol' Value: 'x'
+				 Node Type: 'Number' Value: '4'
+			 Node Type: 'String' Value: '4'
+		 Node Type: 'List' Children (2): 
+			 Node Type: 'List' Children (3): 
+				 Node Type: 'Symbol' Value: '='
+				 Node Type: 'Symbol' Value: 'x'
+				 Node Type: 'Number' Value: '5'
+			 Node Type: 'String' Value: '5'
+		 Node Type: 'List' Children (2): 
+			 Node Type: 'List' Children (3): 
+				 Node Type: 'Symbol' Value: '='
+				 Node Type: 'Symbol' Value: 'x'
+				 Node Type: 'Number' Value: '6'
+			 Node Type: 'String' Value: '6'
+		 Node Type: 'List' Children (2): 
+			 Node Type: 'List' Children (3): 
+				 Node Type: 'Symbol' Value: '='
+				 Node Type: 'Symbol' Value: 'x'
+				 Node Type: 'Number' Value: '7'
+			 Node Type: 'String' Value: '7'
+		 Node Type: 'List' Children (2): 
+			 Node Type: 'List' Children (3): 
+				 Node Type: 'Symbol' Value: '='
+				 Node Type: 'Symbol' Value: 'x'
+				 Node Type: 'Number' Value: '8'
+			 Node Type: 'String' Value: '8'
+		 Node Type: 'List' Children (2): 
+			 Node Type: 'List' Children (3): 
+				 Node Type: 'Symbol' Value: '='
+				 Node Type: 'Symbol' Value: 'x'
+				 Node Type: 'Number' Value: '9'
+			 Node Type: 'String' Value: '9'
+		 Node Type: 'List' Children (2): 
+			 Node Type: 'Symbol' Value: 'else'
+			 Node Type: 'String' Value: 'ERROR'
+ Node Type: 'List' Children (4): 
 	 Node Type: 'Symbol' Value: 'defun'
 	 Node Type: 'Symbol' Value: 'main'
 	 Node Type: 'List'
-	 Node Type: 'List' Children (3): 
-		 Node Type: 'Symbol' Value: 'let'
-		 Node Type: 'Symbol' Value: 'x'
-		 Node Type: 'Number' Value: '5'
-	 Node Type: 'List' Children (3): 
-		 Node Type: 'Symbol' Value: 'let'
-		 Node Type: 'Symbol' Value: 'y'
-		 Node Type: 'Number' Value: '6'
-	 Node Type: 'List' Children (3): 
-		 Node Type: 'Symbol' Value: 'add'
-		 Node Type: 'Symbol' Value: 'x'
-		 Node Type: 'Symbol' Value: 'y'
+	 Node Type: 'List' Children (2): 
+		 Node Type: 'Symbol' Value: 'print'
+		 Node Type: 'List' Children (2): 
+			 Node Type: 'Symbol' Value: 'digitToString'
+			 Node Type: 'Number' Value: '1234'
 dst: value: label type: IMM_STR
 defun
-src1: value: add type: IMM_STR
-
-dst: value: t1 type: TEMP loc: [ebp - 8]
-load
-src1: value: m type: PARAM loc: [ebp + 8]
+src1: value: digitToString type: IMM_STR
 
 dst: value: t2 type: TEMP loc: [ebp - 12]
 load
-src1: value: n type: PARAM loc: [ebp + 12]
+src1: value: x type: PARAM loc: [ebp + 8]
+
+dst: value: t1 type: TEMP loc: [ebp - 8]
+eq
+src1: value: t2 type: TEMP loc: [ebp - 12]
+src2: value: 0 type: IMM_NUM loc: 0
+
+dst: value: label_clause_1_0
+if
+src1: value: t1 type: TEMP loc: [ebp - 8]
+src2: value: label_next_1_0
+
+dst: value: label_next_1_0
+jump
+
+dst: value: label_clause_1_0
+label
+
+dst: value: t3 type: TEMP loc: [ebp - 16]
+loadstr
+src1: value: 0
 
 dst: value: t0 type: TEMP loc: [ebp - 4]
-add
-src1: value: t1 type: TEMP loc: [ebp - 8]
-src2: value: t2 type: TEMP loc: [ebp - 12]
+assign
+src1: value: t3 type: TEMP loc: [ebp - 16]
+
+dst: value: label_cond_end_0
+jump
+
+dst: value: label_next_1_0
+label
+
+dst: value: t5 type: TEMP loc: [ebp - 24]
+load
+src1: value: x type: PARAM loc: [ebp + 8]
+
+dst: value: t4 type: TEMP loc: [ebp - 20]
+eq
+src1: value: t5 type: TEMP loc: [ebp - 24]
+src2: value: 1 type: IMM_NUM loc: 1
+
+dst: value: label_clause_2_0
+if
+src1: value: t4 type: TEMP loc: [ebp - 20]
+src2: value: label_next_2_0
+
+dst: value: label_next_2_0
+jump
+
+dst: value: label_clause_2_0
+label
+
+dst: value: t6 type: TEMP loc: [ebp - 28]
+loadstr
+src1: value: 1
+
+dst: value: t0 type: TEMP loc: [ebp - 4]
+assign
+src1: value: t6 type: TEMP loc: [ebp - 28]
+
+dst: value: label_cond_end_0
+jump
+
+dst: value: label_next_2_0
+label
+
+dst: value: t8 type: TEMP loc: [ebp - 36]
+load
+src1: value: x type: PARAM loc: [ebp + 8]
+
+dst: value: t7 type: TEMP loc: [ebp - 32]
+eq
+src1: value: t8 type: TEMP loc: [ebp - 36]
+src2: value: 2 type: IMM_NUM loc: 2
+
+dst: value: label_clause_3_0
+if
+src1: value: t7 type: TEMP loc: [ebp - 32]
+src2: value: label_next_3_0
+
+dst: value: label_next_3_0
+jump
+
+dst: value: label_clause_3_0
+label
+
+dst: value: t9 type: TEMP loc: [ebp - 40]
+loadstr
+src1: value: 2
+
+dst: value: t0 type: TEMP loc: [ebp - 4]
+assign
+src1: value: t9 type: TEMP loc: [ebp - 40]
+
+dst: value: label_cond_end_0
+jump
+
+dst: value: label_next_3_0
+label
+
+dst: value: t11 type: TEMP loc: [ebp - 48]
+load
+src1: value: x type: PARAM loc: [ebp + 8]
+
+dst: value: t10 type: TEMP loc: [ebp - 44]
+eq
+src1: value: t11 type: TEMP loc: [ebp - 48]
+src2: value: 3 type: IMM_NUM loc: 3
+
+dst: value: label_clause_4_0
+if
+src1: value: t10 type: TEMP loc: [ebp - 44]
+src2: value: label_next_4_0
+
+dst: value: label_next_4_0
+jump
+
+dst: value: label_clause_4_0
+label
+
+dst: value: t12 type: TEMP loc: [ebp - 52]
+loadstr
+src1: value: 3
+
+dst: value: t0 type: TEMP loc: [ebp - 4]
+assign
+src1: value: t12 type: TEMP loc: [ebp - 52]
+
+dst: value: label_cond_end_0
+jump
+
+dst: value: label_next_4_0
+label
+
+dst: value: t14 type: TEMP loc: [ebp - 60]
+load
+src1: value: x type: PARAM loc: [ebp + 8]
+
+dst: value: t13 type: TEMP loc: [ebp - 56]
+eq
+src1: value: t14 type: TEMP loc: [ebp - 60]
+src2: value: 4 type: IMM_NUM loc: 4
+
+dst: value: label_clause_5_0
+if
+src1: value: t13 type: TEMP loc: [ebp - 56]
+src2: value: label_next_5_0
+
+dst: value: label_next_5_0
+jump
+
+dst: value: label_clause_5_0
+label
+
+dst: value: t15 type: TEMP loc: [ebp - 64]
+loadstr
+src1: value: 4
+
+dst: value: t0 type: TEMP loc: [ebp - 4]
+assign
+src1: value: t15 type: TEMP loc: [ebp - 64]
+
+dst: value: label_cond_end_0
+jump
+
+dst: value: label_next_5_0
+label
+
+dst: value: t17 type: TEMP loc: [ebp - 72]
+load
+src1: value: x type: PARAM loc: [ebp + 8]
+
+dst: value: t16 type: TEMP loc: [ebp - 68]
+eq
+src1: value: t17 type: TEMP loc: [ebp - 72]
+src2: value: 5 type: IMM_NUM loc: 5
+
+dst: value: label_clause_6_0
+if
+src1: value: t16 type: TEMP loc: [ebp - 68]
+src2: value: label_next_6_0
+
+dst: value: label_next_6_0
+jump
+
+dst: value: label_clause_6_0
+label
+
+dst: value: t18 type: TEMP loc: [ebp - 76]
+loadstr
+src1: value: 5
+
+dst: value: t0 type: TEMP loc: [ebp - 4]
+assign
+src1: value: t18 type: TEMP loc: [ebp - 76]
+
+dst: value: label_cond_end_0
+jump
+
+dst: value: label_next_6_0
+label
+
+dst: value: t20 type: TEMP loc: [ebp - 84]
+load
+src1: value: x type: PARAM loc: [ebp + 8]
+
+dst: value: t19 type: TEMP loc: [ebp - 80]
+eq
+src1: value: t20 type: TEMP loc: [ebp - 84]
+src2: value: 6 type: IMM_NUM loc: 6
+
+dst: value: label_clause_7_0
+if
+src1: value: t19 type: TEMP loc: [ebp - 80]
+src2: value: label_next_7_0
+
+dst: value: label_next_7_0
+jump
+
+dst: value: label_clause_7_0
+label
+
+dst: value: t21 type: TEMP loc: [ebp - 88]
+loadstr
+src1: value: 6
+
+dst: value: t0 type: TEMP loc: [ebp - 4]
+assign
+src1: value: t21 type: TEMP loc: [ebp - 88]
+
+dst: value: label_cond_end_0
+jump
+
+dst: value: label_next_7_0
+label
+
+dst: value: t23 type: TEMP loc: [ebp - 96]
+load
+src1: value: x type: PARAM loc: [ebp + 8]
+
+dst: value: t22 type: TEMP loc: [ebp - 92]
+eq
+src1: value: t23 type: TEMP loc: [ebp - 96]
+src2: value: 7 type: IMM_NUM loc: 7
+
+dst: value: label_clause_8_0
+if
+src1: value: t22 type: TEMP loc: [ebp - 92]
+src2: value: label_next_8_0
+
+dst: value: label_next_8_0
+jump
+
+dst: value: label_clause_8_0
+label
+
+dst: value: t24 type: TEMP loc: [ebp - 100]
+loadstr
+src1: value: 7
+
+dst: value: t0 type: TEMP loc: [ebp - 4]
+assign
+src1: value: t24 type: TEMP loc: [ebp - 100]
+
+dst: value: label_cond_end_0
+jump
+
+dst: value: label_next_8_0
+label
+
+dst: value: t26 type: TEMP loc: [ebp - 108]
+load
+src1: value: x type: PARAM loc: [ebp + 8]
+
+dst: value: t25 type: TEMP loc: [ebp - 104]
+eq
+src1: value: t26 type: TEMP loc: [ebp - 108]
+src2: value: 8 type: IMM_NUM loc: 8
+
+dst: value: label_clause_9_0
+if
+src1: value: t25 type: TEMP loc: [ebp - 104]
+src2: value: label_next_9_0
+
+dst: value: label_next_9_0
+jump
+
+dst: value: label_clause_9_0
+label
+
+dst: value: t27 type: TEMP loc: [ebp - 112]
+loadstr
+src1: value: 8
+
+dst: value: t0 type: TEMP loc: [ebp - 4]
+assign
+src1: value: t27 type: TEMP loc: [ebp - 112]
+
+dst: value: label_cond_end_0
+jump
+
+dst: value: label_next_9_0
+label
+
+dst: value: t29 type: TEMP loc: [ebp - 120]
+load
+src1: value: x type: PARAM loc: [ebp + 8]
+
+dst: value: t28 type: TEMP loc: [ebp - 116]
+eq
+src1: value: t29 type: TEMP loc: [ebp - 120]
+src2: value: 9 type: IMM_NUM loc: 9
+
+dst: value: label_clause_10_0
+if
+src1: value: t28 type: TEMP loc: [ebp - 116]
+src2: value: label_next_10_0
+
+dst: value: label_next_10_0
+jump
+
+dst: value: label_clause_10_0
+label
+
+dst: value: t30 type: TEMP loc: [ebp - 124]
+loadstr
+src1: value: 9
+
+dst: value: t0 type: TEMP loc: [ebp - 4]
+assign
+src1: value: t30 type: TEMP loc: [ebp - 124]
+
+dst: value: label_cond_end_0
+jump
+
+dst: value: label_next_10_0
+label
+
+dst: value: label_clause_11_0
+label
+
+dst: value: t31 type: TEMP loc: [ebp - 128]
+loadstr
+src1: value: ERROR
+
+dst: value: t0 type: TEMP loc: [ebp - 4]
+assign
+src1: value: t31 type: TEMP loc: [ebp - 128]
+
+dst: value: label_cond_end_0
+jump
+
+dst: value: label_cond_end_0
+label
 
 dst: value: return_value type: TEMP loc: eax
 return
@@ -185,43 +874,27 @@ dst: value: label type: IMM_STR
 defun
 src1: value: main type: IMM_STR
 
-dst: value: x type: LOCAL loc: [ebp - 4]
-assign
-src1: value: 5 type: IMM_NUM loc: 5
-
-dst: value: y type: LOCAL loc: [ebp - 8]
-assign
-src1: value: 6 type: IMM_NUM loc: 6
-
-dst: value: t0 type: TEMP loc: [ebp - 12]
-load
-src1: value: x type: LOCAL loc: [ebp - 4]
-
-dst: value: t1 type: TEMP loc: [ebp - 16]
-load
-src1: value: y type: LOCAL loc: [ebp - 8]
-
 dst: 
 push
-src1: value: t1 type: TEMP loc: [ebp - 16]
-
-dst: 
-push
-src1: value: t0 type: TEMP loc: [ebp - 12]
+src1: value: 1234 type: IMM_NUM loc: 1234
 
 dst: 
 call
-src1: value: add
+src1: value: digitToString
 
 dst: 
 add_esp
-src1: value: 8 type: IMM_NUM
+src1: value: 4 type: IMM_NUM
 
-dst: value: t2 type: TEMP loc: [ebp - 20]
+dst: value: t0 type: TEMP loc: [ebp - 4]
 assign
+
+dst: value: stdout
+print
+src1: value: t0 type: TEMP loc: [ebp - 4]
 
 dst: value: return_value type: TEMP loc: eax
 return
-src1: value: t2 type: TEMP loc: [ebp - 20]
+src1: value: t0 type: TEMP loc: [ebp - 4]
 
-Assembly written to: testout.asm
+Assembly written to: out.asm

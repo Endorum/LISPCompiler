@@ -91,6 +91,8 @@ struct Function {
 
     
 
+    
+
     std::vector<IRInstruction> instructions;
 };
 
@@ -107,7 +109,10 @@ public:
 
     std::vector<IRInstruction> instructions;
 
-
+    size_t local_count = 0; // for all let variables
+    size_t temp_count = 0;  // for all temps (t0 ...)
+    size_t spill_start = 1; // calculated after locals are declared
+    size_t labelId = 0; // for lables like if etc
 
     explicit Generator(std::vector<ASTNode*>& p): ast(p) {
         current_function.name = "GLOBAL";
@@ -121,9 +126,7 @@ public:
     void emit(Value dst, std::string op, Value src1);
     void emit(Value dst, std::string op, Value src1, Value src2);
 
-    size_t local_count = 0; // for all let variables
-    size_t temp_count = 0;  // for all temps (t0 ...)
-    size_t spill_start = 1; // calculated after locals are declared
+    
 
     std::string getPARAMLocation(size_t index) {
         return "[ebp + " + std::to_string(8 + index * 4) + "]";
@@ -250,7 +253,10 @@ public:
     Value handle_defun_keyword(ASTNode* node);
     Value handle_functionCall(ASTNode* node);
 
-    // Value handle_if_keyword(ASTNode* node);
+    Value handle_if_keyword(ASTNode* node);
+    Value handle_print_keyword(ASTNode* node);
+    Value handle_cond_keyword(ASTNode * node);
+
     // Value handle_cons_keyword(ASTNode* node);
     // Value handle_car_keyword(ASTNode* node);
     // Value handle_cdr_keyword(ASTNode* node);
@@ -258,10 +264,8 @@ public:
     // Value handle_toList_keyword(ASTNode * node);
     // Value handle_toString_keyword(ASTNode * node);
     // Value handle_length_keyword(ASTNode * node);
-    // Value handle_print_keyword(ASTNode * node);
     // Value handle_read_keyword(ASTNode * node);
     // Value handle_scan_keyword(ASTNode *node);
-    // Value handle_cond_keyword(ASTNode * node);
     Value generate_code(ASTNode* node) {
         if(!node){
             throw std::runtime_error("ERROR: node == nullptr");
@@ -296,6 +300,18 @@ public:
             // (let x 5)
             if(firstChild->value == "let") {
                 return handle_let_keyword(node);
+            }
+
+            if(firstChild->value == "if") {
+                return handle_if_keyword(node);
+            }
+
+            if(firstChild->value == "print"){
+                return handle_print_keyword(node);
+            }
+
+            if(firstChild->value == "cond"){
+                return handle_cond_keyword(node);
             }
 
             
@@ -342,11 +358,11 @@ public:
                 return dst;
             }
 
-            // if(node->type == NT_String) {
-            //     std::string temp = generate_tmp();
-            //     emit(temp, node->value, "loadstr");
-            //     return temp;
-            // }
+            if(node->type == NT_String) {
+                Value temp = generate_tmp();
+                emit(temp, "loadstr", Value(node->value));
+                return temp;
+            }
 
             // if(node->type == NT_Quote) {
             //     std::string temp = generate_tmp();
