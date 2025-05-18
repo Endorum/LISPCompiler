@@ -9,7 +9,10 @@
 #include <regex>
 
 #define START_SYMBOL "_start"
-#define LIST_SPACE 1024
+
+// so space for around 100k list items
+// 1048576 = 2^20
+#define LIST_SPACE 1048576// / 8 because we're working with full 2x 32 bit integers here (car and cdr)
 
 #include "ir_codegen.hpp"
 
@@ -30,7 +33,8 @@ public:
         
         cleanup();
         dataSection += "list_ptr: dd list_memory ; pointer to next free cell\n";
-        dataSection += "list_memory: times " + std::to_string(LIST_SPACE) + " db 0 ; reserved space for cons cells\n";
+        dataSection += "section .bss\n";
+        dataSection += "list_memory: resb " + std::to_string(LIST_SPACE) + "; reserved (uninitialized!!) space for cons cells\n";
         asm_result += dataSection;
     }
 
@@ -330,43 +334,33 @@ _start:
             asm_result += getCurrentIndentStr() + "jmp " + label + "\n";
         }
 
-        // else if(op == "cons") {
-        //     const std::string dst = instr.dst.loc;
-        //     const std::string leftSide = instr.src1.loc;
-        //     const std::string rightSide = instr.src2.loc;
+        else if(op == "cons") {
+            const std::string dst = instr.dst.loc;
+            const std::string leftSide = instr.src1.loc;
+            const std::string rightSide = instr.src2.loc;
 
-        //     // load car (src1) into eax
-        //     asm_result += getCurrentIndentStr() + "; load car (src1) into eax\n";
-        //     asm_result += getCurrentIndentStr() + "mov eax, " + leftSide + "\n";
+            // load car (src1) into eax
+            asm_result += getCurrentIndentStr() + "mov eax, " + leftSide + "\n";
+            // store car into [list_ptr]
+            asm_result += getCurrentIndentStr() + "mov ebx, [list_ptr]\n";
+            asm_result += getCurrentIndentStr() + "mov [ebx], eax\n";
+            // load cdr (src2) into eax
+            asm_result += getCurrentIndentStr() + "mov eax, " + rightSide + "\n";
+            // Load cdr into [list_ptr + 4]
+            asm_result += getCurrentIndentStr() + "mov ebx, [list_ptr]\n";
+            asm_result += getCurrentIndentStr() + "mov [ebx + 4], eax\n";
+            // Store address of cons cell into dst
+            asm_result += getCurrentIndentStr() + "mov eax, [list_ptr]\n";
+            asm_result += getCurrentIndentStr() + "mov " + dst + ", eax\n";
 
-        //     // store car into [list_ptr]
-        //     asm_result += getCurrentIndentStr() + "; store car into [list_ptr]\n";
-        //     asm_result += getCurrentIndentStr() + "mov ebx, [list_ptr]\n";
-        //     asm_result += getCurrentIndentStr() + "mov [ebx], eax\n";
+            listPtrCounter += 8;
+            if(listPtrCounter > LIST_SPACE) {
+                throw std::runtime_error("Too many cons cells -> increase LIST_SPACE. currently at: " + std::to_string(LIST_SPACE) + "bytes");
+            }
 
-        //     // load cdr (src2) into eax
-        //     asm_result += getCurrentIndentStr() + "; load cdr (src2) into eax\n";
-        //     asm_result += getCurrentIndentStr() + "mov eax, " + rightSide + "\n";
-
-        //     // Load cdr into [list_ptr + 4]
-        //     asm_result += getCurrentIndentStr() + "; Load cdr into [list_ptr + 4]\n";
-        //     asm_result += getCurrentIndentStr() + "mov ebx, [list_ptr]\n";
-        //     asm_result += getCurrentIndentStr() + "mov [ebx + 4], eax\n";
-
-        //     // Store address of cons cell into dst
-        //     asm_result += getCurrentIndentStr() + "; Store address of cons cell into dst\n";
-        //     asm_result += getCurrentIndentStr() + "mov eax, [list_ptr]\n";
-        //     asm_result += getCurrentIndentStr() + "mov " + dst + ", eax\n";
-
-        //     listPtrCounter += 8;
-        //     if(listPtrCounter > LIST_SPACE) {
-        //         throw std::runtime_error("Too many cons cells -> increase LIST_SPACE. currently at: " + std::to_string(LIST_SPACE) + "bytes");
-        //     }
-
-        //     // Increment list pointer by 8 for next allocation
-        //     asm_result += getCurrentIndentStr() + "; Increment list pointer by 8 for next allocation\n";
-        //     asm_result += getCurrentIndentStr() + "add dword [list_ptr], 8\n";
-        // }
+            // Increment list pointer by 8 for next allocation
+            asm_result += getCurrentIndentStr() + "add dword [list_ptr], 8\n";
+        }
 
 
         // else if(op == "car") {

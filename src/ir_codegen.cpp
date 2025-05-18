@@ -367,17 +367,17 @@ Value Generator::handle_cond_keyword(ASTNode *node) {
     return res;
 }
 
-// std::string Generator::handle_cons_keyword(ASTNode *node) {
-//     if (node->children.size() < 3) {
-//         throw std::runtime_error("ERROR: Invalid cons expression: (cons <first> <second>)");
-//     }
+Value Generator::handle_cons_keyword(ASTNode *node) {
+    if (node->children.size() < 3) {
+        throw std::runtime_error("ERROR: Invalid cons expression: (cons <first> <second>)");
+    }
 
-//     std::string left = generate_code(node->children.at(1));
-//     std::string right = generate_code(node->children.at(2));
-//     std::string temp = generate_tmp();
-//     emit(temp, left, "cons", right);
-//     return temp;
-// }
+    Value left = generate_code(node->children.at(1));
+    Value right = generate_code(node->children.at(2));
+    Value temp = generate_tmp();
+    emit(temp, "cons", left, right);
+    return temp;
+}
 
 // std::string Generator::handle_null_keyword(ASTNode *node) {
 //     if (node->children.size() != 2) {

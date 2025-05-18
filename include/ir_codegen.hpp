@@ -257,7 +257,8 @@ public:
     Value handle_print_keyword(ASTNode* node);
     Value handle_cond_keyword(ASTNode * node);
 
-    // Value handle_cons_keyword(ASTNode* node);
+    Value handle_cons_keyword(ASTNode* node);
+
     // Value handle_car_keyword(ASTNode* node);
     // Value handle_cdr_keyword(ASTNode* node);
     // Value handle_null_keyword(ASTNode * node);
@@ -266,6 +267,7 @@ public:
     // Value handle_length_keyword(ASTNode * node);
     // Value handle_read_keyword(ASTNode * node);
     // Value handle_scan_keyword(ASTNode *node);
+
     Value generate_code(ASTNode* node) {
         if(!node){
             throw std::runtime_error("ERROR: node == nullptr");
@@ -314,6 +316,10 @@ public:
                 return handle_cond_keyword(node);
             }
 
+            if(firstChild->value == "cons"){
+                return handle_cons_keyword(node);
+            }
+
             
             if(isDeclaredFunction(firstChild->value)) {
                 return handle_functionCall(node);
@@ -346,6 +352,11 @@ public:
             }
 
             if(node->type == NT_Symbol) {
+                if(node->value == "nil"){
+                    Value ret("nil", IMM_NUM);
+                    ret.loc = "0";
+                    return ret;
+                }
                 auto it = variable_table.find(node->value);
                 if (it == variable_table.end()) {
                     throw std::runtime_error("ERROR: Variable '" + node->value + "' not declared in current scope.");

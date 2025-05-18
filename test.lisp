@@ -1,6 +1,3 @@
-#include "stdio.lisp"
-
-
 (defun main()
-  (print (digitToString 1234))
+  (cons 1 (cons 2 (cons 3 nil)))
 )
