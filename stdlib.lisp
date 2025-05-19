@@ -1,3 +1,18 @@
+;; malloc(int:size) -> ptr, allocates a block of size size bytes of memory returning a pointer to the beg
+;; itoa(num base) -> str integer to string with base
+;; atoi(str) -> int string to integer
+;; strlen(str) -> int returns length of string
+;; strcmp(strA strB) return 0 if they are the same, not 0 if they are different
+;; strncmp(strA strB amount) -> 0/1 compares amount of characters 
+;; strcat(strA strB) -> strA + strB
+;; memcpy(dst src num) -> dst, copies num amount of bytes from src to dst
+;; memset(ptr int:value num) -> ptr, sets the first num of bytes in ptr to the value value
+
+;; (defun malloc (size)
+
+;; )
+
+
 (defun strlen_internal (str n)
     (if (= (deref str) 0)  
         n
@@ -11,20 +26,7 @@
 
 
 (defun digitToString (x)
-    (cond 
-        ( (= x 0) (+ 0 48))
-        ( (= x 1) (+ 1 48))
-        ( (= x 2) (+ 2 48))
-        ( (= x 3) (+ 3 48))
-        ( (= x 4) (+ 4 48))
-        ( (= x 5) (+ 5 48))
-        ( (= x 6) (+ 6 48))
-        ( (= x 7) (+ 7 48))
-        ( (= x 8) (+ 8 48))
-        ( (= x 9) (+ 9 48))
-        ( else "ERROR" )
-    )
-
+    (if (< x 10) (+ x 48) (+ x 55)) ;; after 0..9 comes A B etc
 )
 
 (defun reverse_str (str)
@@ -32,20 +34,19 @@
     (let out "..........")
     (let i 0)
     (while (< i len)
-        (let c (
-            deref (+ 
-                str 
-                (- (- 
-                    len 
-                    i
-                ) 1)
-                    )
-                )
-        ) ;; maybe digitToString is necessary
+        (let c ( 
+            deref (+ str (- (- len i ) 1) )
+            )
+        )
         (setchar out i c)
         (set i (+ i 1))
     )
     out
+)
+
+(defun printLn (str)
+    (print str)
+    (print "\n")
 )
 
 ;; itoa

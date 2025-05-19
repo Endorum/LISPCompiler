@@ -66,11 +66,11 @@ private:
 
     void checkSyntax() const { //TODO: expand on that
         if(parenCounter > 0) {
-            throw std::runtime_error("Expeced closing parentheses");
+            throw std::runtime_error("parser.hpp: Expeced closing parentheses");
         }
 
         if(parenCounter < 0) {
-            throw std::runtime_error("too many closing parentheses");
+            throw std::runtime_error("parser.hpp: too many closing parentheses");
         }
     }
 
@@ -141,7 +141,7 @@ private:
             localTree->addChild(parseExpression());
 
         } else {
-            throw std::runtime_error("not yet implemented: " + std::to_string(token.type));
+            throw std::runtime_error("parser.hpp: not yet implemented: " + std::to_string(token.type));
         }
 
         return localTree;

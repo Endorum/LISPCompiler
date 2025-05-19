@@ -42,7 +42,7 @@ public:
   void setInput(std::string &v) { input = v; }
 
   void printError(std::string msg) {
-    printf("ERROR at position: %zu\n", position);
+    printf("ERROR in tokenizer at position: %zu\n", position);
     printf("    %s\n", msg.c_str());
     exit(1);
   }

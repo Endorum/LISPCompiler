@@ -13,6 +13,8 @@
 #define OPERATORS "+-*/&|^~>=<!%"
 #define BIN_OP "+-*/&|^>=<%"
 
+
+
 typedef enum VarType{
     VT_NONE,
     PARAM,       // PARAMument in a function  [rbp + offset]
@@ -107,6 +109,8 @@ public:
     size_t temp_count = 0;  // for all temps (t0 ...)
     size_t spill_start = 1; // calculated after locals are declared
     size_t labelId = 0; // for lables like if etc
+
+    size_t heap_ptr = 0;
 
     explicit Generator(std::vector<ASTNode*>& p): ast(p) {
         current_function.name = "GLOBAL";
@@ -243,10 +247,16 @@ public:
         }
         return (
             op == "!=" ||
+            op == ">=" ||
+            op == "<=" ||
             op == "+=" ||
             op == "-=" ||
             op == "*=" ||
-            op == "/=" || 0
+            op == "/=" ||
+            op == "<<" ||
+            op == ">>" 
+            // op == "<<=" || 
+            // op == ">>=" 
         );
     }
 
@@ -269,6 +279,7 @@ public:
     Value handle_deref_keyword(ASTNode* node);
     Value handle_while_keyword(ASTNode* node);
     Value handle_setchar_keyword(ASTNode* node);
+    Value handle_malloc_keyword(ASTNode* node);
 
     // Value handle_null_keyword(ASTNode * node);
     // Value handle_toList_keyword(ASTNode * node);
@@ -279,10 +290,10 @@ public:
 
     Value generate_code(ASTNode* node) {
         if(!node){
-            throw std::runtime_error("ERROR: node == nullptr");
+            throw std::runtime_error("ir_codegen.hpp: ERROR: node == nullptr");
         }
         if(node->type == NT_None) {
-            throw std::runtime_error("ERROR: node->type == NT_None");
+            throw std::runtime_error("ir_codegen.hpp: ERROR: node->type == NT_None");
         }
 
         if(node->type == NT_List) {
@@ -293,9 +304,16 @@ public:
             // 2. check for various keywords
             // 3. check if its a known function
 
+            if(node->children.size() <= 0){
+                throw std::runtime_error("ir_codegen.hpp: Empty expression");
+            }
+
             ASTNode* firstChild = node->children.at(0);
-            if(!firstChild)
-                throw std::runtime_error("FirstChild = nullptr?");
+            if(!firstChild){
+                throw std::runtime_error("ir_codegen.hpp: FirstChild = nullptr?");
+            }
+
+             
 
 
             if(isOperator(firstChild->value)) {
@@ -354,6 +372,10 @@ public:
                 return handle_setchar_keyword(node);
             }
 
+            if(firstChild->value == "malloc"){
+                return handle_malloc_keyword(node);
+            }
+
             
             if(isDeclaredFunction(firstChild->value)) {
                 return handle_functionCall(node);
@@ -362,10 +384,12 @@ public:
             
 
             else {
+                // if first is not a function maybe (variable) was meant and should be interpreted as such
+                
                 printf("Node with unrecognized first child:\n");
 
                 std::cout << printASTNode(*node) << std::endl;
-                throw std::runtime_error("\'" + firstChild->value + "\' was not recognized as a built in or userdefined function");
+                throw std::runtime_error("ir_codegen.hpp: \'" + firstChild->value + "\' was not recognized as a built in or userdefined function");
             }
 
 
@@ -397,7 +421,7 @@ public:
                     for(const auto& pair : variable_table){
                         scope += "Variable: \'" + pair.first + "\'\n";
                     }
-                    throw std::runtime_error("ERROR: Variable '" + node->value + "' not declared in current scope. \nScope:\n" + scope);
+                    throw std::runtime_error("ir_codegen.hpp: ERROR: Variable '" + node->value + "' not declared in current scope. \nScope:\n" + scope);
                 }
 
                 Value src = it->second;
@@ -429,7 +453,7 @@ public:
 
         }
         
-        throw std::runtime_error("ERROR theres probably missing a return somewhere: " + printASTNode(*node));
+        throw std::runtime_error("ir_codegen.hpp: ERROR theres probably missing a return somewhere: " + printASTNode(*node));
     }
 
 };

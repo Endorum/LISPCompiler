@@ -59,7 +59,7 @@ void Generator::findFuncDecls() {
             std::string funcName = node->children.at(1)->value;
 
             if (seenFunctions.count(funcName)) {
-                throw std::runtime_error("ERROR: Function '" + funcName + "' is declared multiple times");
+                throw std::runtime_error("ir_codegen.cpp: ERROR: Function '" + funcName + "' is declared multiple times");
             }
 
             seenFunctions.insert(funcName);
@@ -92,6 +92,10 @@ std::string opCharToWord(std::string op) {
 
     if(op == "!="){
         return "noteq";
+    }else if(op == ">="){
+        return "geq";
+    }else if(op == "<="){
+        return "leq";
     }else if(op == "+="){
         return "addeq";
     }else if(op == "-="){
@@ -104,7 +108,16 @@ std::string opCharToWord(std::string op) {
         return "inc";
     }else if(op == "--"){
         return "dec";
+    }else if(op == "<<"){
+        return "shl";
+    }else if(op == "<<="){
+        return "shleq";
+    }else if(op == ">>"){
+        return "shr";
+    }else if(op == ">>="){
+        return "shreq";
     }
+
 
 
 
@@ -136,59 +149,59 @@ std::string Generator::wordToChar(std::string op){
 }
 
 Value Generator::handle_operator(ASTNode *node) {
-
-
     std::string op = node->children.at(0)->value;
-
     op = wordToChar(op);
 
-    // binary op
-    if( !(op == "~" || op == "!") ) {
-
-        if (node->children.size() != 3) {
-            throw std::runtime_error("ERROR: Expected exactly one leftside, op and one rightside");
-        }
-
-        Value dst = generate_tmp();
-
-        Value left = generate_code(node->children.at(1));
-        Value right = generate_code(node->children.at(2));
-
-        if(op != "+=" && op != "-=" && op != "*=" && op != "/="){
-            emit(dst, opCharToWord(op), left, right);
-        }else{
-            ASTNode* local = node->children.at(1);
-            Value loc_local = variable_table[local->value];
-            emit(loc_local, opCharToWord(op), loc_local, right);
-        }
-
-
-        return dst;
-
-    } else {
+    // Unary operators
+    if (op == "~" || op == "!") {
         if (node->children.size() != 2) {
-            throw std::runtime_error("ERROR: Expected one argument for unary operator");
+            throw std::runtime_error("ir_codegen.cpp: ERROR: Expected one argument for unary operator");
         }
 
         Value dst = generate_tmp();
         Value operand = generate_code(node->children.at(1));
-
         emit(dst, opCharToWord(op), operand);
-
         return dst;
     }
 
-    throw std::runtime_error("ERROR: not an operator: " + op);
+    // Assignment-style ops (+=, -=, etc.)
+    if (op == "+=" || op == "-=" || op == "*=" || op == "/=" || op == "<<=" || op == ">>=") {
+        if (node->children.size() != 3) {
+            throw std::runtime_error("ir_codegen.cpp: ERROR: Expected exactly two arguments for compound assignment operator");
+        }
+        ASTNode* local = node->children.at(1);
+        Value loc_local = variable_table[local->value];
+        Value right = generate_code(node->children.at(2));
+        emit(loc_local, opCharToWord(op), loc_local, right);
+        return loc_local;
+    }
+
+    // Variadic binary operators
+    if (node->children.size() < 3) {
+        throw std::runtime_error("ir_codegen.cpp: ERROR: Expected at least two arguments for binary operator: " + op);
+    }
+
+    // Left fold: (((arg1 op arg2) op arg3) op arg4)
+    Value acc = generate_code(node->children.at(1));
+    for (size_t i = 2; i < node->children.size(); ++i) {
+        Value next = generate_code(node->children.at(i));
+        Value tmp = generate_tmp();
+        emit(tmp, opCharToWord(op), acc, next);
+        acc = tmp;
+    }
+
+    return acc;
 }
+
 
 // (let x 5) TODO: maybe implement scoped variables
 Value Generator::handle_let_keyword(ASTNode *node) {
     if (node->children.size() < 3) {
-        throw std::runtime_error("ERROR: Invalid let expression");
+        throw std::runtime_error("ir_codegen.cpp: ERROR: Invalid let expression");
     }
 
     if (node->children.at(1)->type != NT_Symbol) {
-        throw std::runtime_error("ERROR: Expected a Symbol for the variable name");
+        throw std::runtime_error("ir_codegen.cpp: ERROR: Expected a Symbol for the variable name");
     }
 
     std::string varname = node->children.at(1)->value;
@@ -221,17 +234,17 @@ Value Generator::handle_let_keyword(ASTNode *node) {
 
 Value Generator::handle_set_keyword(ASTNode *node){
     if (node->children.size() < 3) {
-        throw std::runtime_error("ERROR: Invalid set expression");
+        throw std::runtime_error("ir_codegen.cpp: ERROR: Invalid set expression");
     }
 
     if (node->children.at(1)->type != NT_Symbol) {
-        throw std::runtime_error("ERROR: Expected a Symbol for the variable name");
+        throw std::runtime_error("ir_codegen.cpp: ERROR: Expected a Symbol for the variable name");
     }
 
     std::string varname = node->children.at(1)->value;
 
     if(variable_table.find(varname) == variable_table.end()){
-        throw std::runtime_error("Cant set variable, " + varname + " not declared in this scope");
+        throw std::runtime_error("ir_codegen.cpp: Cant set variable, " + varname + " not declared in this scope");
     }
 
     Value var = variable_table[varname];
@@ -269,7 +282,7 @@ Value Generator::handle_defun_keyword(ASTNode *node) {
     variable_table.clear(); // clear from previous scope
 
     if (!parameters) {
-        throw std::runtime_error("ERROR: Expected parameters");
+        throw std::runtime_error("ir_codegen.cpp: ERROR: Expected parameters");
     }
 
     
@@ -301,7 +314,7 @@ Value Generator::handle_defun_keyword(ASTNode *node) {
 
     // check if body is empty
     if(node->children.size() < 4){
-        throw std::runtime_error("Missing a function body for function: \'" + func.name + "\'");
+        throw std::runtime_error("ir_codegen.cpp: Missing a function body for function: \'" + func.name + "\'");
     }
 
     // multi line body
@@ -334,7 +347,7 @@ Value Generator::handle_functionCall(ASTNode *node) {
     std::string funcName = node->children.at(0)->value;
 
     if (!isDeclaredFunction(funcName)) {
-        throw std::runtime_error("ERROR: Function " + funcName + " is not declared");
+        throw std::runtime_error("ir_codegen.cpp: ERROR: Function " + funcName + " is not declared");
     }
 
     std::vector<Value> args;
@@ -348,7 +361,7 @@ Value Generator::handle_functionCall(ASTNode *node) {
     size_t providedArgs = args.size();
     for (const auto& f : functions) {
         if (f.name == funcName && f.paramCount != providedArgs) {
-            throw std::runtime_error("ERROR: Function " + funcName + " expects " +
+            throw std::runtime_error("ir_codegen.cpp: ERROR: Function " + funcName + " expects " +
                 std::to_string(f.paramCount) + " arguments, got " + std::to_string(providedArgs));
         }
     }
@@ -374,8 +387,8 @@ Value Generator::handle_functionCall(ASTNode *node) {
 }
 
 Value Generator::handle_if_keyword(ASTNode *node) {
-    if(node->children.size() != 4) {
-        throw std::runtime_error("ERROR: Expected: (if (<cond>) (<true body>) (<false body>) )");
+    if(node->children.size() < 4) {
+        throw std::runtime_error("ir_codegen.cpp: ERROR: Expected: (if (<cond>) (<true body>) (<false body>) )");
     }
     ASTNode* cond = node->children.at(1);
     ASTNode* trueBody = node->children.at(2);
@@ -410,7 +423,7 @@ Value Generator::handle_if_keyword(ASTNode *node) {
 Value Generator::handle_print_keyword(ASTNode *node) {
     // (print string/stringvar/var)
     if(node->children.size() < 2) {
-        throw std::runtime_error("ERROR: Expected: (print <string/stringvariable>)");
+        throw std::runtime_error("ir_codegen.cpp: ERROR: Expected: (print <string/stringvariable>)");
     }
 
     Value strAddr = generate_code(node->children.at(1)); // address of string
@@ -422,7 +435,7 @@ Value Generator::handle_print_keyword(ASTNode *node) {
 
 Value Generator::handle_cond_keyword(ASTNode *node) {
     if (node->children.size() < 2) {
-        throw std::runtime_error("ERROR: cond expects at least one clause");
+        throw std::runtime_error("ir_codegen.cpp: ERROR: cond expects at least one clause");
     }
 
     Value res = generate_tmp();
@@ -435,7 +448,7 @@ Value Generator::handle_cond_keyword(ASTNode *node) {
         ASTNode* clause = node->children.at(i);
 
         if(clause->children.size() != 2){
-            throw std::runtime_error("Each cond clause must have exactly 2 elements");
+            throw std::runtime_error("ir_codegen.cpp: Each cond clause must have exactly 2 elements");
         }
 
         ASTNode* test = clause->children.at(0);
@@ -466,7 +479,7 @@ Value Generator::handle_cond_keyword(ASTNode *node) {
 
     if(!hasElse){
         // emit(res, "assign", Value("0",IMM_NUM));
-        throw std::runtime_error("Expected an else");
+        throw std::runtime_error("ir_codegen.cpp: Expected an else");
     }
 
     return res;
@@ -474,7 +487,7 @@ Value Generator::handle_cond_keyword(ASTNode *node) {
 
 Value Generator::handle_cons_keyword(ASTNode *node) {
     if (node->children.size() < 3) {
-        throw std::runtime_error("ERROR: Invalid cons expression: (cons <first> <second>)");
+        throw std::runtime_error("ir_codegen.cpp: ERROR: Invalid cons expression: (cons <first> <second>)");
     }
 
     Value left = generate_code(node->children.at(1));
@@ -487,7 +500,7 @@ Value Generator::handle_cons_keyword(ASTNode *node) {
 
 Value Generator::handle_car_keyword(ASTNode* node) {
     if (node->children.size() != 2) {
-        throw std::runtime_error("ERROR: Expected usage: (car <list>)");
+        throw std::runtime_error("ir_codegen.cpp: ERROR: Expected usage: (car <list>)");
     }
 
     Value listAddr = generate_code(node->children.at(1));
@@ -502,7 +515,7 @@ Value Generator::handle_car_keyword(ASTNode* node) {
 Value Generator::handle_cdr_keyword(ASTNode *node) {
     // (cdr <list>)
     if(node->children.size() < 2) {
-        throw std::runtime_error("ERROR: Expected: (cdr <list>)");
+        throw std::runtime_error("ir_codegen.cpp: ERROR: Expected: (cdr <list>)");
     }
 
     Value listAddr = generate_code(node->children.at(1)); // address of the list
@@ -516,7 +529,7 @@ Value Generator::handle_cdr_keyword(ASTNode *node) {
 
 Value Generator::handle_deref_keyword(ASTNode* node){
     if(node->children.size() < 2) {
-        throw std::runtime_error("ERROR: Expected: (deref <variable / const string>)");
+        throw std::runtime_error("ir_codegen.cpp: ERROR: Expected: (deref <variable / const string>)");
     }
 
 
@@ -529,23 +542,23 @@ Value Generator::handle_deref_keyword(ASTNode* node){
         const std::string& name = addr->value;
         auto it = variable_table.find(name);
         if(it == variable_table.end()){
-            throw std::runtime_error("deref called on undefined symbol " + printASTNode(*node));    
+            throw std::runtime_error("ir_codegen.cpp: deref called on undefined symbol " + printASTNode(*node));    
         }
 
         const Value& info = it->second;
 
         // if(info.type != VarType::IMM_STR && info.type != VarType::LOCAL){
-        //     throw std::runtime_error("deref can only be used on string and locals right now" + printASTNode(*node));
+        //     throw std::runtime_error("ir_codegen.cpp: deref can only be used on string and locals right now" + printASTNode(*node));
         // }
 
     }else if(addr->type == NT_String){
         // this always works
     }else if(addr->type == NT_Number){
-        throw std::runtime_error("An immediate can not be dereferenced " + printASTNode(*node));
+        throw std::runtime_error("ir_codegen.cpp: An immediate can not be dereferenced " + printASTNode(*node));
     }else if(addr->type == NT_List){
         // should work depending on the result of the list ofcourese
     }else{
-        throw std::runtime_error("deref operand must be a symbol, string literal or an expression\n" + printASTNode(*node));
+        throw std::runtime_error("ir_codegen.cpp: deref operand must be a symbol, string literal or an expression\n" + printASTNode(*node));
     }
 
     emit(dst, "deref", Addr);
@@ -555,7 +568,7 @@ Value Generator::handle_deref_keyword(ASTNode* node){
 
 Value Generator::handle_while_keyword(ASTNode* node){
     if(node->children.size() < 3){
-        throw std::runtime_error("Invalid while expression" + printASTNode(*node));
+        throw std::runtime_error("ir_codegen.cpp: Invalid while expression" + printASTNode(*node));
     }
 
     
@@ -590,7 +603,7 @@ Value Generator::handle_while_keyword(ASTNode* node){
 
 Value Generator::handle_setchar_keyword(ASTNode* node){
     if(node->children.size() != 4){
-        throw std::runtime_error("invalid setchar expression");
+        throw std::runtime_error("ir_codegen.cpp: invalid setchar expression");
     }
 
     Value ptr = generate_code(node->children.at(1));
@@ -602,9 +615,23 @@ Value Generator::handle_setchar_keyword(ASTNode* node){
     return ptr;
 }
 
+Value Generator::handle_malloc_keyword(ASTNode* node){
+    if(node->children.size() != 2){
+        throw std::runtime_error("ir_codegen.cpp: malloc expects a single integer argument");
+    } 
+
+    Value size = generate_code(node->children.at(1));
+    Value dst = generate_tmp();
+
+    emit(dst, "malloc", size);
+
+    
+    return dst;
+}
+
 // std::string Generator::handle_null_keyword(ASTNode *node) {
 //     if (node->children.size() != 2) {
-//         throw std::runtime_error("ERROR: Invalid null? expression: (null? <list>)");
+//         throw std::runtime_error("ir_codegen.cpp: ERROR: Invalid null? expression: (null? <list>)");
 //     }
 
 //     std::string listAddr = generate_code(node->children.at(1));
@@ -617,7 +644,7 @@ Value Generator::handle_setchar_keyword(ASTNode* node){
 
 // std::string Generator::handle_toList_keyword(ASTNode *node) {
 //     if (node->children.size() != 2) {
-//         throw std::runtime_error("ERROR: Invalid toList expression: (toList <string>)");
+//         throw std::runtime_error("ir_codegen.cpp: ERROR: Invalid toList expression: (toList <string>)");
 //     }
 
 //     std::string strAddr = generate_code(node->children.at(1));
@@ -644,7 +671,7 @@ Value Generator::handle_setchar_keyword(ASTNode* node){
 
 // std::string Generator::handle_toString_keyword(ASTNode *node) {
 //     if (node->children.size() != 2) {
-//         throw std::runtime_error("ERROR: Invalid toString expression: (toString <list>)");
+//         throw std::runtime_error("ir_codegen.cpp: ERROR: Invalid toString expression: (toString <list>)");
 //     }
 
 
@@ -665,7 +692,7 @@ Value Generator::handle_setchar_keyword(ASTNode* node){
 // std::string Generator::handle_length_keyword(ASTNode *node) {
 //     // (length list)
 //     if(node->children.size() < 2) {
-//         throw std::runtime_error("ERROR: Expected: (length <list>)");
+//         throw std::runtime_error("ir_codegen.cpp: ERROR: Expected: (length <list>)");
 //     }
 
 
@@ -685,7 +712,7 @@ Value Generator::handle_setchar_keyword(ASTNode* node){
 
 // std::string Generator::handle_read_keyword(ASTNode *node) {
 //     if (node->children.size() != 2) {
-//         throw std::runtime_error("ERROR: Expected only a filename");
+//         throw std::runtime_error("ir_codegen.cpp: ERROR: Expected only a filename");
 //     }
 
 //     std::string filename = generate_code(node->children.at(1));
@@ -698,7 +725,7 @@ Value Generator::handle_setchar_keyword(ASTNode* node){
 
 // std::string Generator::handle_scan_keyword(ASTNode *node) {
 //     if (node->children.size() != 2) {
-//         throw std::runtime_error("ERROR: Expected only a variable");
+//         throw std::runtime_error("ir_codegen.cpp: ERROR: Expected only a variable");
 //     }
 
 //     std::string temp = generate_tmp();

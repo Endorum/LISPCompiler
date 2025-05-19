@@ -13,7 +13,9 @@
 
 // so space for around 100k list items
 // 1048576 = 2^20
-#define LIST_SPACE 1048576// / 8 because we're working with full 2x 32 bit integers here (car and cdr)
+#define LIST_SPACE 8192// / 8 because we're working with full 2x 32 bit integers here (car and cdr)
+#define HEAP_SIZE  8192
+
 
 #include "ir_codegen.hpp"
 
@@ -34,8 +36,11 @@ public:
         
         if(CLEANUP) cleanup();
         dataSection += "list_ptr: dd list_memory ; pointer to next free cell\n";
+        dataSection += "heap_ptr: dd heap ; pointer to heap begin\n";
+
         dataSection += "section .bss\n";
         dataSection += "list_memory: resb " + std::to_string(LIST_SPACE) + "; reserved (uninitialized!!) space for cons cells\n";
+        dataSection += "heap: resb " + std::to_string(HEAP_SIZE) + "; heap space\n";
         asm_result += dataSection;
     }
 
@@ -91,7 +96,7 @@ _start:
         for(auto& func : functions){
             if(func.name == name) return func;
         }
-        throw std::runtime_error("Function " + name + " not declared");
+        throw std::runtime_error("asmgen.hpp: Function " + name + " not declared");
     }
 
     void generateBinaryArithmeticOp(const IRInstruction& instr) {
@@ -209,7 +214,7 @@ _start:
     std::string generate_asm(IRInstruction& instr) {
         const std::string op = instr.op;
         if(op.empty()) {
-            throw std::runtime_error("ERROR: op was empty");
+            throw std::runtime_error("asmgen.hpp: ERROR: op was empty");
         }
 
         asm_result += getCurrentIndentStr() + ";; " + op + " " + instr.dst.value + ", " + instr.src1.value + ", " + instr.src2.value +"\n";
@@ -244,6 +249,13 @@ _start:
             asm_result += getCurrentIndentStr() + "mov " + instr.dst.loc + ", edx\n"; // remainder → dst
         }
 
+        else if(op == "shl" || op == "shr"){
+            asm_result += getCurrentIndentStr() + "mov eax, " + instr.src1.loc + "\n"; // value to be shifted
+            asm_result += getCurrentIndentStr() + "mov cl, " + instr.src2.loc + "\n"; // shift amount
+            asm_result += getCurrentIndentStr() + op + " eax, cl\n";
+            asm_result += getCurrentIndentStr() + "mov " + instr.dst.loc + ", eax\n";
+        }
+
 
         else if(op == "l" || op == "g" || op == "eq") {
             generateCmps(instr);
@@ -257,9 +269,25 @@ _start:
             asm_result += getCurrentIndentStr() + "mov " + instr.dst.loc + ", eax\n";
         }
 
+        else if(op == "geq"){
+            asm_result += getCurrentIndentStr() + "mov eax, " + instr.src1.loc + "\n";
+            asm_result += getCurrentIndentStr() + "cmp eax, " + instr.src2.loc + "\n";
+            asm_result += getCurrentIndentStr() + "setge" + " al\n";
+            asm_result += getCurrentIndentStr() + "movzx eax, al\n";
+            asm_result += getCurrentIndentStr() + "mov " + instr.dst.loc + ", eax\n";
+        }
+
+        else if(op == "leq"){
+            asm_result += getCurrentIndentStr() + "mov eax, " + instr.src1.loc + "\n";
+            asm_result += getCurrentIndentStr() + "cmp eax, " + instr.src2.loc + "\n";
+            asm_result += getCurrentIndentStr() + "setle" + " al\n";
+            asm_result += getCurrentIndentStr() + "movzx eax, al\n";
+            asm_result += getCurrentIndentStr() + "mov " + instr.dst.loc + ", eax\n";
+        }
+
         else if (op == "addeq" || op == "subeq" || op == "imuleq" || op == "idiveq") {
             // if (instr.src1.type != LOCAL) {
-            //     throw std::runtime_error("Can only use compound assignment on local variables");
+            //     throw std::runtime_error("asmgen.hpp: Can only use compound assignment on local variables");
             // }
 
             std::string op_instr;
@@ -416,7 +444,7 @@ _start:
 
             listPtrCounter += 8;
             if(listPtrCounter > LIST_SPACE) {
-                throw std::runtime_error("Too many cons cells -> increase LIST_SPACE. currently at: " + std::to_string(LIST_SPACE) + "bytes");
+                throw std::runtime_error("asmgen.hpp: Too many cons cells -> increase LIST_SPACE. currently at: " + std::to_string(LIST_SPACE) + "bytes");
             }
 
             // Increment list pointer by 8 for next allocation
@@ -464,11 +492,20 @@ _start:
             asm_result += getCurrentIndentStr() + "mov [eax], cl\n"; // write into memory
         }
 
+        else if(op == "malloc"){
+            asm_result += getCurrentIndentStr() + "mov eax, [heap_ptr]\n"; // current ptr
+            asm_result += getCurrentIndentStr() + "mov " + instr.dst.loc + ", eax\n"; // output = current ptr
+            asm_result += getCurrentIndentStr() + "mov ecx, " + instr.src1.loc + "\n"; // size
+            asm_result += getCurrentIndentStr() + "add eax, ecx\n"; // new ptr = old + size
+            asm_result += getCurrentIndentStr() + "mov [heap_ptr], eax\n"; // update heap ptr
+        }
+
+
 
 
 
         else {
-            throw std::runtime_error("ERROR: Unhandled Instruction: " + op);
+            throw std::runtime_error("asmgen.hpp: ERROR: Unhandled Instruction: " + op);
         }
 
 

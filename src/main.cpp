@@ -16,7 +16,7 @@
 std::string readFile(const std::string& filename) {
     std::ifstream inFile(filename);
     if (!inFile) {
-        throw std::runtime_error("Failed to open input file: " + filename);
+        throw std::runtime_error("main.cpp: Failed to open input file: " + filename);
     }
     return std::string((std::istreambuf_iterator<char>(inFile)),
                         std::istreambuf_iterator<char>());
@@ -25,13 +25,13 @@ std::string readFile(const std::string& filename) {
 void writeToFile(const std::string& content, const std::string& filename) {
     std::ofstream outFile(filename);
     if (!outFile) {
-        throw std::runtime_error("Failed to open output file: " + filename);
+        throw std::runtime_error("main.cpp: Failed to open output file: " + filename);
     }
 
     outFile << content;
 
     if (!outFile) {
-        throw std::runtime_error("Failed to write to file: " + filename);
+        throw std::runtime_error("main.cpp: Failed to write to file: " + filename);
     }
 }
 
@@ -57,7 +57,7 @@ int main(int argc, char* argv[]) {
         tokenizer.setInput(input);
         tokenizer.tokenize();
         std::vector<Token> tokens = tokenizer.getTokens();
-        tokenizer.printTokens();
+        // tokenizer.printTokens();
 
         
         // Parser
@@ -98,7 +98,7 @@ int main(int argc, char* argv[]) {
         writeToFile(asm_out, outputFile);
         std::cout << "Assembly written to: " << outputFile << "\n";
     } catch (const std::exception& e) {
-        std::cerr << "ERROR: " << e.what() << "\n";
+        std::cerr << "ERROR in main: " << e.what() << "\n";
         return 1;
     }
 
