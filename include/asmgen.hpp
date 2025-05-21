@@ -36,11 +36,13 @@ public:
         
         if(CLEANUP) cleanup();
         dataSection += "list_ptr: dd list_memory ; pointer to next free cell\n";
-        dataSection += "heap_ptr: dd heap ; pointer to heap begin\n";
+        dataSection += "heap_ptr: dd heap_start ; pointer to heap begin\n";
+        dataSection += "free_list: dd heap_start\n";
+        
 
         dataSection += "section .bss\n";
         dataSection += "list_memory: resb " + std::to_string(LIST_SPACE) + "; reserved (uninitialized!!) space for cons cells\n";
-        dataSection += "heap: resb " + std::to_string(HEAP_SIZE) + "; heap space\n";
+        dataSection += "heap_start: resb " + std::to_string(HEAP_SIZE) + "; heap space\n";
         asm_result += dataSection;
     }
 
@@ -57,89 +59,85 @@ private:
     std::map<std::string, std::string> stringLabelMap;
     int stringCounter = 0;
     int listPtrCounter = 0;
+    int currentIndent = 0;
+
+
     std::string dataSection = "section .data\n";
-
-    Function currentScope = {"global", 0};
-
-
     std::string start = START_SYMBOL;
     std::string asm_overhead = R"(
 %include "stdlib.asm"
 section .text
 global _start
-_start:
+_start: 
+    ;; init malloc
+    mov eax, )" + std::to_string(HEAP_SIZE) + R"(
+    mov [heap_start], eax ; size
+    mov dword [heap_start+4], 0 ; next = 0
+    mov dword [free_list], heap_start
     call main
     mov eax, 1
     mov ebx, 0
     int 0x80
     ret)";
 
-    bool isBinaryArithmeticOp(std::string op) {
-        return (
-            op == "add"  ||
-            op == "sub"  ||
-            op == "imul" ||
-            op == "idiv" ||
-            op == "and"  ||
-            op == "or"   ||
-            op == "xor"
-        );
-    }
+    void generate_assign(IRInstruction& instr);
+    void generate_add(IRInstruction& instr);
+    void generate_sub(IRInstruction& instr);
+    void generate_imul(IRInstruction& instr);
+    void generate_idiv(IRInstruction& instr);
+    void generate_and(IRInstruction& instr);
+    void generate_or(IRInstruction& instr);
+    void generate_xor(IRInstruction& instr);
+    void generate_less(IRInstruction& instr);
+    void generate_less_equal(IRInstruction& instr);
+    void generate_equal(IRInstruction& instr);
+    void generate_not_equal(IRInstruction& instr);
+    void generate_greater(IRInstruction& instr);
+    void generate_greater_equal(IRInstruction& instr);
+    void generate_mod(IRInstruction& instr);
+    void generate_shl(IRInstruction& instr);
+    void generate_shr(IRInstruction& instr);
+    void generate_neg(IRInstruction& instr);
+    void generate_not(IRInstruction& instr);
+    void generate_addeq(IRInstruction& instr);
+    void generate_subeq(IRInstruction& instr);
+    void generate_imuleq(IRInstruction& instr);
+    void generate_idiveq(IRInstruction& instr);
+    void generate_inc(IRInstruction& instr);
+    void generate_dec(IRInstruction& instr);
+    void generate_load(IRInstruction& instr);
+    void generate_defun(IRInstruction& instr);
+    void generate_push(IRInstruction& instr);
+    void generate_return(IRInstruction& instr);
+    void generate_call(IRInstruction& instr);
+    void generate_add_esp(IRInstruction& instr);
+    void generate_loadstr(IRInstruction& instr);
+    void generate_print(IRInstruction& instr);
+    void generate_if(IRInstruction& instr);
+    void generate_label(IRInstruction& instr);
+    void generate_jump(IRInstruction& instr);
+    void generate_cons(IRInstruction& instr);
+    void generate_car(IRInstruction& instr);
+    void generate_cdr(IRInstruction& instr);
+    void generate_deref(IRInstruction& instr);
+    void generate_let(IRInstruction& instr);
+    void generate_set(IRInstruction& instr);
+    void generate_cond(IRInstruction& instr);
+    void generate_while(IRInstruction& instr);
+    void generate_setbyte(IRInstruction& instr);
+    void generate_malloc(IRInstruction& instr);
+    void generate_free(IRInstruction& instr);
 
-    int currentIndent = 0;
+    
 
     std::string getCurrentIndentStr() const{
         return (currentIndent != 0) ? "    " : "";
     }
 
-    Function getFunction(std::string name){
-        for(auto& func : functions){
-            if(func.name == name) return func;
-        }
-        throw std::runtime_error("asmgen.hpp: Function " + name + " not declared");
-    }
+    
 
-    void generateBinaryArithmeticOp(const IRInstruction& instr) {
-        if(instr.op == "idiv") {
-            asm_result += getCurrentIndentStr() + "mov eax, " + instr.src1.loc + "\n";
-            asm_result += "    cdq\n"; // sign extend eax into edx:eax
-            asm_result += "    idiv dword " + instr.src2.loc + "\n";
-            asm_result += "    mov " + instr.dst.loc + ", eax\n";
-            return;
-        }
-        asm_result += getCurrentIndentStr() + "mov eax, " + instr.src1.loc + "\n";
-        asm_result += getCurrentIndentStr() + instr.op + " eax, " + instr.src2.loc + "\n";
-        asm_result += getCurrentIndentStr() + "mov " + instr.dst.loc + ", eax\n";
-    }
+    std::string _mov(Value dst, Value src);
 
-    std::string _mov(Value dst, Value src) {
-        std::string code;
-
-        bool dstIsMem = dst.loc.find('[') != std::string::npos;
-        bool srcIsMem = src.loc.find('[') != std::string::npos;
-
-        if (dstIsMem && srcIsMem) {
-            // Memory to memory: use ecx as temporary because edx is used for idiv and imul
-            code += "mov ecx, " + src.loc + "\n";
-            code += getCurrentIndentStr() + "mov " + dst.loc + ", ecx\n";
-        } else {
-            code += "mov " + dst.loc + ", " + src.loc + "\n";
-        }
-
-        return code;
-    }
-
-
-    void generateAssignment(const IRInstruction &instr) {
-        Value src = instr.src1;
-        Value dst = instr.dst;
-
-        if (src.type == IMM_NUM){
-            asm_result += getCurrentIndentStr() + "mov dword " + dst.loc + ", " + src.value + "\n";
-        }else{
-            asm_result += getCurrentIndentStr() + _mov(dst, src);
-        }
-    }
 
     bool isNumber(const std::string& s) {
         if (s.empty()) return false;
@@ -149,66 +147,10 @@ _start:
         return true;
     }
 
-
-    void generateCmps(const IRInstruction & instr) {
-        asm_result += getCurrentIndentStr() + "mov eax, " + instr.src1.loc + "\n";
-        asm_result += getCurrentIndentStr() + "cmp eax, " + instr.src2.loc + "\n";
-        if(instr.op == "eq") {
-            asm_result += getCurrentIndentStr() + "sete" + " al\n";
-        }else {
-            asm_result += getCurrentIndentStr() + "set" + instr.op + " al\n";
-        }
-        asm_result += getCurrentIndentStr() + "movzx eax, al\n";
-        asm_result += getCurrentIndentStr() + "mov " + instr.dst.loc + ", eax\n";
-
-    }
-
-    std::string formatStringForNASM(const std::string& input) {
-        std::ostringstream result;
-        result << "\"";
-
-        for (size_t i = 0; i < input.size(); ++i) {
-            if (input[i] == '\\' && i + 1 < input.size()) {
-                switch (input[i + 1]) {
-                    case 'n':
-                        result << "\", 10, \""; // newline
-                    ++i;
-                    break;
-                    case 't':
-                        result << "\", 9, \"";  // tab
-                    ++i;
-                    break;
-                    case '\\':
-                        result << "\\\\";
-                    ++i;
-                    break;
-                    case '\"':
-                        result << "\\\"";
-                    ++i;
-                    break;
-                    default:
-                        result << input[i];
-                    break;
-                }
-            } else {
-                result << input[i];
-            }
-        }
-
-        result << "\"";
-        return result.str();
-    }
-
-    /*
-    cleanup things like
-
-    mov [ebp - 8], eax
-    mov eax, [ebp - 8]
-
-    which can just be removed
-    
-    */
     std::string cleanup();
+
+    std::string formatStringForNASM(const std::string& input);
+    
 
 
     std::string generate_asm(IRInstruction& instr) {
@@ -217,291 +159,49 @@ _start:
             throw std::runtime_error("asmgen.hpp: ERROR: op was empty");
         }
 
-        asm_result += getCurrentIndentStr() + ";; " + op + " " + instr.dst.value + ", " + instr.src1.value + ", " + instr.src2.value +"\n";
-
-        // asm_result += getCurrentIndentStr() +"; " + instr.str() + "\n";
-
-        if(op == "assign") {
-            generateAssignment(instr);
-        }
-
-        else if(isBinaryArithmeticOp(op)) {
-            generateBinaryArithmeticOp(instr);
-        }
-
-        else if(op == "neg") {
-            asm_result += getCurrentIndentStr() + "mov eax, " + instr.src1.loc + "\n";
-            asm_result += getCurrentIndentStr() + "neg eax\n";
-            asm_result += getCurrentIndentStr() + "mov " + instr.dst.loc + ", eax\n";
-        }
-
-        else if(op == "not") {
-            asm_result += getCurrentIndentStr() + "mov eax, " + instr.src1.loc + "\n";
-            asm_result += getCurrentIndentStr() + "not eax\n";
-            asm_result += getCurrentIndentStr() + "mov " + instr.dst.loc + ", eax\n";
-        }
-
-        else if(op == "mod") {
-            asm_result += getCurrentIndentStr() + "mov eax, " + instr.src1.loc + "\n";
-            asm_result += getCurrentIndentStr() + "cdq\n"; // sign-extend eax into edx:eax
-            asm_result += getCurrentIndentStr() + "mov ebx, dword " + instr.src2.loc + "\n"; // sign-extend eax into edx:eax
-            asm_result += getCurrentIndentStr() + "idiv dword ebx\n";
-            asm_result += getCurrentIndentStr() + "mov " + instr.dst.loc + ", edx\n"; // remainder → dst
-        }
-
-        else if(op == "shl" || op == "shr"){
-            asm_result += getCurrentIndentStr() + "mov eax, " + instr.src1.loc + "\n"; // value to be shifted
-            asm_result += getCurrentIndentStr() + "mov cl, " + instr.src2.loc + "\n"; // shift amount
-            asm_result += getCurrentIndentStr() + op + " eax, cl\n";
-            asm_result += getCurrentIndentStr() + "mov " + instr.dst.loc + ", eax\n";
-        }
-
-
-        else if(op == "l" || op == "g" || op == "eq") {
-            generateCmps(instr);
-        }
-
-        else if(op == "noteq"){
-            asm_result += getCurrentIndentStr() + "mov eax, " + instr.src1.loc + "\n";
-            asm_result += getCurrentIndentStr() + "cmp eax, " + instr.src2.loc + "\n";
-            asm_result += getCurrentIndentStr() + "setne" + " al\n";
-            asm_result += getCurrentIndentStr() + "movzx eax, al\n";
-            asm_result += getCurrentIndentStr() + "mov " + instr.dst.loc + ", eax\n";
-        }
-
-        else if(op == "geq"){
-            asm_result += getCurrentIndentStr() + "mov eax, " + instr.src1.loc + "\n";
-            asm_result += getCurrentIndentStr() + "cmp eax, " + instr.src2.loc + "\n";
-            asm_result += getCurrentIndentStr() + "setge" + " al\n";
-            asm_result += getCurrentIndentStr() + "movzx eax, al\n";
-            asm_result += getCurrentIndentStr() + "mov " + instr.dst.loc + ", eax\n";
-        }
-
-        else if(op == "leq"){
-            asm_result += getCurrentIndentStr() + "mov eax, " + instr.src1.loc + "\n";
-            asm_result += getCurrentIndentStr() + "cmp eax, " + instr.src2.loc + "\n";
-            asm_result += getCurrentIndentStr() + "setle" + " al\n";
-            asm_result += getCurrentIndentStr() + "movzx eax, al\n";
-            asm_result += getCurrentIndentStr() + "mov " + instr.dst.loc + ", eax\n";
-        }
-
-        else if (op == "addeq" || op == "subeq" || op == "imuleq" || op == "idiveq") {
-            // if (instr.src1.type != LOCAL) {
-            //     throw std::runtime_error("asmgen.hpp: Can only use compound assignment on local variables");
-            // }
-
-            std::string op_instr;
-            if (op == "addeq")      op_instr = "add";
-            else if (op == "subeq") op_instr = "sub";
-
-            if(op != "idiveq") asm_result += getCurrentIndentStr() + "mov eax, " + instr.src2.loc + "\n"; // value to add sub mul div (the right side like (+= x 2))
-
-            if (op == "addeq" || op == "subeq") {
-                asm_result += getCurrentIndentStr() + "mov ebx, " + instr.src1.loc + "\n";       // load original local
-                asm_result += getCurrentIndentStr() + op_instr + " ebx, eax\n";                  // ebx = ebx ± eax
-                asm_result += getCurrentIndentStr() + "mov " + instr.src1.loc + ", ebx\n";       // store back to local
-            }
-
-            else if (op == "imuleq") {
-                asm_result += getCurrentIndentStr() + "mov ebx, " + instr.src1.loc + "\n";       // load local
-                asm_result += getCurrentIndentStr() + "imul ebx, eax\n";                         // ebx *= eax
-                asm_result += getCurrentIndentStr() + "mov " + instr.src1.loc + ", ebx\n";       // store back to local
-            }
-
-            else if (op == "idiveq") {
-                // For signed division, use eax for dividend, edx for high bits (clear to 0 for 32-bit division)
-                asm_result += getCurrentIndentStr() + "mov eax, " + instr.src1.loc + "\n";
-                asm_result += getCurrentIndentStr() + "cdq\n";                                    // sign extend eax -> edx:eax
-                asm_result += getCurrentIndentStr() + "mov ebx, " + instr.src2.loc + "\n";       // divisor
-                asm_result += getCurrentIndentStr() + "idiv ebx\n";                               // eax = eax / ebx
-                asm_result += getCurrentIndentStr() + "mov " + instr.src1.loc + ", eax\n";       // store back to local
-            }
-        }
-
-
-
-        else if(op == "load") {
-            asm_result += getCurrentIndentStr() + _mov(instr.dst, instr.src1);
-        }
-
-        else if(op == "defun") {
-            currentIndent++;
-
-            std::string funcName = instr.src1.value;
-
-            Function func = getFunction(funcName);
-            
-            asm_result += funcName + ":\n";
-
-            int local_bytes = func.localVarCount * 4;
-            // stack frame
-            asm_result += getCurrentIndentStr() + "push ebp\n";
-            asm_result += getCurrentIndentStr() + "mov ebp, esp\n";
-            asm_result += getCurrentIndentStr() + "sub esp, " + std::to_string(local_bytes) + "\n"; // adjusting the stack for local vars (let)
-
-        }
-
-        else if(op == "push") {
-            if (instr.src1.type == IMM_NUM) {
-                asm_result += getCurrentIndentStr() + "mov eax, " + instr.src1.value + "\n";
-                asm_result += getCurrentIndentStr() + "push dword eax\n";
-            } else {
-                // instr.src1.loc is a register or memory location, can push directly
-                asm_result += getCurrentIndentStr() + "push dword " + instr.src1.loc + "\n";
-            }
-
-        }
-
-        else if(op == "return") {
-            asm_result += getCurrentIndentStr() + _mov(instr.dst,instr.src1);
-            asm_result += getCurrentIndentStr() + "mov esp, ebp\n";
-            asm_result += getCurrentIndentStr() + "pop ebp\n";
-            asm_result += getCurrentIndentStr() + "ret\n";
-            currentIndent--;
-        }
-
-
-        else if(op == "call") {
-            asm_result += getCurrentIndentStr() + "call " + instr.src1.value + "\n";
-        }
-
-        // esp is restored simply using mov esp, ebp, nvm its necessary
-        else if(op == "add_esp"){
-            asm_result += getCurrentIndentStr() + "add esp, " + std::to_string(std::stoi(instr.src1.value)) + "\n";
-        }
-
-        else if(op == "loadstr") {
-            std::string str = instr.src1.value;
-            std::string label;
-
-            // if(stringLabelMap.find(str) == stringLabelMap.end()) {
-            //     // string hasnt been added yet
-            //     label = "str_" + std::to_string(stringCounter++);
-            //     stringLabelMap[str] = label;
-
-            //     dataSection += label + ": db " + formatStringForNASM(str) + ", 0\n";
-            // }else {
-            //     label = stringLabelMap[str];
-            // }
-
-            label = "str_" + std::to_string(stringCounter++);
-            stringLabelMap[str] = label;
-
-            dataSection += label + ": db " + formatStringForNASM(str) + ", 0\n";
-
-            std::string dstOffset = instr.dst.loc;
-            asm_result += getCurrentIndentStr() + "mov eax, " + label + "\n";
-            asm_result += getCurrentIndentStr() + "mov " + dstOffset + ", eax\n";
-        }
-
-        else if(op == "print") {
-            std::string stringAddr = instr.src1.loc;
-            asm_result += getCurrentIndentStr() + "mov eax, " + stringAddr + "\n";
-            asm_result += getCurrentIndentStr() + "call _internal_print_string\n";
-        }
-
-        else if(op == "if") {
-            std::string trueLabel = instr.dst.value;
-            std::string falseLabel = instr.src2.value;
-
-            Value cond = instr.src1;
-
-            asm_result += getCurrentIndentStr() + "mov eax, " + cond.loc + "\n";
-            asm_result += getCurrentIndentStr() + "cmp eax, 0\n";
-            asm_result += getCurrentIndentStr() + "je  " + falseLabel + "\n";
-            asm_result += getCurrentIndentStr() + "jmp " + trueLabel + "\n";
-
-        }
-
-        else if(op == "label") {
-            std::string label = instr.dst.value;
-            asm_result += label + ":\n";
-        }
-
-        else if(op == "jump") {
-            std::string label = instr.dst.value;
-            asm_result += getCurrentIndentStr() + "jmp " + label + "\n";
-        }
-
-        else if(op == "cons") {
-            const std::string dst = instr.dst.loc;
-            const std::string leftSide = instr.src1.loc;
-            const std::string rightSide = instr.src2.loc;
-
-            // load car (src1) into eax
-            asm_result += getCurrentIndentStr() + "mov eax, " + leftSide + "\n";
-            // store car into [list_ptr]
-            asm_result += getCurrentIndentStr() + "mov ebx, [list_ptr]\n";
-            asm_result += getCurrentIndentStr() + "mov [ebx], eax\n";
-            // load cdr (src2) into eax
-            asm_result += getCurrentIndentStr() + "mov eax, " + rightSide + "\n";
-            // Load cdr into [list_ptr + 4]
-            asm_result += getCurrentIndentStr() + "mov ebx, [list_ptr]\n";
-            asm_result += getCurrentIndentStr() + "mov [ebx + 4], eax\n";
-            // Store address of cons cell into dst
-            asm_result += getCurrentIndentStr() + "mov eax, [list_ptr]\n";
-            asm_result += getCurrentIndentStr() + "mov " + dst + ", eax\n";
-
-            listPtrCounter += 8;
-            if(listPtrCounter > LIST_SPACE) {
-                throw std::runtime_error("asmgen.hpp: Too many cons cells -> increase LIST_SPACE. currently at: " + std::to_string(LIST_SPACE) + "bytes");
-            }
-
-            // Increment list pointer by 8 for next allocation
-            asm_result += getCurrentIndentStr() + "add dword [list_ptr], 8\n";
-        }
-
-
-        else if(op == "car") {
-            const std::string dst = instr.dst.loc;
-            const std::string src = instr.src1.loc;
-
-            asm_result += getCurrentIndentStr() + "mov ebx, " + src + "\n";       // Load pointer to cons cell
-            asm_result += getCurrentIndentStr() + "mov eax, [ebx]\n";             // Load car (first 4 bytes)
-            asm_result += getCurrentIndentStr() + "mov " + dst + ", eax\n";       // Store car into dst
-        }
-
-        else if(op == "cdr") {
-            const std::string dst = instr.dst.loc;
-            const std::string src = instr.src1.loc;
-
-            asm_result += getCurrentIndentStr() + "mov ebx, " + src + "\n";       // Load pointer to cons cell
-            asm_result += getCurrentIndentStr() + "mov eax, [ebx + 4]\n";         // Load cdr (second 4 bytes)
-            asm_result += getCurrentIndentStr() + "mov " + dst + ", eax\n";       // Store cdr into dst
-        }
-
-        else if(op == "deref"){
-            const std::string dst = instr.dst.loc;
-            const std::string src = instr.src1.loc;
-
-            //TODO: some kind of type safety
-
-            
-            asm_result += getCurrentIndentStr() + "mov eax, " + src + "\n";
-            asm_result += getCurrentIndentStr() + "movzx ebx, byte [eax]\n";
-            asm_result += getCurrentIndentStr() + "mov " + dst + ", ebx\n";
-        }
-
-        else if(op == "setchar"){
-            const std::string ptrLoc = instr.dst.loc;
-            const std::string indexLoc = instr.src1.loc;
-            const std::string character = instr.src2.loc;
-            asm_result += getCurrentIndentStr() + "mov eax, " + ptrLoc + "\n";
-            asm_result += getCurrentIndentStr() + "add eax, " + indexLoc + "\n";
-            asm_result += getCurrentIndentStr() + "mov ecx, " + character + "\n"; // character saved in ecx
-            asm_result += getCurrentIndentStr() + "mov [eax], cl\n"; // write into memory
-        }
-
-        else if(op == "malloc"){
-            asm_result += getCurrentIndentStr() + "mov eax, [heap_ptr]\n"; // current ptr
-            asm_result += getCurrentIndentStr() + "mov " + instr.dst.loc + ", eax\n"; // output = current ptr
-            asm_result += getCurrentIndentStr() + "mov ecx, " + instr.src1.loc + "\n"; // size
-            asm_result += getCurrentIndentStr() + "add eax, ecx\n"; // new ptr = old + size
-            asm_result += getCurrentIndentStr() + "mov [heap_ptr], eax\n"; // update heap ptr
-        }
-
-
-
+        if(op == "assign") generate_assign(instr);
+        else if(op == "add") generate_add(instr);
+        else if(op == "sub") generate_sub(instr);
+        else if(op == "imul") generate_imul(instr);
+        else if(op == "idiv") generate_idiv(instr);
+        else if(op == "and") generate_and(instr);
+        else if(op == "or") generate_or(instr);
+        else if(op == "xor") generate_xor(instr);
+        else if(op == "less") generate_less(instr);
+        else if(op == "less_equal") generate_less_equal(instr);
+        else if(op == "equal") generate_equal(instr);
+        else if(op == "not_equal") generate_not_equal(instr);
+        else if(op == "greater") generate_greater(instr);
+        else if(op == "greater_equal") generate_greater_equal(instr);
+        else if(op == "mod") generate_mod(instr);
+        else if(op == "shl") generate_shl(instr);
+        else if(op == "shr") generate_shr(instr);
+        else if(op == "neg") generate_neg(instr);
+        else if(op == "not") generate_not(instr);
+        else if(op == "addeq") generate_addeq(instr);
+        else if(op == "subeq") generate_subeq(instr);
+        else if(op == "imuleq") generate_imuleq(instr);
+        else if(op == "idiveq") generate_idiveq(instr);
+        else if(op == "inc") generate_inc(instr);
+        else if(op == "dec") generate_dec(instr);
+        else if(op == "load") generate_load(instr);
+        else if(op == "defun") generate_defun(instr);
+        else if(op == "push") generate_push(instr);
+        else if(op == "return") generate_return(instr);
+        else if(op == "call") generate_call(instr);
+        else if(op == "add_esp") generate_add_esp(instr);
+        else if(op == "loadstr") generate_loadstr(instr);
+        else if(op == "print") generate_print(instr);
+        else if(op == "if") generate_if(instr);
+        else if(op == "label") generate_label(instr);
+        else if(op == "jump") generate_jump(instr);
+        else if(op == "cons") generate_cons(instr);
+        else if(op == "car") generate_car(instr);
+        else if(op == "cdr") generate_cdr(instr);
+        else if(op == "deref") generate_deref(instr);
+        else if(op == "setbyte") generate_setbyte(instr);
+        else if(op == "malloc") generate_malloc(instr);
+        else if(op == "free") generate_free(instr);
 
 
         else {

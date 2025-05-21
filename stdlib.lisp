@@ -8,10 +8,6 @@
 ;; memcpy(dst src num) -> dst, copies num amount of bytes from src to dst
 ;; memset(ptr int:value num) -> ptr, sets the first num of bytes in ptr to the value value
 
-;; (defun malloc (size)
-
-;; )
-
 
 (defun strlen_internal (str n)
     (if (= (deref str) 0)  
@@ -38,7 +34,7 @@
             deref (+ str (- (- len i ) 1) )
             )
         )
-        (setchar out i c)
+        (setbyte out i c)
         (set i (+ i 1))
     )
     out
@@ -59,10 +55,53 @@
     (while (> num 0)
         (let digit (mod num base))
         (let ch (digitToString digit))
-        (setchar tmp i ch) ;; set a character in tmp
+        (setbyte tmp i ch) ;; set a character in tmp
         (+= i 1)
         (/= num base)
     )
 
     (reverse_str tmp)
+)
+
+;; reads a character at index "index"
+(defun readchar (ptr index)
+  (deref (+ ptr index))
+)
+
+;; works with strings or arrays on the .section data or in the heap
+(defun memcpy (ptrDst ptrSrc num )
+
+  (let i 0)
+
+  (while (< i num)
+    (let ch (readchar ptrSrc i))
+    (setbyte ptrDst i ch)
+    (+= i 1)
+  )
+
+  ptrDst
+  
+)
+
+
+(defun strcat (strA strB)
+  (let lenA (strlen strA))
+  (let lenB (strlen strB))
+  (let res_len (+ lenA lenB))
+
+  (let res_str (malloc (+ res_len 1)))
+
+  (memcpy res_str strA lenA)
+  (memcpy (+ res_str lenA) strB lenB)
+
+  (setbyte res_str res_len 0)
+  res_str
+)
+
+(defun alloc_string (init)
+  (let len (strlen init))
+  (let dst (malloc (+ len 1)))
+  (memcpy dst init len)
+  (setbyte dst len 0)
+  dst
 )

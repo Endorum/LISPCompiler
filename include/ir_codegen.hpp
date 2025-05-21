@@ -163,13 +163,12 @@ public:
 
     std::string getTempOffset(int index){
         // cant use the registers anymore as they are needed for asm gen e.g. idiv 
-        // switch (temp_count){
-        //     default: break;
-        //     case 0: return "eax";
-        //     case 1: return "ecx";
-        //     case 2: return "edx";
-        //     case 3: return "ebx";
-        // }
+        switch (temp_count){
+            default: break;
+            case 0: return "[ebp]";
+            case 1: return "esi";
+            case 2: return "edi";
+        }
         return "[ebp - " + std::to_string(++local_count * 4) + "]"; // spill after locals
     }
 
@@ -254,7 +253,9 @@ public:
             op == "*=" ||
             op == "/=" ||
             op == "<<" ||
-            op == ">>" 
+            op == ">>" ||
+            op == "++" ||
+            op == "--" 
             // op == "<<=" || 
             // op == ">>=" 
         );
@@ -267,19 +268,17 @@ public:
     Value handle_set_keyword(ASTNode* node);
     Value handle_defun_keyword(ASTNode* node);
     Value handle_functionCall(ASTNode* node);
-
     Value handle_if_keyword(ASTNode* node);
     Value handle_print_keyword(ASTNode* node);
     Value handle_cond_keyword(ASTNode * node);
-
     Value handle_cons_keyword(ASTNode* node);
     Value handle_car_keyword(ASTNode* node);
     Value handle_cdr_keyword(ASTNode* node);
-
     Value handle_deref_keyword(ASTNode* node);
     Value handle_while_keyword(ASTNode* node);
-    Value handle_setchar_keyword(ASTNode* node);
+    Value handle_setbyte_keyword(ASTNode* node);
     Value handle_malloc_keyword(ASTNode* node);
+    Value handle_free_keyword(ASTNode* node);
 
     // Value handle_null_keyword(ASTNode * node);
     // Value handle_toList_keyword(ASTNode * node);
@@ -313,7 +312,7 @@ public:
                 throw std::runtime_error("ir_codegen.hpp: FirstChild = nullptr?");
             }
 
-             
+            
 
 
             if(isOperator(firstChild->value)) {
@@ -368,12 +367,16 @@ public:
                 return handle_while_keyword(node);
             }
 
-            if(firstChild->value == "setchar"){
-                return handle_setchar_keyword(node);
+            if(firstChild->value == "setbyte"){
+                return handle_setbyte_keyword(node);
             }
 
             if(firstChild->value == "malloc"){
                 return handle_malloc_keyword(node);
+            }
+
+            if(firstChild->value == "free"){
+                return handle_free_keyword(node);
             }
 
             
@@ -381,6 +384,13 @@ public:
                 return handle_functionCall(node);
             }
 
+            if(firstChild->type == NT_List){
+                Value retval;
+                for(int i=0;i<firstChild->children.size();i++){
+                    retval = generate_code(firstChild->children.at(i));
+                }
+                return retval;
+            }
             
 
             else {
@@ -409,29 +419,39 @@ public:
                 return immVal;
             }
 
-            if(node->type == NT_Symbol) {
-                if(node->value == "nil"){
+            if (node->type == NT_Symbol) {
+                if (node->value == "nil") {
                     Value ret("nil", IMM_NUM);
                     ret.loc = "0";
                     return ret;
                 }
-                auto it = variable_table.find(node->value);
-                if (it == variable_table.end()) {
-                    std::string scope = "";
-                    for(const auto& pair : variable_table){
-                        scope += "Variable: \'" + pair.first + "\'\n";
-                    }
-                    throw std::runtime_error("ir_codegen.hpp: ERROR: Variable '" + node->value + "' not declared in current scope. \nScope:\n" + scope);
+
+                std::string scope = "";
+                for (const auto& pair : variable_table) {
+                    scope += "Variable: \'" + pair.first + "\'\n";
                 }
 
-                Value src = it->second;
-                Value dst = generate_tmp();
+                auto it = variable_table.find(node->value);
+                if (it != variable_table.end()) {
+                    // Variable is found
+                    Value src = it->second;
+                    Value dst = generate_tmp();
 
-                dst.valueType = src.type;
-                emit(dst, "load", src); // or "assign", depending on your IR naming
+                    dst.valueType = src.type;
+                    emit(dst, "load", src); // or "assign", depending on your IR naming
 
-                return dst;
+                    return dst;
+                } else if (isDeclaredFunction(node->value)) {
+                    // Symbol is a declared function
+                    // return Value("tried to call function: " + node->value);
+                    return handle_functionCall(node);
+                } else {
+                    // Neither variable nor function is found — throw an error
+                    throw std::runtime_error("ir_codegen.hpp: ERROR: Variable or Function '" + node->value +
+                                            "' not declared in current scope. \nScope:\n" + scope);
+                }
             }
+
 
             if(node->type == NT_String) {
                 Value temp = generate_tmp();

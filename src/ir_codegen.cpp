@@ -7,11 +7,6 @@
 #include "../include/ir_codegen.hpp"
 
 
-void Generator::printError(const std::string &msg) {
-    printf("not yet implemented\n");
-    exit(1);
-}
-
 void Generator::emit(Value dst, std::string op) {
     IRInstruction instruction;
     instruction.dst = dst;
@@ -84,18 +79,18 @@ std::string opCharToWord(std::string op) {
         case '^': return "xor";
         case '~': return "neg";
 
-        case '<': return "l";
-        case '>': return "g";
-        case '=': return "eq";
+        case '<': return "less";
+        case '>': return "greater";
+        case '=': return "equal";
         case '!': return "not";
     }
 
     if(op == "!="){
-        return "noteq";
+        return "not_equal";
     }else if(op == ">="){
-        return "geq";
+        return "greater_equal";
     }else if(op == "<="){
-        return "leq";
+        return "less_equal";
     }else if(op == "+="){
         return "addeq";
     }else if(op == "-="){
@@ -114,8 +109,6 @@ std::string opCharToWord(std::string op) {
         return "shleq";
     }else if(op == ">>"){
         return "shr";
-    }else if(op == ">>="){
-        return "shreq";
     }
 
 
@@ -164,8 +157,22 @@ Value Generator::handle_operator(ASTNode *node) {
         return dst;
     }
 
+    if( op == "<<=" || op == ">>="){
+        throw std::runtime_error("ir_codegen.cpp: Not longer supported, just use (set x (<< x y))");
+    }
+
+    if(op == "++" || op == "--"){
+        if (node->children.size() != 2) {
+            throw std::runtime_error("ir_codegen.cpp: ERROR: Expected exactly one argument for increase/decrease operator");
+        }
+        ASTNode* local = node->children.at(1);
+        Value loc_local = variable_table[local->value];
+        emit(loc_local, (op == "++") ? "inc" : "dec", loc_local);
+        return loc_local;
+    }
+
     // Assignment-style ops (+=, -=, etc.)
-    if (op == "+=" || op == "-=" || op == "*=" || op == "/=" || op == "<<=" || op == ">>=") {
+    if (op == "+=" || op == "-=" || op == "*=" || op == "/=") {
         if (node->children.size() != 3) {
             throw std::runtime_error("ir_codegen.cpp: ERROR: Expected exactly two arguments for compound assignment operator");
         }
@@ -183,11 +190,11 @@ Value Generator::handle_operator(ASTNode *node) {
 
     // Left fold: (((arg1 op arg2) op arg3) op arg4)
     Value acc = generate_code(node->children.at(1));
+    Value res = generate_tmp();
     for (size_t i = 2; i < node->children.size(); ++i) {
         Value next = generate_code(node->children.at(i));
-        Value tmp = generate_tmp();
-        emit(tmp, opCharToWord(op), acc, next);
-        acc = tmp;
+        emit(res, opCharToWord(op), acc, next);
+        acc = res;
     }
 
     return acc;
@@ -405,12 +412,28 @@ Value Generator::handle_if_keyword(ASTNode *node) {
     emit(Value(labelTrue), "if", condValue, Value(labelFalse));
 
     emit(Value(labelFalse), "label");
-    Value resIfFalse = generate_code(falseBody);
+    Value resIfFalse;
+    // kind of bad fix may change this later
+    if(node->children.size() != 4){ // allow multi line ifs using ( (line1) (line2) ) but also use the old way like (if (cond) (trueBody) (FalseBody) )
+        for(int i=0;i<falseBody->children.size();i++){
+            resIfFalse = generate_code(falseBody->children.at(i));
+        }
+    }else{
+        resIfFalse = generate_code(falseBody);
+    }
     emit(result, "assign", resIfFalse);
     emit(Value(labelEnd),"jump");
     
     emit(Value(labelTrue), "label");
-    Value resIfTrue = generate_code(trueBody);
+    Value resIfTrue;
+    if(node->children.size() != 4){
+        for(int i=0;i<trueBody->children.size();i++){
+            resIfTrue = generate_code(trueBody->children.at(i));
+        }
+    }else{
+        resIfTrue = generate_code(trueBody);
+    }
+    
     emit(result, "assign", resIfTrue);
 
     emit(Value(labelEnd), "label");
@@ -601,16 +624,16 @@ Value Generator::handle_while_keyword(ASTNode* node){
     return lastOutput;
 }
 
-Value Generator::handle_setchar_keyword(ASTNode* node){
+Value Generator::handle_setbyte_keyword(ASTNode* node){
     if(node->children.size() != 4){
-        throw std::runtime_error("ir_codegen.cpp: invalid setchar expression");
+        throw std::runtime_error("ir_codegen.cpp: invalid setbyte expression");
     }
 
     Value ptr = generate_code(node->children.at(1));
     Value index = generate_code(node->children.at(2));
     Value character = generate_code(node->children.at(3));
 
-    emit(Value(ptr), "setchar", index, character);
+    emit(Value(ptr), "setbyte", index, character);
 
     return ptr;
 }
@@ -627,6 +650,23 @@ Value Generator::handle_malloc_keyword(ASTNode* node){
 
     
     return dst;
+}
+
+Value Generator::handle_free_keyword(ASTNode* node){
+    if(node->children.size() != 2){
+        throw std::runtime_error("ir_codegen.cpp: free expects a single pointer argument");
+    } 
+
+    Value addr = generate_code(node->children.at(1));
+    Value dst = generate_tmp();
+
+    emit(dst, "free", addr);
+
+    dst.loc = "0";
+    dst.value = "0";
+
+    return dst;
+
 }
 
 // std::string Generator::handle_null_keyword(ASTNode *node) {
