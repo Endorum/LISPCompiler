@@ -1,74 +1,374 @@
- Node Type: 'List' Children (6): 
+ Node Type: 'List' Children (4): 
 	 Node Type: 'Symbol' Value: 'defun'
-	 Node Type: 'Symbol' Value: 'main'
-	 Node Type: 'List'
-	 Node Type: 'List' Children (3): 
-		 Node Type: 'Symbol' Value: 'let'
-		 Node Type: 'Symbol' Value: 'a'
-		 Node Type: 'Number' Value: '5'
-	 Node Type: 'List' Children (3): 
-		 Node Type: 'Symbol' Value: 'let'
-		 Node Type: 'Symbol' Value: 'b'
-		 Node Type: 'Number' Value: '6'
+	 Node Type: 'Symbol' Value: 'strlen_internal'
+	 Node Type: 'List' Children (2): 
+		 Node Type: 'Symbol' Value: 'str'
+		 Node Type: 'Symbol' Value: 'n'
 	 Node Type: 'List' Children (4): 
 		 Node Type: 'Symbol' Value: 'if'
 		 Node Type: 'List' Children (3): 
+			 Node Type: 'Symbol' Value: '='
+			 Node Type: 'List' Children (2): 
+				 Node Type: 'Symbol' Value: 'deref'
+				 Node Type: 'Symbol' Value: 'str'
+			 Node Type: 'Number' Value: '0'
+		 Node Type: 'Symbol' Value: 'n'
+		 Node Type: 'List' Children (3): 
+			 Node Type: 'Symbol' Value: 'strlen_internal'
+			 Node Type: 'List' Children (3): 
+				 Node Type: 'Symbol' Value: '+'
+				 Node Type: 'Symbol' Value: 'str'
+				 Node Type: 'Number' Value: '1'
+			 Node Type: 'List' Children (3): 
+				 Node Type: 'Symbol' Value: '+'
+				 Node Type: 'Symbol' Value: 'n'
+				 Node Type: 'Number' Value: '1'
+ Node Type: 'List' Children (4): 
+	 Node Type: 'Symbol' Value: 'defun'
+	 Node Type: 'Symbol' Value: 'strlen'
+	 Node Type: 'List' Children (1): 
+		 Node Type: 'Symbol' Value: 'str'
+	 Node Type: 'List' Children (3): 
+		 Node Type: 'Symbol' Value: 'strlen_internal'
+		 Node Type: 'Symbol' Value: 'str'
+		 Node Type: 'Number' Value: '0'
+ Node Type: 'List' Children (4): 
+	 Node Type: 'Symbol' Value: 'defun'
+	 Node Type: 'Symbol' Value: 'digitToString'
+	 Node Type: 'List' Children (1): 
+		 Node Type: 'Symbol' Value: 'x'
+	 Node Type: 'List' Children (4): 
+		 Node Type: 'Symbol' Value: 'if'
+		 Node Type: 'List' Children (3): 
+			 Node Type: 'Symbol' Value: '<'
+			 Node Type: 'Symbol' Value: 'x'
+			 Node Type: 'Number' Value: '10'
+		 Node Type: 'List' Children (3): 
+			 Node Type: 'Symbol' Value: '+'
+			 Node Type: 'Symbol' Value: 'x'
+			 Node Type: 'Number' Value: '48'
+		 Node Type: 'List' Children (3): 
+			 Node Type: 'Symbol' Value: '+'
+			 Node Type: 'Symbol' Value: 'x'
+			 Node Type: 'Number' Value: '55'
+ Node Type: 'List' Children (8): 
+	 Node Type: 'Symbol' Value: 'defun'
+	 Node Type: 'Symbol' Value: 'reverse_str'
+	 Node Type: 'List' Children (1): 
+		 Node Type: 'Symbol' Value: 'str'
+	 Node Type: 'List' Children (3): 
+		 Node Type: 'Symbol' Value: 'let'
+		 Node Type: 'Symbol' Value: 'len'
+		 Node Type: 'List' Children (2): 
+			 Node Type: 'Symbol' Value: 'strlen'
+			 Node Type: 'Symbol' Value: 'str'
+	 Node Type: 'List' Children (3): 
+		 Node Type: 'Symbol' Value: 'let'
+		 Node Type: 'Symbol' Value: 'out'
+		 Node Type: 'String' Value: '..........'
+	 Node Type: 'List' Children (3): 
+		 Node Type: 'Symbol' Value: 'let'
+		 Node Type: 'Symbol' Value: 'i'
+		 Node Type: 'Number' Value: '0'
+	 Node Type: 'List' Children (5): 
+		 Node Type: 'Symbol' Value: 'while'
+		 Node Type: 'List' Children (3): 
+			 Node Type: 'Symbol' Value: '<'
+			 Node Type: 'Symbol' Value: 'i'
+			 Node Type: 'Symbol' Value: 'len'
+		 Node Type: 'List' Children (3): 
+			 Node Type: 'Symbol' Value: 'let'
+			 Node Type: 'Symbol' Value: 'c'
+			 Node Type: 'List' Children (2): 
+				 Node Type: 'Symbol' Value: 'deref'
+				 Node Type: 'List' Children (3): 
+					 Node Type: 'Symbol' Value: '+'
+					 Node Type: 'Symbol' Value: 'str'
+					 Node Type: 'List' Children (3): 
+						 Node Type: 'Symbol' Value: '-'
+						 Node Type: 'List' Children (3): 
+							 Node Type: 'Symbol' Value: '-'
+							 Node Type: 'Symbol' Value: 'len'
+							 Node Type: 'Symbol' Value: 'i'
+						 Node Type: 'Number' Value: '1'
+		 Node Type: 'List' Children (4): 
+			 Node Type: 'Symbol' Value: 'setbyte'
+			 Node Type: 'Symbol' Value: 'out'
+			 Node Type: 'Symbol' Value: 'i'
+			 Node Type: 'Symbol' Value: 'c'
+		 Node Type: 'List' Children (3): 
+			 Node Type: 'Symbol' Value: 'set'
+			 Node Type: 'Symbol' Value: 'i'
+			 Node Type: 'List' Children (3): 
+				 Node Type: 'Symbol' Value: '+'
+				 Node Type: 'Symbol' Value: 'i'
+				 Node Type: 'Number' Value: '1'
+	 Node Type: 'Symbol' Value: 'out'
+ Node Type: 'List' Children (5): 
+	 Node Type: 'Symbol' Value: 'defun'
+	 Node Type: 'Symbol' Value: 'printLn'
+	 Node Type: 'List' Children (1): 
+		 Node Type: 'Symbol' Value: 'str'
+	 Node Type: 'List' Children (2): 
+		 Node Type: 'Symbol' Value: 'print'
+		 Node Type: 'Symbol' Value: 'str'
+	 Node Type: 'List' Children (2): 
+		 Node Type: 'Symbol' Value: 'print'
+		 Node Type: 'String' Value: '\n'
+ Node Type: 'List' Children (7): 
+	 Node Type: 'Symbol' Value: 'defun'
+	 Node Type: 'Symbol' Value: 'itoa'
+	 Node Type: 'List' Children (2): 
+		 Node Type: 'Symbol' Value: 'num'
+		 Node Type: 'Symbol' Value: 'base'
+	 Node Type: 'List' Children (3): 
+		 Node Type: 'Symbol' Value: 'let'
+		 Node Type: 'Symbol' Value: 'tmp'
+		 Node Type: 'String' Value: '..........'
+	 Node Type: 'List' Children (3): 
+		 Node Type: 'Symbol' Value: 'let'
+		 Node Type: 'Symbol' Value: 'i'
+		 Node Type: 'Number' Value: '0'
+	 Node Type: 'List' Children (7): 
+		 Node Type: 'Symbol' Value: 'while'
+		 Node Type: 'List' Children (3): 
 			 Node Type: 'Symbol' Value: '>'
-			 Node Type: 'Symbol' Value: 'a'
-			 Node Type: 'Symbol' Value: 'b'
+			 Node Type: 'Symbol' Value: 'num'
+			 Node Type: 'Number' Value: '0'
+		 Node Type: 'List' Children (3): 
+			 Node Type: 'Symbol' Value: 'let'
+			 Node Type: 'Symbol' Value: 'digit'
+			 Node Type: 'List' Children (3): 
+				 Node Type: 'Symbol' Value: 'mod'
+				 Node Type: 'Symbol' Value: 'num'
+				 Node Type: 'Symbol' Value: 'base'
+		 Node Type: 'List' Children (3): 
+			 Node Type: 'Symbol' Value: 'let'
+			 Node Type: 'Symbol' Value: 'ch'
+			 Node Type: 'List' Children (2): 
+				 Node Type: 'Symbol' Value: 'digitToString'
+				 Node Type: 'Symbol' Value: 'digit'
+		 Node Type: 'List' Children (4): 
+			 Node Type: 'Symbol' Value: 'setbyte'
+			 Node Type: 'Symbol' Value: 'tmp'
+			 Node Type: 'Symbol' Value: 'i'
+			 Node Type: 'Symbol' Value: 'ch'
 		 Node Type: 'List' Children (3): 
 			 Node Type: 'Symbol' Value: '+='
-			 Node Type: 'Symbol' Value: 'a'
-			 Node Type: 'Symbol' Value: 'b'
+			 Node Type: 'Symbol' Value: 'i'
+			 Node Type: 'Number' Value: '1'
 		 Node Type: 'List' Children (3): 
-			 Node Type: 'Symbol' Value: '-='
-			 Node Type: 'Symbol' Value: 'a'
-			 Node Type: 'Symbol' Value: 'b'
+			 Node Type: 'Symbol' Value: '/='
+			 Node Type: 'Symbol' Value: 'num'
+			 Node Type: 'Symbol' Value: 'base'
+	 Node Type: 'List' Children (2): 
+		 Node Type: 'Symbol' Value: 'reverse_str'
+		 Node Type: 'Symbol' Value: 'tmp'
+ Node Type: 'List' Children (4): 
+	 Node Type: 'Symbol' Value: 'defun'
+	 Node Type: 'Symbol' Value: 'readchar'
+	 Node Type: 'List' Children (2): 
+		 Node Type: 'Symbol' Value: 'ptr'
+		 Node Type: 'Symbol' Value: 'index'
+	 Node Type: 'List' Children (2): 
+		 Node Type: 'Symbol' Value: 'deref'
+		 Node Type: 'List' Children (3): 
+			 Node Type: 'Symbol' Value: '+'
+			 Node Type: 'Symbol' Value: 'ptr'
+			 Node Type: 'Symbol' Value: 'index'
+ Node Type: 'List' Children (6): 
+	 Node Type: 'Symbol' Value: 'defun'
+	 Node Type: 'Symbol' Value: 'memcpy'
+	 Node Type: 'List' Children (3): 
+		 Node Type: 'Symbol' Value: 'ptrDst'
+		 Node Type: 'Symbol' Value: 'ptrSrc'
+		 Node Type: 'Symbol' Value: 'num'
+	 Node Type: 'List' Children (3): 
+		 Node Type: 'Symbol' Value: 'let'
+		 Node Type: 'Symbol' Value: 'i'
+		 Node Type: 'Number' Value: '0'
+	 Node Type: 'List' Children (5): 
+		 Node Type: 'Symbol' Value: 'while'
+		 Node Type: 'List' Children (3): 
+			 Node Type: 'Symbol' Value: '<'
+			 Node Type: 'Symbol' Value: 'i'
+			 Node Type: 'Symbol' Value: 'num'
+		 Node Type: 'List' Children (3): 
+			 Node Type: 'Symbol' Value: 'let'
+			 Node Type: 'Symbol' Value: 'ch'
+			 Node Type: 'List' Children (3): 
+				 Node Type: 'Symbol' Value: 'readchar'
+				 Node Type: 'Symbol' Value: 'ptrSrc'
+				 Node Type: 'Symbol' Value: 'i'
+		 Node Type: 'List' Children (4): 
+			 Node Type: 'Symbol' Value: 'setbyte'
+			 Node Type: 'Symbol' Value: 'ptrDst'
+			 Node Type: 'Symbol' Value: 'i'
+			 Node Type: 'Symbol' Value: 'ch'
+		 Node Type: 'List' Children (3): 
+			 Node Type: 'Symbol' Value: '+='
+			 Node Type: 'Symbol' Value: 'i'
+			 Node Type: 'Number' Value: '1'
+	 Node Type: 'Symbol' Value: 'ptrDst'
+ Node Type: 'List' Children (11): 
+	 Node Type: 'Symbol' Value: 'defun'
+	 Node Type: 'Symbol' Value: 'strcat'
+	 Node Type: 'List' Children (2): 
+		 Node Type: 'Symbol' Value: 'strA'
+		 Node Type: 'Symbol' Value: 'strB'
+	 Node Type: 'List' Children (3): 
+		 Node Type: 'Symbol' Value: 'let'
+		 Node Type: 'Symbol' Value: 'lenA'
+		 Node Type: 'List' Children (2): 
+			 Node Type: 'Symbol' Value: 'strlen'
+			 Node Type: 'Symbol' Value: 'strA'
+	 Node Type: 'List' Children (3): 
+		 Node Type: 'Symbol' Value: 'let'
+		 Node Type: 'Symbol' Value: 'lenB'
+		 Node Type: 'List' Children (2): 
+			 Node Type: 'Symbol' Value: 'strlen'
+			 Node Type: 'Symbol' Value: 'strB'
+	 Node Type: 'List' Children (3): 
+		 Node Type: 'Symbol' Value: 'let'
+		 Node Type: 'Symbol' Value: 'res_len'
+		 Node Type: 'List' Children (3): 
+			 Node Type: 'Symbol' Value: '+'
+			 Node Type: 'Symbol' Value: 'lenA'
+			 Node Type: 'Symbol' Value: 'lenB'
+	 Node Type: 'List' Children (3): 
+		 Node Type: 'Symbol' Value: 'let'
+		 Node Type: 'Symbol' Value: 'res_str'
+		 Node Type: 'List' Children (2): 
+			 Node Type: 'Symbol' Value: 'malloc'
+			 Node Type: 'List' Children (3): 
+				 Node Type: 'Symbol' Value: '+'
+				 Node Type: 'Symbol' Value: 'res_len'
+				 Node Type: 'Number' Value: '1'
+	 Node Type: 'List' Children (4): 
+		 Node Type: 'Symbol' Value: 'memcpy'
+		 Node Type: 'Symbol' Value: 'res_str'
+		 Node Type: 'Symbol' Value: 'strA'
+		 Node Type: 'Symbol' Value: 'lenA'
+	 Node Type: 'List' Children (4): 
+		 Node Type: 'Symbol' Value: 'memcpy'
+		 Node Type: 'List' Children (3): 
+			 Node Type: 'Symbol' Value: '+'
+			 Node Type: 'Symbol' Value: 'res_str'
+			 Node Type: 'Symbol' Value: 'lenA'
+		 Node Type: 'Symbol' Value: 'strB'
+		 Node Type: 'Symbol' Value: 'lenB'
+	 Node Type: 'List' Children (4): 
+		 Node Type: 'Symbol' Value: 'setbyte'
+		 Node Type: 'Symbol' Value: 'res_str'
+		 Node Type: 'Symbol' Value: 'res_len'
+		 Node Type: 'Number' Value: '0'
+	 Node Type: 'Symbol' Value: 'res_str'
+ Node Type: 'List' Children (8): 
+	 Node Type: 'Symbol' Value: 'defun'
+	 Node Type: 'Symbol' Value: 'alloc_string'
+	 Node Type: 'List' Children (1): 
+		 Node Type: 'Symbol' Value: 'init'
+	 Node Type: 'List' Children (3): 
+		 Node Type: 'Symbol' Value: 'let'
+		 Node Type: 'Symbol' Value: 'len'
+		 Node Type: 'List' Children (2): 
+			 Node Type: 'Symbol' Value: 'strlen'
+			 Node Type: 'Symbol' Value: 'init'
+	 Node Type: 'List' Children (3): 
+		 Node Type: 'Symbol' Value: 'let'
+		 Node Type: 'Symbol' Value: 'dst'
+		 Node Type: 'List' Children (2): 
+			 Node Type: 'Symbol' Value: 'malloc'
+			 Node Type: 'List' Children (3): 
+				 Node Type: 'Symbol' Value: '+'
+				 Node Type: 'Symbol' Value: 'len'
+				 Node Type: 'Number' Value: '1'
+	 Node Type: 'List' Children (4): 
+		 Node Type: 'Symbol' Value: 'memcpy'
+		 Node Type: 'Symbol' Value: 'dst'
+		 Node Type: 'Symbol' Value: 'init'
+		 Node Type: 'Symbol' Value: 'len'
+	 Node Type: 'List' Children (4): 
+		 Node Type: 'Symbol' Value: 'setbyte'
+		 Node Type: 'Symbol' Value: 'dst'
+		 Node Type: 'Symbol' Value: 'len'
+		 Node Type: 'Number' Value: '0'
+	 Node Type: 'Symbol' Value: 'dst'
+ Node Type: 'List' Children (4): 
+	 Node Type: 'Symbol' Value: 'defun'
+	 Node Type: 'Symbol' Value: 'main'
+	 Node Type: 'List'
+	 Node Type: 'List' Children (2): 
+		 Node Type: 'Symbol' Value: 'printLn'
+		 Node Type: 'List' Children (3): 
+			 Node Type: 'Symbol' Value: 'itoa'
+			 Node Type: 'Number' Value: '123'
+			 Node Type: 'Number' Value: '10'
 dst: value: label type: IMM_STR ValueType: NONE
 defun
-src1: value: main type: IMM_STR ValueType: NONE
+src1: value: strlen_internal type: IMM_STR ValueType: NONE
 
-dst: value: a type: LOCAL loc: [ebp - 4] ValueType: NONE
-assign
-src1: value: 5 type: IMM_NUM loc: 5 ValueType: NONE
-
-dst: value: b type: LOCAL loc: [ebp - 8] ValueType: NONE
-assign
-src1: value: 6 type: IMM_NUM loc: 6 ValueType: NONE
-
-dst: value: t0 type: TEMP loc: [ebp] ValueType: LOCAL
+dst: value: t0 type: TEMP loc: [ebp] ValueType: PARAM
 load
-src1: value: a type: LOCAL loc: [ebp - 4] ValueType: NONE
-
-dst: value: t2 type: TEMP loc: edi ValueType: LOCAL
-load
-src1: value: b type: LOCAL loc: [ebp - 8] ValueType: NONE
+src1: value: str type: PARAM loc: [ebp + 8] ValueType: NONE
 
 dst: value: t1 type: TEMP loc: esi ValueType: NONE
-greater
-src1: value: t0 type: TEMP loc: [ebp] ValueType: LOCAL
-src2: value: t2 type: TEMP loc: edi ValueType: LOCAL
+deref
+src1: value: t0 type: TEMP loc: [ebp] ValueType: PARAM
+
+dst: value: t2 type: TEMP loc: edi ValueType: NONE
+equal
+src1: value: t1 type: TEMP loc: esi ValueType: NONE
+src2: value: 0 type: IMM_NUM loc: 0 ValueType: NONE
 
 dst: value: label_if_true_0 ValueType: NONE
 if
-src1: value: t1 type: TEMP loc: esi ValueType: NONE
+src1: value: t2 type: TEMP loc: edi ValueType: NONE
 src2: value: label_if_false_0 ValueType: NONE
 
 dst: value: label_if_false_0 ValueType: NONE
 label
 
-dst: value: t4 type: TEMP loc: [ebp - 16] ValueType: LOCAL
+dst: value: t4 type: TEMP loc: [t1] ValueType: PARAM
 load
-src1: value: b type: LOCAL loc: [ebp - 8] ValueType: NONE
+src1: value: str type: PARAM loc: [ebp + 8] ValueType: NONE
 
-dst: value: a type: LOCAL loc: [ebp - 4] ValueType: NONE
-subeq
-src1: value: a type: LOCAL loc: [ebp - 4] ValueType: NONE
-src2: value: t4 type: TEMP loc: [ebp - 16] ValueType: LOCAL
+dst: value: t5 type: TEMP loc: [t2] ValueType: NONE
+add
+src1: value: t4 type: TEMP loc: [t1] ValueType: PARAM
+src2: value: 1 type: IMM_NUM loc: 1 ValueType: NONE
 
-dst: value: t3 type: TEMP loc: [ebp - 12] ValueType: NONE
+dst: value: t6 type: TEMP loc: [t3] ValueType: PARAM
+load
+src1: value: n type: PARAM loc: [ebp + 12] ValueType: NONE
+
+dst: value: t7 type: TEMP loc: [t4] ValueType: NONE
+add
+src1: value: t6 type: TEMP loc: [t3] ValueType: PARAM
+src2: value: 1 type: IMM_NUM loc: 1 ValueType: NONE
+
+dst: 
+push
+src1: value: t7 type: TEMP loc: [t4] ValueType: NONE
+
+dst: 
+push
+src1: value: t5 type: TEMP loc: [t2] ValueType: NONE
+
+dst: 
+call
+src1: value: strlen_internal ValueType: NONE
+
+dst: 
+add_esp
+src1: value: 8 type: IMM_NUM ValueType: NONE
+
+dst: value: t8 type: TEMP loc: [t5] ValueType: NONE
 assign
-src1: value: a type: LOCAL loc: [ebp - 4] ValueType: NONE
+
+dst: value: t3 type: TEMP loc: [t0] ValueType: NONE
+assign
+src1: value: t8 type: TEMP loc: [t5] ValueType: NONE
 
 dst: value: label_if_end_0 ValueType: NONE
 jump
@@ -76,26 +376,862 @@ jump
 dst: value: label_if_true_0 ValueType: NONE
 label
 
-dst: value: t5 type: TEMP loc: [ebp - 20] ValueType: LOCAL
+dst: value: t9 type: TEMP loc: [t6] ValueType: PARAM
 load
-src1: value: b type: LOCAL loc: [ebp - 8] ValueType: NONE
+src1: value: n type: PARAM loc: [ebp + 12] ValueType: NONE
 
-dst: value: a type: LOCAL loc: [ebp - 4] ValueType: NONE
-addeq
-src1: value: a type: LOCAL loc: [ebp - 4] ValueType: NONE
-src2: value: t5 type: TEMP loc: [ebp - 20] ValueType: LOCAL
-
-dst: value: t3 type: TEMP loc: [ebp - 12] ValueType: NONE
+dst: value: t3 type: TEMP loc: [t0] ValueType: NONE
 assign
-src1: value: a type: LOCAL loc: [ebp - 4] ValueType: NONE
+src1: value: t9 type: TEMP loc: [t6] ValueType: PARAM
 
 dst: value: label_if_end_0 ValueType: NONE
 label
 
 dst: value: return_value type: TEMP loc: eax ValueType: NONE
 return
-src1: value: t3 type: TEMP loc: [ebp - 12] ValueType: NONE
+src1: value: t3 type: TEMP loc: [t0] ValueType: NONE
 
-b : 0
-a : 0
+dst: value: label type: IMM_STR ValueType: NONE
+defun
+src1: value: strlen type: IMM_STR ValueType: NONE
+
+dst: value: t0 type: TEMP loc: [ebp] ValueType: PARAM
+load
+src1: value: str type: PARAM loc: [ebp + 8] ValueType: NONE
+
+dst: 
+push
+src1: value: 0 type: IMM_NUM loc: 0 ValueType: NONE
+
+dst: 
+push
+src1: value: t0 type: TEMP loc: [ebp] ValueType: PARAM
+
+dst: 
+call
+src1: value: strlen_internal ValueType: NONE
+
+dst: 
+add_esp
+src1: value: 8 type: IMM_NUM ValueType: NONE
+
+dst: value: t1 type: TEMP loc: esi ValueType: NONE
+assign
+
+dst: value: return_value type: TEMP loc: eax ValueType: NONE
+return
+src1: value: t1 type: TEMP loc: esi ValueType: NONE
+
+dst: value: label type: IMM_STR ValueType: NONE
+defun
+src1: value: digitToString type: IMM_STR ValueType: NONE
+
+dst: value: t0 type: TEMP loc: [ebp] ValueType: PARAM
+load
+src1: value: x type: PARAM loc: [ebp + 8] ValueType: NONE
+
+dst: value: t1 type: TEMP loc: esi ValueType: NONE
+less
+src1: value: t0 type: TEMP loc: [ebp] ValueType: PARAM
+src2: value: 10 type: IMM_NUM loc: 10 ValueType: NONE
+
+dst: value: label_if_true_1 ValueType: NONE
+if
+src1: value: t1 type: TEMP loc: esi ValueType: NONE
+src2: value: label_if_false_1 ValueType: NONE
+
+dst: value: label_if_false_1 ValueType: NONE
+label
+
+dst: value: t3 type: TEMP loc: [t0] ValueType: PARAM
+load
+src1: value: x type: PARAM loc: [ebp + 8] ValueType: NONE
+
+dst: value: t4 type: TEMP loc: [t1] ValueType: NONE
+add
+src1: value: t3 type: TEMP loc: [t0] ValueType: PARAM
+src2: value: 55 type: IMM_NUM loc: 55 ValueType: NONE
+
+dst: value: t2 type: TEMP loc: edi ValueType: NONE
+assign
+src1: value: t4 type: TEMP loc: [t1] ValueType: NONE
+
+dst: value: label_if_end_1 ValueType: NONE
+jump
+
+dst: value: label_if_true_1 ValueType: NONE
+label
+
+dst: value: t5 type: TEMP loc: [t2] ValueType: PARAM
+load
+src1: value: x type: PARAM loc: [ebp + 8] ValueType: NONE
+
+dst: value: t6 type: TEMP loc: [t3] ValueType: NONE
+add
+src1: value: t5 type: TEMP loc: [t2] ValueType: PARAM
+src2: value: 48 type: IMM_NUM loc: 48 ValueType: NONE
+
+dst: value: t2 type: TEMP loc: edi ValueType: NONE
+assign
+src1: value: t6 type: TEMP loc: [t3] ValueType: NONE
+
+dst: value: label_if_end_1 ValueType: NONE
+label
+
+dst: value: return_value type: TEMP loc: eax ValueType: NONE
+return
+src1: value: t2 type: TEMP loc: edi ValueType: NONE
+
+dst: value: label type: IMM_STR ValueType: NONE
+defun
+src1: value: reverse_str type: IMM_STR ValueType: NONE
+
+dst: value: t0 type: TEMP loc: [ebp] ValueType: PARAM
+load
+src1: value: str type: PARAM loc: [ebp + 8] ValueType: NONE
+
+dst: 
+push
+src1: value: t0 type: TEMP loc: [ebp] ValueType: PARAM
+
+dst: 
+call
+src1: value: strlen ValueType: NONE
+
+dst: 
+add_esp
+src1: value: 4 type: IMM_NUM ValueType: NONE
+
+dst: value: t1 type: TEMP loc: esi ValueType: NONE
+assign
+
+dst: value: len type: LOCAL loc: [ebp - 4] ValueType: NONE
+assign
+src1: value: t1 type: TEMP loc: esi ValueType: NONE
+
+dst: value: t2 type: TEMP loc: edi ValueType: IMM_STR
+loadstr
+src1: value: .......... type: IMM_STR ValueType: NONE
+
+dst: value: out type: LOCAL loc: [ebp - 8] ValueType: IMM_STR
+assign
+src1: value: t2 type: TEMP loc: edi ValueType: IMM_STR
+
+dst: value: i type: LOCAL loc: [ebp - 12] ValueType: NONE
+assign
+src1: value: 0 type: IMM_NUM loc: 0 ValueType: NONE
+
+dst: value: label_while_start_2 ValueType: NONE
+label
+
+dst: value: t3 type: TEMP loc: [t0] ValueType: LOCAL
+load
+src1: value: i type: LOCAL loc: [ebp - 12] ValueType: NONE
+
+dst: value: t5 type: TEMP loc: [t2] ValueType: LOCAL
+load
+src1: value: len type: LOCAL loc: [ebp - 4] ValueType: NONE
+
+dst: value: t4 type: TEMP loc: [t1] ValueType: NONE
+less
+src1: value: t3 type: TEMP loc: [t0] ValueType: LOCAL
+src2: value: t5 type: TEMP loc: [t2] ValueType: LOCAL
+
+dst: value: label_while_body_2 ValueType: NONE
+if
+src1: value: t4 type: TEMP loc: [t1] ValueType: NONE
+src2: value: label_while_end_2 ValueType: NONE
+
+dst: value: label_while_body_2 ValueType: NONE
+label
+
+dst: value: t6 type: TEMP loc: [t3] ValueType: PARAM
+load
+src1: value: str type: PARAM loc: [ebp + 8] ValueType: NONE
+
+dst: value: t8 type: TEMP loc: [t5] ValueType: LOCAL
+load
+src1: value: len type: LOCAL loc: [ebp - 4] ValueType: NONE
+
+dst: value: t10 type: TEMP loc: [t7] ValueType: LOCAL
+load
+src1: value: i type: LOCAL loc: [ebp - 12] ValueType: NONE
+
+dst: value: t9 type: TEMP loc: [t6] ValueType: NONE
+sub
+src1: value: t8 type: TEMP loc: [t5] ValueType: LOCAL
+src2: value: t10 type: TEMP loc: [t7] ValueType: LOCAL
+
+dst: value: t11 type: TEMP loc: [t8] ValueType: NONE
+sub
+src1: value: t9 type: TEMP loc: [t6] ValueType: NONE
+src2: value: 1 type: IMM_NUM loc: 1 ValueType: NONE
+
+dst: value: t7 type: TEMP loc: [t4] ValueType: NONE
+add
+src1: value: t6 type: TEMP loc: [t3] ValueType: PARAM
+src2: value: t11 type: TEMP loc: [t8] ValueType: NONE
+
+dst: value: t12 type: TEMP loc: [t9] ValueType: NONE
+deref
+src1: value: t7 type: TEMP loc: [t4] ValueType: NONE
+
+dst: value: c type: LOCAL loc: [ebp - 16] ValueType: NONE
+assign
+src1: value: t12 type: TEMP loc: [t9] ValueType: NONE
+
+dst: value: t13 type: TEMP loc: [ebp - 20] ValueType: LOCAL
+load
+src1: value: out type: LOCAL loc: [ebp - 8] ValueType: IMM_STR
+
+dst: value: t14 type: TEMP loc: [ebp - 24] ValueType: LOCAL
+load
+src1: value: i type: LOCAL loc: [ebp - 12] ValueType: NONE
+
+dst: value: t15 type: TEMP loc: [ebp - 28] ValueType: LOCAL
+load
+src1: value: c type: LOCAL loc: [ebp - 16] ValueType: NONE
+
+dst: value: t13 type: TEMP loc: [ebp - 20] ValueType: LOCAL
+setbyte
+src1: value: t14 type: TEMP loc: [ebp - 24] ValueType: LOCAL
+src2: value: t15 type: TEMP loc: [ebp - 28] ValueType: LOCAL
+
+dst: value: t16 type: TEMP loc: [ebp - 32] ValueType: LOCAL
+load
+src1: value: i type: LOCAL loc: [ebp - 12] ValueType: NONE
+
+dst: value: t17 type: TEMP loc: [ebp - 36] ValueType: NONE
+add
+src1: value: t16 type: TEMP loc: [ebp - 32] ValueType: LOCAL
+src2: value: 1 type: IMM_NUM loc: 1 ValueType: NONE
+
+dst: value: i type: LOCAL loc: [ebp - 12] ValueType: NONE
+assign
+src1: value: t17 type: TEMP loc: [ebp - 36] ValueType: NONE
+
+dst: value: label_while_start_2 ValueType: NONE
+jump
+
+dst: value: label_while_end_2 ValueType: NONE
+label
+
+dst: value: t18 type: TEMP loc: [ebp - 40] ValueType: LOCAL
+load
+src1: value: out type: LOCAL loc: [ebp - 8] ValueType: IMM_STR
+
+dst: value: return_value type: TEMP loc: eax ValueType: NONE
+return
+src1: value: t18 type: TEMP loc: [ebp - 40] ValueType: LOCAL
+
+dst: value: label type: IMM_STR ValueType: NONE
+defun
+src1: value: printLn type: IMM_STR ValueType: NONE
+
+dst: value: t0 type: TEMP loc: [ebp] ValueType: PARAM
+load
+src1: value: str type: PARAM loc: [ebp + 8] ValueType: NONE
+
+dst: value: stdout ValueType: NONE
+print
+src1: value: t0 type: TEMP loc: [ebp] ValueType: PARAM
+
+dst: value: t1 type: TEMP loc: esi ValueType: IMM_STR
+loadstr
+src1: value: \n type: IMM_STR ValueType: NONE
+
+dst: value: stdout ValueType: NONE
+print
+src1: value: t1 type: TEMP loc: esi ValueType: IMM_STR
+
+dst: value: return_value type: TEMP loc: eax ValueType: NONE
+return
+src1: value: t1 type: TEMP loc: esi ValueType: IMM_STR
+
+dst: value: label type: IMM_STR ValueType: NONE
+defun
+src1: value: itoa type: IMM_STR ValueType: NONE
+
+dst: value: t0 type: TEMP loc: [ebp] ValueType: IMM_STR
+loadstr
+src1: value: .......... type: IMM_STR ValueType: NONE
+
+dst: value: tmp type: LOCAL loc: [ebp - 4] ValueType: IMM_STR
+assign
+src1: value: t0 type: TEMP loc: [ebp] ValueType: IMM_STR
+
+dst: value: i type: LOCAL loc: [ebp - 8] ValueType: NONE
+assign
+src1: value: 0 type: IMM_NUM loc: 0 ValueType: NONE
+
+dst: value: label_while_start_3 ValueType: NONE
+label
+
+dst: value: t1 type: TEMP loc: esi ValueType: PARAM
+load
+src1: value: num type: PARAM loc: [ebp + 8] ValueType: NONE
+
+dst: value: t2 type: TEMP loc: edi ValueType: NONE
+greater
+src1: value: t1 type: TEMP loc: esi ValueType: PARAM
+src2: value: 0 type: IMM_NUM loc: 0 ValueType: NONE
+
+dst: value: label_while_body_3 ValueType: NONE
+if
+src1: value: t2 type: TEMP loc: edi ValueType: NONE
+src2: value: label_while_end_3 ValueType: NONE
+
+dst: value: label_while_body_3 ValueType: NONE
+label
+
+dst: value: t3 type: TEMP loc: [t0] ValueType: PARAM
+load
+src1: value: num type: PARAM loc: [ebp + 8] ValueType: NONE
+
+dst: value: t5 type: TEMP loc: [t2] ValueType: PARAM
+load
+src1: value: base type: PARAM loc: [ebp + 12] ValueType: NONE
+
+dst: value: t4 type: TEMP loc: [t1] ValueType: NONE
+mod
+src1: value: t3 type: TEMP loc: [t0] ValueType: PARAM
+src2: value: t5 type: TEMP loc: [t2] ValueType: PARAM
+
+dst: value: digit type: LOCAL loc: [ebp - 12] ValueType: NONE
+assign
+src1: value: t4 type: TEMP loc: [t1] ValueType: NONE
+
+dst: value: t6 type: TEMP loc: [t3] ValueType: LOCAL
+load
+src1: value: digit type: LOCAL loc: [ebp - 12] ValueType: NONE
+
+dst: 
+push
+src1: value: t6 type: TEMP loc: [t3] ValueType: LOCAL
+
+dst: 
+call
+src1: value: digitToString ValueType: NONE
+
+dst: 
+add_esp
+src1: value: 4 type: IMM_NUM ValueType: NONE
+
+dst: value: t7 type: TEMP loc: [t4] ValueType: NONE
+assign
+
+dst: value: ch type: LOCAL loc: [ebp - 16] ValueType: NONE
+assign
+src1: value: t7 type: TEMP loc: [t4] ValueType: NONE
+
+dst: value: t8 type: TEMP loc: [t5] ValueType: LOCAL
+load
+src1: value: tmp type: LOCAL loc: [ebp - 4] ValueType: IMM_STR
+
+dst: value: t9 type: TEMP loc: [t6] ValueType: LOCAL
+load
+src1: value: i type: LOCAL loc: [ebp - 8] ValueType: NONE
+
+dst: value: t10 type: TEMP loc: [t7] ValueType: LOCAL
+load
+src1: value: ch type: LOCAL loc: [ebp - 16] ValueType: NONE
+
+dst: value: t8 type: TEMP loc: [t5] ValueType: LOCAL
+setbyte
+src1: value: t9 type: TEMP loc: [t6] ValueType: LOCAL
+src2: value: t10 type: TEMP loc: [t7] ValueType: LOCAL
+
+dst: value: i type: LOCAL loc: [ebp - 8] ValueType: NONE
+addeq
+src1: value: i type: LOCAL loc: [ebp - 8] ValueType: NONE
+src2: value: 1 type: IMM_NUM loc: 1 ValueType: NONE
+
+dst: value: t11 type: TEMP loc: [t8] ValueType: PARAM
+load
+src1: value: base type: PARAM loc: [ebp + 12] ValueType: NONE
+
+dst: value: num type: PARAM loc: [ebp + 8] ValueType: NONE
+idiveq
+src1: value: num type: PARAM loc: [ebp + 8] ValueType: NONE
+src2: value: t11 type: TEMP loc: [t8] ValueType: PARAM
+
+dst: value: label_while_start_3 ValueType: NONE
+jump
+
+dst: value: label_while_end_3 ValueType: NONE
+label
+
+dst: value: t12 type: TEMP loc: [t9] ValueType: LOCAL
+load
+src1: value: tmp type: LOCAL loc: [ebp - 4] ValueType: IMM_STR
+
+dst: 
+push
+src1: value: t12 type: TEMP loc: [t9] ValueType: LOCAL
+
+dst: 
+call
+src1: value: reverse_str ValueType: NONE
+
+dst: 
+add_esp
+src1: value: 4 type: IMM_NUM ValueType: NONE
+
+dst: value: t13 type: TEMP loc: [ebp - 20] ValueType: NONE
+assign
+
+dst: value: return_value type: TEMP loc: eax ValueType: NONE
+return
+src1: value: t13 type: TEMP loc: [ebp - 20] ValueType: NONE
+
+dst: value: label type: IMM_STR ValueType: NONE
+defun
+src1: value: readchar type: IMM_STR ValueType: NONE
+
+dst: value: t0 type: TEMP loc: [ebp] ValueType: PARAM
+load
+src1: value: ptr type: PARAM loc: [ebp + 8] ValueType: NONE
+
+dst: value: t2 type: TEMP loc: edi ValueType: PARAM
+load
+src1: value: index type: PARAM loc: [ebp + 12] ValueType: NONE
+
+dst: value: t1 type: TEMP loc: esi ValueType: NONE
+add
+src1: value: t0 type: TEMP loc: [ebp] ValueType: PARAM
+src2: value: t2 type: TEMP loc: edi ValueType: PARAM
+
+dst: value: t3 type: TEMP loc: [t0] ValueType: NONE
+deref
+src1: value: t1 type: TEMP loc: esi ValueType: NONE
+
+dst: value: return_value type: TEMP loc: eax ValueType: NONE
+return
+src1: value: t3 type: TEMP loc: [t0] ValueType: NONE
+
+dst: value: label type: IMM_STR ValueType: NONE
+defun
+src1: value: memcpy type: IMM_STR ValueType: NONE
+
+dst: value: i type: LOCAL loc: [ebp - 4] ValueType: NONE
+assign
+src1: value: 0 type: IMM_NUM loc: 0 ValueType: NONE
+
+dst: value: label_while_start_4 ValueType: NONE
+label
+
+dst: value: t0 type: TEMP loc: [ebp] ValueType: LOCAL
+load
+src1: value: i type: LOCAL loc: [ebp - 4] ValueType: NONE
+
+dst: value: t2 type: TEMP loc: edi ValueType: PARAM
+load
+src1: value: num type: PARAM loc: [ebp + 16] ValueType: NONE
+
+dst: value: t1 type: TEMP loc: esi ValueType: NONE
+less
+src1: value: t0 type: TEMP loc: [ebp] ValueType: LOCAL
+src2: value: t2 type: TEMP loc: edi ValueType: PARAM
+
+dst: value: label_while_body_4 ValueType: NONE
+if
+src1: value: t1 type: TEMP loc: esi ValueType: NONE
+src2: value: label_while_end_4 ValueType: NONE
+
+dst: value: label_while_body_4 ValueType: NONE
+label
+
+dst: value: t3 type: TEMP loc: [t0] ValueType: PARAM
+load
+src1: value: ptrSrc type: PARAM loc: [ebp + 12] ValueType: NONE
+
+dst: value: t4 type: TEMP loc: [t1] ValueType: LOCAL
+load
+src1: value: i type: LOCAL loc: [ebp - 4] ValueType: NONE
+
+dst: 
+push
+src1: value: t4 type: TEMP loc: [t1] ValueType: LOCAL
+
+dst: 
+push
+src1: value: t3 type: TEMP loc: [t0] ValueType: PARAM
+
+dst: 
+call
+src1: value: readchar ValueType: NONE
+
+dst: 
+add_esp
+src1: value: 8 type: IMM_NUM ValueType: NONE
+
+dst: value: t5 type: TEMP loc: [t2] ValueType: NONE
+assign
+
+dst: value: ch type: LOCAL loc: [ebp - 8] ValueType: NONE
+assign
+src1: value: t5 type: TEMP loc: [t2] ValueType: NONE
+
+dst: value: t6 type: TEMP loc: [t3] ValueType: PARAM
+load
+src1: value: ptrDst type: PARAM loc: [ebp + 8] ValueType: NONE
+
+dst: value: t7 type: TEMP loc: [t4] ValueType: LOCAL
+load
+src1: value: i type: LOCAL loc: [ebp - 4] ValueType: NONE
+
+dst: value: t8 type: TEMP loc: [t5] ValueType: LOCAL
+load
+src1: value: ch type: LOCAL loc: [ebp - 8] ValueType: NONE
+
+dst: value: t6 type: TEMP loc: [t3] ValueType: PARAM
+setbyte
+src1: value: t7 type: TEMP loc: [t4] ValueType: LOCAL
+src2: value: t8 type: TEMP loc: [t5] ValueType: LOCAL
+
+dst: value: i type: LOCAL loc: [ebp - 4] ValueType: NONE
+addeq
+src1: value: i type: LOCAL loc: [ebp - 4] ValueType: NONE
+src2: value: 1 type: IMM_NUM loc: 1 ValueType: NONE
+
+dst: value: label_while_start_4 ValueType: NONE
+jump
+
+dst: value: label_while_end_4 ValueType: NONE
+label
+
+dst: value: t9 type: TEMP loc: [t6] ValueType: PARAM
+load
+src1: value: ptrDst type: PARAM loc: [ebp + 8] ValueType: NONE
+
+dst: value: return_value type: TEMP loc: eax ValueType: NONE
+return
+src1: value: t9 type: TEMP loc: [t6] ValueType: PARAM
+
+dst: value: label type: IMM_STR ValueType: NONE
+defun
+src1: value: strcat type: IMM_STR ValueType: NONE
+
+dst: value: t0 type: TEMP loc: [ebp] ValueType: PARAM
+load
+src1: value: strA type: PARAM loc: [ebp + 8] ValueType: NONE
+
+dst: 
+push
+src1: value: t0 type: TEMP loc: [ebp] ValueType: PARAM
+
+dst: 
+call
+src1: value: strlen ValueType: NONE
+
+dst: 
+add_esp
+src1: value: 4 type: IMM_NUM ValueType: NONE
+
+dst: value: t1 type: TEMP loc: esi ValueType: NONE
+assign
+
+dst: value: lenA type: LOCAL loc: [ebp - 4] ValueType: NONE
+assign
+src1: value: t1 type: TEMP loc: esi ValueType: NONE
+
+dst: value: t2 type: TEMP loc: edi ValueType: PARAM
+load
+src1: value: strB type: PARAM loc: [ebp + 12] ValueType: NONE
+
+dst: 
+push
+src1: value: t2 type: TEMP loc: edi ValueType: PARAM
+
+dst: 
+call
+src1: value: strlen ValueType: NONE
+
+dst: 
+add_esp
+src1: value: 4 type: IMM_NUM ValueType: NONE
+
+dst: value: t3 type: TEMP loc: [t0] ValueType: NONE
+assign
+
+dst: value: lenB type: LOCAL loc: [ebp - 8] ValueType: NONE
+assign
+src1: value: t3 type: TEMP loc: [t0] ValueType: NONE
+
+dst: value: t4 type: TEMP loc: [t1] ValueType: LOCAL
+load
+src1: value: lenA type: LOCAL loc: [ebp - 4] ValueType: NONE
+
+dst: value: t6 type: TEMP loc: [t3] ValueType: LOCAL
+load
+src1: value: lenB type: LOCAL loc: [ebp - 8] ValueType: NONE
+
+dst: value: t5 type: TEMP loc: [t2] ValueType: NONE
+add
+src1: value: t4 type: TEMP loc: [t1] ValueType: LOCAL
+src2: value: t6 type: TEMP loc: [t3] ValueType: LOCAL
+
+dst: value: res_len type: LOCAL loc: [ebp - 12] ValueType: NONE
+assign
+src1: value: t5 type: TEMP loc: [t2] ValueType: NONE
+
+dst: value: t7 type: TEMP loc: [t4] ValueType: LOCAL
+load
+src1: value: res_len type: LOCAL loc: [ebp - 12] ValueType: NONE
+
+dst: value: t8 type: TEMP loc: [t5] ValueType: NONE
+add
+src1: value: t7 type: TEMP loc: [t4] ValueType: LOCAL
+src2: value: 1 type: IMM_NUM loc: 1 ValueType: NONE
+
+dst: value: t9 type: TEMP loc: [t6] ValueType: NONE
+malloc
+src1: value: t8 type: TEMP loc: [t5] ValueType: NONE
+
+dst: value: res_str type: LOCAL loc: [ebp - 16] ValueType: NONE
+assign
+src1: value: t9 type: TEMP loc: [t6] ValueType: NONE
+
+dst: value: t10 type: TEMP loc: [t7] ValueType: LOCAL
+load
+src1: value: res_str type: LOCAL loc: [ebp - 16] ValueType: NONE
+
+dst: value: t11 type: TEMP loc: [t8] ValueType: PARAM
+load
+src1: value: strA type: PARAM loc: [ebp + 8] ValueType: NONE
+
+dst: value: t12 type: TEMP loc: [t9] ValueType: LOCAL
+load
+src1: value: lenA type: LOCAL loc: [ebp - 4] ValueType: NONE
+
+dst: 
+push
+src1: value: t12 type: TEMP loc: [t9] ValueType: LOCAL
+
+dst: 
+push
+src1: value: t11 type: TEMP loc: [t8] ValueType: PARAM
+
+dst: 
+push
+src1: value: t10 type: TEMP loc: [t7] ValueType: LOCAL
+
+dst: 
+call
+src1: value: memcpy ValueType: NONE
+
+dst: 
+add_esp
+src1: value: 12 type: IMM_NUM ValueType: NONE
+
+dst: value: t13 type: TEMP loc: [ebp - 20] ValueType: NONE
+assign
+
+dst: value: t14 type: TEMP loc: [ebp - 24] ValueType: LOCAL
+load
+src1: value: res_str type: LOCAL loc: [ebp - 16] ValueType: NONE
+
+dst: value: t16 type: TEMP loc: [ebp - 32] ValueType: LOCAL
+load
+src1: value: lenA type: LOCAL loc: [ebp - 4] ValueType: NONE
+
+dst: value: t15 type: TEMP loc: [ebp - 28] ValueType: NONE
+add
+src1: value: t14 type: TEMP loc: [ebp - 24] ValueType: LOCAL
+src2: value: t16 type: TEMP loc: [ebp - 32] ValueType: LOCAL
+
+dst: value: t17 type: TEMP loc: [ebp - 36] ValueType: PARAM
+load
+src1: value: strB type: PARAM loc: [ebp + 12] ValueType: NONE
+
+dst: value: t18 type: TEMP loc: [ebp - 40] ValueType: LOCAL
+load
+src1: value: lenB type: LOCAL loc: [ebp - 8] ValueType: NONE
+
+dst: 
+push
+src1: value: t18 type: TEMP loc: [ebp - 40] ValueType: LOCAL
+
+dst: 
+push
+src1: value: t17 type: TEMP loc: [ebp - 36] ValueType: PARAM
+
+dst: 
+push
+src1: value: t15 type: TEMP loc: [ebp - 28] ValueType: NONE
+
+dst: 
+call
+src1: value: memcpy ValueType: NONE
+
+dst: 
+add_esp
+src1: value: 12 type: IMM_NUM ValueType: NONE
+
+dst: value: t19 type: TEMP loc: [ebp - 44] ValueType: NONE
+assign
+
+dst: value: t20 type: TEMP loc: [ebp - 48] ValueType: LOCAL
+load
+src1: value: res_str type: LOCAL loc: [ebp - 16] ValueType: NONE
+
+dst: value: t21 type: TEMP loc: [ebp - 52] ValueType: LOCAL
+load
+src1: value: res_len type: LOCAL loc: [ebp - 12] ValueType: NONE
+
+dst: value: t20 type: TEMP loc: [ebp - 48] ValueType: LOCAL
+setbyte
+src1: value: t21 type: TEMP loc: [ebp - 52] ValueType: LOCAL
+src2: value: 0 type: IMM_NUM loc: 0 ValueType: NONE
+
+dst: value: t22 type: TEMP loc: [ebp - 56] ValueType: LOCAL
+load
+src1: value: res_str type: LOCAL loc: [ebp - 16] ValueType: NONE
+
+dst: value: return_value type: TEMP loc: eax ValueType: NONE
+return
+src1: value: t22 type: TEMP loc: [ebp - 56] ValueType: LOCAL
+
+dst: value: label type: IMM_STR ValueType: NONE
+defun
+src1: value: alloc_string type: IMM_STR ValueType: NONE
+
+dst: value: t0 type: TEMP loc: [ebp] ValueType: PARAM
+load
+src1: value: init type: PARAM loc: [ebp + 8] ValueType: NONE
+
+dst: 
+push
+src1: value: t0 type: TEMP loc: [ebp] ValueType: PARAM
+
+dst: 
+call
+src1: value: strlen ValueType: NONE
+
+dst: 
+add_esp
+src1: value: 4 type: IMM_NUM ValueType: NONE
+
+dst: value: t1 type: TEMP loc: esi ValueType: NONE
+assign
+
+dst: value: len type: LOCAL loc: [ebp - 4] ValueType: NONE
+assign
+src1: value: t1 type: TEMP loc: esi ValueType: NONE
+
+dst: value: t2 type: TEMP loc: edi ValueType: LOCAL
+load
+src1: value: len type: LOCAL loc: [ebp - 4] ValueType: NONE
+
+dst: value: t3 type: TEMP loc: [t0] ValueType: NONE
+add
+src1: value: t2 type: TEMP loc: edi ValueType: LOCAL
+src2: value: 1 type: IMM_NUM loc: 1 ValueType: NONE
+
+dst: value: t4 type: TEMP loc: [t1] ValueType: NONE
+malloc
+src1: value: t3 type: TEMP loc: [t0] ValueType: NONE
+
+dst: value: dst type: LOCAL loc: [ebp - 8] ValueType: NONE
+assign
+src1: value: t4 type: TEMP loc: [t1] ValueType: NONE
+
+dst: value: t5 type: TEMP loc: [t2] ValueType: LOCAL
+load
+src1: value: dst type: LOCAL loc: [ebp - 8] ValueType: NONE
+
+dst: value: t6 type: TEMP loc: [t3] ValueType: PARAM
+load
+src1: value: init type: PARAM loc: [ebp + 8] ValueType: NONE
+
+dst: value: t7 type: TEMP loc: [t4] ValueType: LOCAL
+load
+src1: value: len type: LOCAL loc: [ebp - 4] ValueType: NONE
+
+dst: 
+push
+src1: value: t7 type: TEMP loc: [t4] ValueType: LOCAL
+
+dst: 
+push
+src1: value: t6 type: TEMP loc: [t3] ValueType: PARAM
+
+dst: 
+push
+src1: value: t5 type: TEMP loc: [t2] ValueType: LOCAL
+
+dst: 
+call
+src1: value: memcpy ValueType: NONE
+
+dst: 
+add_esp
+src1: value: 12 type: IMM_NUM ValueType: NONE
+
+dst: value: t8 type: TEMP loc: [t5] ValueType: NONE
+assign
+
+dst: value: t9 type: TEMP loc: [t6] ValueType: LOCAL
+load
+src1: value: dst type: LOCAL loc: [ebp - 8] ValueType: NONE
+
+dst: value: t10 type: TEMP loc: [t7] ValueType: LOCAL
+load
+src1: value: len type: LOCAL loc: [ebp - 4] ValueType: NONE
+
+dst: value: t9 type: TEMP loc: [t6] ValueType: LOCAL
+setbyte
+src1: value: t10 type: TEMP loc: [t7] ValueType: LOCAL
+src2: value: 0 type: IMM_NUM loc: 0 ValueType: NONE
+
+dst: value: t11 type: TEMP loc: [t8] ValueType: LOCAL
+load
+src1: value: dst type: LOCAL loc: [ebp - 8] ValueType: NONE
+
+dst: value: return_value type: TEMP loc: eax ValueType: NONE
+return
+src1: value: t11 type: TEMP loc: [t8] ValueType: LOCAL
+
+dst: value: label type: IMM_STR ValueType: NONE
+defun
+src1: value: main type: IMM_STR ValueType: NONE
+
+dst: 
+push
+src1: value: 10 type: IMM_NUM loc: 10 ValueType: NONE
+
+dst: 
+push
+src1: value: 123 type: IMM_NUM loc: 123 ValueType: NONE
+
+dst: 
+call
+src1: value: itoa ValueType: NONE
+
+dst: 
+add_esp
+src1: value: 8 type: IMM_NUM ValueType: NONE
+
+dst: value: t0 type: TEMP loc: [ebp] ValueType: NONE
+assign
+
+dst: 
+push
+src1: value: t0 type: TEMP loc: [ebp] ValueType: NONE
+
+dst: 
+call
+src1: value: printLn ValueType: NONE
+
+dst: 
+add_esp
+src1: value: 4 type: IMM_NUM ValueType: NONE
+
+dst: value: t1 type: TEMP loc: esi ValueType: NONE
+assign
+
+dst: value: return_value type: TEMP loc: eax ValueType: NONE
+return
+src1: value: t1 type: TEMP loc: esi ValueType: NONE
+
 Assembly written to: out.asm

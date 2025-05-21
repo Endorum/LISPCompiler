@@ -9,7 +9,8 @@
 #include <regex>
 
 #define START_SYMBOL "_start"
-#define CLEANUP true
+#define CLEANUP true // _should_ work 
+#define REMOVE_TWO_WAY_MOV false // not tested yet
 
 // so space for around 100k list items
 // 1048576 = 2^20
@@ -35,6 +36,16 @@ public:
         }
         
         if(CLEANUP) cleanup();
+        dataSection += "t0: dd 0\n";
+        dataSection += "t1: dd 0\n";
+        dataSection += "t2: dd 0\n";
+        dataSection += "t3: dd 0\n";
+        dataSection += "t4: dd 0\n";
+        dataSection += "t5: dd 0\n";
+        dataSection += "t6: dd 0\n";
+        dataSection += "t7: dd 0\n";
+        dataSection += "t8: dd 0\n";
+        dataSection += "t9: dd 0\n";
         dataSection += "list_ptr: dd list_memory ; pointer to next free cell\n";
         dataSection += "heap_ptr: dd heap_start ; pointer to heap begin\n";
         dataSection += "free_list: dd heap_start\n";
@@ -147,6 +158,7 @@ _start:
         return true;
     }
 
+    void optimize_redundant_movs(std::string& asm_code);
     std::string cleanup();
 
     std::string formatStringForNASM(const std::string& input);

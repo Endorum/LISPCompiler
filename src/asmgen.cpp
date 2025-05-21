@@ -4,6 +4,11 @@
 
 #include "../include/asmgen.hpp"
 
+#include <regex>
+#include <string>
+
+
+
 std::string Asmgen::cleanup() {
         
     std::istringstream iss(asm_result);
@@ -44,25 +49,36 @@ std::string Asmgen::cleanup() {
                 trim(dst2);
                 trim(src2);
 
+                std::cout << "dst1: " << dst1 << " src1: " << src1 << " dst2: " << dst2 << " src2: " << src2 << std::endl;
+
                 if (dst1 == src2 && src1 == dst2) {
                     // Found matching mov X, Y and mov Y, X pair — skip both lines
                     i++;
                     continue;
                 }
+                
+                if(REMOVE_TWO_WAY_MOV){
+                    if (dst1 == src2 && dst1.back() == ']' && src2.back() == ']'){
+                        cleaned_lines.push_back("    mov " + dst2 + ", " + src1);
+                        i++; // Skip the next line (already merged)
+                        continue;
+                    }
                 }
             }
-
-            cleaned_lines.push_back(lines[i]);
         }
 
-        std::ostringstream oss;
-        for (auto& l : cleaned_lines) {
-            oss << l << "\n";
-        }
+        cleaned_lines.push_back(lines[i]);
+    }
 
-        asm_result = oss.str();
-        return asm_result;
+    std::ostringstream oss;
+    for (auto& l : cleaned_lines) {
+        oss << l << "\n";
+    }
+
+    asm_result = oss.str();
+    return asm_result;
 }
+
 
 std::string Asmgen::formatStringForNASM(const std::string& input){
      {
@@ -216,8 +232,8 @@ void Asmgen::generate_greater_equal(IRInstruction& instr){
 void Asmgen::generate_mod(IRInstruction& instr){
     asm_result += getCurrentIndentStr() + "mov eax, " + instr.src1.loc + "\n";
     asm_result += getCurrentIndentStr() + "cdq\n";
-    asm_result += getCurrentIndentStr() + "idiv " + instr.src2.loc + "\n";
-    asm_result += getCurrentIndentStr() + "mov " + instr.dst.loc + "\n";
+    asm_result += getCurrentIndentStr() + "idiv dword " + instr.src2.loc + "\n";
+    asm_result += getCurrentIndentStr() + "mov " + instr.dst.loc + ", eax\n";
 }
 void Asmgen::generate_shl(IRInstruction& instr){
     asm_result += getCurrentIndentStr() + "mov eax, " + instr.src1.loc + "\n";
@@ -263,7 +279,7 @@ void Asmgen::generate_idiveq(IRInstruction& instr){
     asm_result += getCurrentIndentStr() + "mov ebx, " + instr.src1.loc + "\n";
     asm_result += getCurrentIndentStr() + "mov eax, " + instr.src2.loc + "\n";
     asm_result += getCurrentIndentStr() + "cdq\n";
-    asm_result += getCurrentIndentStr() + "idiv ebx\n";
+    asm_result += getCurrentIndentStr() + "idiv dword ebx\n";
     asm_result += getCurrentIndentStr() + "mov " + instr.src1.loc + ", eax\n";
 }
 void Asmgen::generate_inc(IRInstruction& instr){

@@ -168,6 +168,16 @@ public:
             case 0: return "[ebp]";
             case 1: return "esi";
             case 2: return "edi";
+            case 3: return "[t0]";
+            case 4: return "[t1]";
+            case 5: return "[t2]";
+            case 6: return "[t3]";
+            case 7: return "[t4]";
+            case 8: return "[t5]";
+            case 9: return "[t6]";
+            case 10: return "[t7]";
+            case 11: return "[t8]";
+            case 12: return "[t9]";
         }
         return "[ebp - " + std::to_string(++local_count * 4) + "]"; // spill after locals
     }
